@@ -8,9 +8,8 @@ mod plonk_tests {
     use plonk_verifier::plonk::verify::{PlonkVerifier};
     use core::traits::Into;
     use plonk_verifier::curve::groups::{g1, g2, AffineG1, AffineG2, Fq, Fq2};
-
+   
     #[test]
-    #[available_gas(100000000000)]
     fn test_plonk_verify() {
         // verification PlonkVerificationKey
         let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
@@ -43,8 +42,8 @@ mod plonk_tests {
             4693417943536520268746058560989260808135478372449023987176805259899316401080,
             8186764010206899711756657704517859444555824539207093839904632766037261603987
         );
-        assert_eq!(PlonkVerifier::is_on_curve(pt_on_curve), true);
-        assert_eq!(PlonkVerifier::is_on_curve(pt_not_on_curve), false);
+        assert(PlonkVerifier::is_on_curve(pt_on_curve), '');
+        assert(!PlonkVerifier::is_on_curve(pt_not_on_curve), '');
     }
 
     use plonk_verifier::curve::constants::{ORDER};
@@ -58,8 +57,8 @@ mod plonk_tests {
         let num_not_in_field = fq(
             31888242871839275222246405745257275088548364400416034343698204186575808495617
         );
-        assert_eq!(PlonkVerifier::is_in_field(num_in_field), true);
-        assert_eq!(PlonkVerifier::is_in_field(num_not_in_field), false);
+        assert(PlonkVerifier::is_in_field(num_in_field), '');
+        assert(!PlonkVerifier::is_in_field(num_not_in_field), '');
     }
 
     #[test]
@@ -68,8 +67,8 @@ mod plonk_tests {
         let len_b = 5;
         let len_c = 6;
 
-        assert_eq!(PlonkVerifier::check_public_inputs_length(len_a, len_b), true);
-        assert_eq!(PlonkVerifier::check_public_inputs_length(len_a, len_c), false);
+        assert(PlonkVerifier::check_public_inputs_length(len_a, len_b), '');
+        assert(!PlonkVerifier::check_public_inputs_length(len_a, len_c), '');
     }
 
     #[test]
@@ -112,7 +111,7 @@ mod plonk_tests {
 
         let is_equal: bool = PlonkChallengePartialEq::eq(@challenges, @correct_challenges);
 
-        assert_eq!(is_equal, true);
+        assert(is_equal, '');
     }
 
     #[test]
@@ -149,15 +148,15 @@ mod plonk_tests {
             fq(4022337429609156333024873048706819958201086574374594171651602119736297244553),
             fq(6617265984905210439143759470664564048122583210514619596354035502195742709385),
         ];
-        assert_eq!(
-            challenges.xin,
-            fq(2547969369229319030019457190033843677010987911599058423863006450250883277211)
+        assert(
+            challenges.xin ==
+            fq(2547969369229319030019457190033843677010987911599058423863006450250883277211), ''
         );
-        assert_eq!(
-            challenges.zh,
-            fq(2547969369229319030019457190033843677010987911599058423863006450250883277210)
+        assert(
+            challenges.zh == 
+            fq(2547969369229319030019457190033843677010987911599058423863006450250883277210), ''
         );
-        assert_eq!(L, correct_L);
+        assert(L == correct_L, '');
     }
 
     #[test]
@@ -174,7 +173,7 @@ mod plonk_tests {
         let PI = PlonkVerifier::compute_PI(public_signals, L);
         let correct_PI: u256 =
             18271457399299900228442257502287788641966159684441642978038700334889779304449;
-        assert_eq!(fq(correct_PI), PI);
+        assert(fq(correct_PI) == PI, '');
     }
 
     #[test]
@@ -208,7 +207,7 @@ mod plonk_tests {
 
         let correct_R0: u256 =
             8252012205077960742641393316361079931166529015625841574934366119104137152715;
-        assert_eq!(fq(correct_R0), R0);
+        assert(fq(correct_R0) == R0, '');
     }
 
     #[test]
@@ -245,8 +244,8 @@ mod plonk_tests {
             4333398450220542935061332802082369181528242679087535767638817155055555907729,
             3001452470579370622125939372942669046487921723785465821088780020440992474494
         );
-        assert_eq!(D.x, corret_D.x);
-        assert_eq!(D.y, corret_D.y);
+        assert(D.x == corret_D.x, '');
+        assert(D.y == corret_D.y, '');
     }
 
     #[test]
@@ -286,8 +285,8 @@ mod plonk_tests {
             2447957664398607938229566909991195557288608349864545209476580844025113917745,
             16981442144394521581137981015380711983763128730701172250766417640481995742343
         );
-        assert_eq!(F.x, correct_F.x);
-        assert_eq!(F.y, correct_F.y);
+        assert(F.x == correct_F.x, '');
+        assert(F.y == correct_F.y, '');
     }
 
     #[test]
@@ -320,8 +319,8 @@ mod plonk_tests {
             2484568790068257088204458404505761583129899393337173775535121851653226285099,
             6454403560011284872933736696278881925473069516668053066370404348177163484123
         );
-        assert_eq!(E.x, correct_E.x);
-        assert_eq!(E.y, correct_E.y);
+        assert(E.x == correct_E.x, '');
+        assert(E.y == correct_E.y, '');
     }
 
     #[test]
@@ -361,7 +360,7 @@ mod plonk_tests {
             16981442144394521581137981015380711983763128730701172250766417640481995742343
         );
         let valid = PlonkVerifier::valid_pairing(proof, challenges, verification_key, E, F);
-        assert_eq!(valid, true);
+        assert(valid, '');
     }
 
     // corelib keccak hash test
@@ -385,20 +384,20 @@ mod plonk_tests {
         let test_hex_1: ByteArray =
             "1a45183d6c56cf5364935635b48815116ad40d9382a41e525d9784b4916c2c70";
         let dec_1 = hex_to_decimal(test_hex_1);
-        assert_eq!(
-            dec_1, 11882213808513143293994894265765176245869305285611379364593291279901519522928
+        assert(
+            dec_1 == 11882213808513143293994894265765176245869305285611379364593291279901519522928, ''
         );
 
         let test_hex_2: ByteArray =
             "acc0b671a0e5c50307b930cfd05ed26ff6db6c6aa81ac7f8a1ed11b077a2a7cc";
         let dec_2 = hex_to_decimal(test_hex_2);
-        assert_eq!(
-            dec_2, 78138303774012846250814548983539832692685901550348365675046268153074630698956
+        assert(
+            dec_2 == 78138303774012846250814548983539832692685901550348365675046268153074630698956, ''
         );
 
         let test_hex_3: ByteArray = "ff";
         let dec_3 = hex_to_decimal(test_hex_3);
-        assert_eq!(dec_3, 255);
+        assert(dec_3 == 255, '');
     }
 
     #[test]
@@ -406,37 +405,37 @@ mod plonk_tests {
         let test_1: u256 =
             61490746474045761767661087867430693677409928396669494327352779807704464432003;
         let le_1 = convert_le_to_be(test_1);
-        assert_eq!(le_1, "831b973f210f2ca7224752808be5c58fa20f316b67823942965aa4517687f287");
+        assert(le_1 == "831b973f210f2ca7224752808be5c58fa20f316b67823942965aa4517687f287", '');
 
         let test_2: u256 =
             19101300766783147186443130233662574138172230046365805365368327481934084863501;
         let le_2 = convert_le_to_be(test_2);
-        assert_eq!(le_2, "0d765c165a19aa287707be08978a793366584fc2d5553e76957a1fe7fef33a2a");
+        assert(le_2 == "0d765c165a19aa287707be08978a793366584fc2d5553e76957a1fe7fef33a2a", '');
     }
 
     #[test]
     fn test_left_padding_32_bytes() {
         let test_1: ByteArray = "hello";
         let padded_1 = left_padding_32_bytes(test_1);
-        assert_eq!(padded_1, "00000000000000000000000000000000000000000000000000000000000hello");
+        assert(padded_1 == "00000000000000000000000000000000000000000000000000000000000hello", '');
 
         let test_2: ByteArray = "2c6c91b484975d521ea482930dd46a111588b43556936453cf566c3d18451a";
         let padded_2 = left_padding_32_bytes(test_2);
-        assert_eq!(padded_2, "002c6c91b484975d521ea482930dd46a111588b43556936453cf566c3d18451a");
+        assert(padded_2 == "002c6c91b484975d521ea482930dd46a111588b43556936453cf566c3d18451a", '');
     }
 
     #[test]
     fn test_ascii_to_dec() {
         let test_1: u8 = 97;
         let dec_1 = ascii_to_dec(test_1);
-        assert_eq!(dec_1, 10);
+        assert(dec_1 == 10, '');
 
         let test_2: u8 = 48;
         let dec_2 = ascii_to_dec(test_2);
-        assert_eq!(dec_2, 0);
+        assert(dec_2 == 0, '');
 
         let test_3: u8 = 102;
         let dec_3 = ascii_to_dec(test_3);
-        assert_eq!(dec_3, 15);
+        assert(dec_3 == 15, '');
     }
-}
+ }

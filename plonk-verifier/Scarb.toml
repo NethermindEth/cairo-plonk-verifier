@@ -7,7 +7,9 @@ cairo-version = "2.7.0-rc.3"
 edition = "2024_07"
 
 [dev-dependencies]
-cairo_test = "2.7.0-rc.3"
+# cairo_test = "2.7.0-rc.3"
+snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry.git", tag = "v0.30.0" }
+
 
 [dependencies] 
 starknet = ">=2.7.0-rc.3" 
@@ -16,5 +18,3 @@ starknet = ">=2.7.0-rc.3"
 [[target.starknet-contract]]
 sierra = true
 casm = true
-
-
