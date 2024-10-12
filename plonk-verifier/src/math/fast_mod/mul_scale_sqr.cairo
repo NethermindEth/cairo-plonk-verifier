@@ -1,31 +1,38 @@
 use core::traits::TryInto;
 use integer::{u512, u128_wide_mul};
+use core::num::traits::{WideMul};
+use core::num::traits::{OverflowingAdd, OverflowingSub, WrappingAdd};
+
 use super::{utils as u, reduce, u512_reduce};
 // scale u512 by u128 (for smaller numbers)
 // unreduced, returns u512 plus u128 (fifth limb) which needs handling
 #[inline(always)]
 fn u512_scl(a: u512, x: u128) -> (u512, u128) {
     let u512 { limb0, limb1, limb2, limb3 } = a;
-    // (a1 + a2) * c
-    let (limb1_part1, limb0) = u128_wide_mul(limb0, x);
-    let (limb2_part1, limb1_part2) = u128_wide_mul(limb1, x);
-    let limb1 = u::u128_wrapping_add(limb1_part1, limb1_part2);
-    let (limb3_part1, limb2_part2) = u128_wide_mul(limb2, x);
-    let limb2 = u::u128_wrapping_add(limb2_part1, limb2_part2);
-    let (limb4, limb3_part2) = u128_wide_mul(limb3, x);
-    let limb3 = u::u128_wrapping_add(limb3_part1, limb3_part2);
-    (u512 { limb0, limb1, limb2, limb3 }, limb4)
+
+    let result0 = limb0.wide_mul(x);
+    let result1 = limb1.wide_mul(x);
+    let result2 = limb2.wide_mul(x);
+    let result3 = limb3.wide_mul(x);
+
+    let limb1 = result0.high.wrapping_add(result1.low);
+    let limb2 = result1.high.wrapping_add(result2.low);
+    let limb3 = result2.high.wrapping_add(result3.low);
+    let limb4 = result3.high;
+
+    (u512 { limb0: result0.low, limb1, limb2, limb3 }, limb4)
 }
+
 
 // scale u256 by u128 (for smaller numbers)
 // unreduced, returns u512
 #[inline(always)]
 fn scl_u(a: u256, b: u128) -> u512 {
     // (a1 + a2) * c
-    let (limb1_part1, limb0) = u128_wide_mul(a.low, b);
-    let (limb2, limb1_part2) = u128_wide_mul(a.high, b);
-    let limb1 = u::u128_wrapping_add(limb1_part1, limb1_part2);
-    u512 { limb0, limb1, limb2, limb3: 0 }
+    let result1 = a.low.wide_mul(b);
+    let result2 = a.high.wide_mul(b);
+    let limb1 = result1.high.wrapping_add(result2.low);
+    u512 { limb0: result1.low, limb1, limb2: result2.high, limb3: 0 }
 }
 
 // scale u256 by u128 (for smaller numbers)
@@ -45,7 +52,7 @@ fn scl(a: u256, b: u128, modulo: NonZero<u256>) -> u256 {
 
 // mul two u256
 // unreduced, returns u512
-// #[inline(always)]
+#[inline(always)]
 fn mul_u(a: u256, b: u256) -> u512 {
     let (limb1, limb0) = u128_wide_mul(a.low, b.low);
     let (limb2, limb1_part) = u128_wide_mul(a.low, b.high);
@@ -54,16 +61,18 @@ fn mul_u(a: u256, b: u256) -> u512 {
     let (limb1, limb1_overflow1) = u::u128_add_with_carry(limb1, limb1_part);
     let (limb2, limb2_overflow) = u::u128_add_with_carry(limb2, limb2_part);
     let (limb3, limb2_part) = u128_wide_mul(a.high, b.high);
+
     // No overflow since no limb4.
-    let limb3 = u::u128_wrapping_add(limb3, limb2_overflow);
+    let limb3 = limb3.wrapping_add(limb2_overflow);
     let (limb2, limb2_overflow) = u::u128_add_with_carry(limb2, limb2_part);
     // No overflow since no limb4.
-    let limb3 = u::u128_wrapping_add(limb3, limb2_overflow);
+    let limb3 = limb3.wrapping_add(limb2_overflow);
     // No overflow possible in this addition since both operands are 0/1.
-    let limb1_overflow = u::u128_wrapping_add(limb1_overflow0, limb1_overflow1);
+    let limb1_overflow = limb1_overflow0.wrapping_add(limb1_overflow1);
+
     let (limb2, limb2_overflow) = u::u128_add_with_carry(limb2, limb1_overflow);
     // No overflow since no limb4.
-    let limb3 = u::u128_wrapping_add(limb3, limb2_overflow);
+    let limb3 = limb3.wrapping_add(limb2_overflow);
 
     u512 { limb0, limb1, limb2, limb3 }
 }
@@ -94,15 +103,15 @@ fn sqr_u(a: u256) -> u512 {
     let (limb2, limb2_overflow) = u::u128_add_with_carry(limb2, limb2);
     let (limb3, limb2_part) = u128_wide_mul(a.high, a.high);
     // No overflow since no limb4.
-    let limb3 = u::u128_wrapping_add(limb3, limb2_overflow);
+    let limb3 = limb3.wrapping_add(limb2_overflow);
     let (limb2, limb2_overflow) = u::u128_add_with_carry(limb2, limb2_part);
     // No overflow since no limb4.
-    let limb3 = u::u128_wrapping_add(limb3, limb2_overflow);
+    let limb3 = limb3.wrapping_add(limb2_overflow);
     // No overflow possible in this addition since both operands are 0/1.
-    let limb1_overflow = u::u128_wrapping_add(limb1_overflow0, limb1_overflow1);
+    let limb1_overflow = limb1_overflow0.wrapping_add(limb1_overflow1);
     let (limb2, limb2_overflow) = u::u128_add_with_carry(limb2, limb1_overflow);
     // No overflow since no limb4.
-    let limb3 = u::u128_wrapping_add(limb3, limb2_overflow);
+    let limb3 = limb3.wrapping_add(limb2_overflow);
     u512 { limb0, limb1, limb2, limb3 }
 }
 

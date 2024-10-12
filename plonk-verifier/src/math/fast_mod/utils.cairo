@@ -1,12 +1,5 @@
 use integer::{u128_overflowing_add, u128_overflowing_sub, u512};
-
-#[inline(always)]
-fn u128_wrapping_add(lhs: u128, rhs: u128) -> u128 implicits(RangeCheck) nopanic {
-    match u128_overflowing_add(lhs, rhs) {
-        Result::Ok(x) => x,
-        Result::Err(x) => x,
-    }
-}
+use core::num::traits::{OverflowingAdd, OverflowingSub};
 
 #[inline(always)]
 fn u128_add_with_carry(a: u128, b: u128) -> (u128, u128) nopanic {
@@ -15,14 +8,13 @@ fn u128_add_with_carry(a: u128, b: u128) -> (u128, u128) nopanic {
         Result::Err(v) => (v, 1),
     }
 }
-
-#[inline(always)]
-fn u128_wrapping_sub(lhs: u128, rhs: u128) -> u128 implicits(RangeCheck) nopanic {
-    match u128_overflowing_sub(lhs, rhs) {
-        Result::Ok(x) => x,
-        Result::Err(x) => x,
-    }
-}
+// fn u128_add_with_carry(a: u128, b: u128) -> (u128, u128) {
+//     let (v, carry) = a.overflowing_add(b);
+//     match carry {
+//         true => (v, 1),
+//         false => (v, 0),
+//     }
+// }
 
 #[inline(always)]
 fn u256_overflow_add(lhs: u256, rhs: u256) -> Result<u256, u256> implicits(RangeCheck) nopanic {
