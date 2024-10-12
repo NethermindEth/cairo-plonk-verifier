@@ -379,6 +379,7 @@ mod plonk_tests {
     use plonk_verifier::plonk::utils::{
         convert_le_to_be, hex_to_decimal, decimal_to_byte_array, left_padding_32_bytes, ascii_to_dec
     };
+
     #[test]
     fn test_hex_to_decimal() {
         let test_hex_1: ByteArray =
@@ -438,4 +439,12 @@ mod plonk_tests {
         let dec_3 = ascii_to_dec(test_3);
         assert(dec_3 == 15, '');
     }
- }
+
+    #[test]
+    fn test_modular_arithmetic() {
+        let max = u256 {low: 0xffffffffffffffffffffffffffffffff_u128, high: 0xffffffffffffffffffffffffffffffff_u128};
+        let a = Fq { c0: max};
+        let b = Fq { c0: max}; 
+
+    }
+}

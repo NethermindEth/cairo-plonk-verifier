@@ -7,6 +7,12 @@ use core::traits::Into;
 use core::debug::{PrintTrait, print_byte_array_as_string};
 use core::array::ArrayTrait;
 use core::cmp::max;
+use core::circuit::{
+    RangeCheck96, AddMod, MulMod, u96, CircuitElement, CircuitInput, circuit_add, circuit_sub,
+    circuit_mul, circuit_inverse, EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus,
+    AddInputResultTrait, CircuitInputs,EvalCircuitResult,
+};
+use core::circuit::conversions::from_u256;
 
 use plonk_verifier::traits::FieldShortcuts;
 use plonk_verifier::traits::FieldOps;
@@ -16,12 +22,14 @@ use plonk_verifier::plonk::transcript::Keccak256Transcript;
 use plonk_verifier::curve::groups::{g1, g2, AffineG1, AffineG2, AffineG2Impl};
 use plonk_verifier::curve::groups::ECOperations;
 use plonk_verifier::fields::{fq, Fq, Fq12, Fq12Exponentiation, Fq12Utils};
-use plonk_verifier::curve::constants::{ORDER, ORDER_NZ, get_field_nz};
+use plonk_verifier::curve::constants::{ORDER, ORDER_NZ, get_field_nz, FIELD_U384, ORDER_U384};
 use plonk_verifier::plonk::types::{PlonkProof, PlonkVerificationKey, PlonkChallenge};
 use plonk_verifier::plonk::transcript::{Transcript, TranscriptElement};
 use plonk_verifier::curve::{u512, neg_o, sqr_nz, mul, mul_u, mul_nz, div_nz, add_nz, sub_u, sub};
 use plonk_verifier::pairing::tate_bkls::{tate_pairing, tate_miller_loop};
 use plonk_verifier::pairing::optimal_ate::{single_ate_pairing, ate_miller_loop};
+
+
 
 #[generate_trait]
 impl PlonkVerifier of PVerifier {
@@ -52,6 +60,7 @@ impl PlonkVerifier of PVerifier {
             && Self::check_public_inputs_length(
                 verification_key.nPublic, publicSignals.len().into()
             );
+            
         let mut challenges: PlonkChallenge = Self::compute_challenges(
             verification_key, proof, publicSignals.clone()
         );
@@ -76,22 +85,40 @@ impl PlonkVerifier of PVerifier {
 
     // step 1: check if the points are on the bn254 curve
     fn is_on_curve(pt: AffineG1) -> bool {
-        // bn254 curve equation: y^2 = x^3 + 3
-        let x_sqr = pt.x.sqr();
-        let x_cubed = x_sqr.mul(pt.x);
-        let lhs = x_cubed.add(fq(3));
-        let rhs = pt.y.sqr();
+        // Circuit for bn254 curve equation: y^2 = x^3 + 3
+        // As y^2 - x^3 = 3
+        let x = CircuitElement::<CircuitInput<0>> {};
+        let y = CircuitElement::<CircuitInput<1>> {};
+        let x_sqr = circuit_mul(x, x);
+        let x_cube = circuit_mul(x_sqr, x); 
+        let y_sqr = circuit_mul(y, y); 
+        let out = circuit_sub(y_sqr, x_cube);
 
-        rhs == lhs
+        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+        let in1 = from_u256(pt.x.c0);
+        let in2 = from_u256(pt.y.c0);
+
+        let outputs =
+            match (out, )
+                .new_inputs()
+                .next(in1)
+                .next(in2)
+                .done()
+                .eval(modulus) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
+        };
+        let out: u256 = outputs.get_output(out).try_into().unwrap(); 
+        
+        out == 3
     }
 
     // step 2: check if the field element is in the field
     fn is_in_field(num: Fq) -> bool {
         // bn254 curve field:
         // 21888242871839275222246405745257275088548364400416034343698204186575808495617
-        let field_p = fq(ORDER);
 
-        num.c0 < field_p.c0
+        num.c0 < ORDER
     }
 
     //step 3: check proof public inputs match the verification key
@@ -129,11 +156,10 @@ impl PlonkVerifier of PVerifier {
         beta_transcript.add_poly_commitment(verification_key.S2);
         beta_transcript.add_poly_commitment(verification_key.S3);
 
-        let mut i = 0;
-        while i < publicSignals.len() {
+        for i in 0..publicSignals.len() {
             beta_transcript.add_scalar(fq(publicSignals.at(i).clone()));
-            i += 1;
         };
+            
         beta_transcript.add_poly_commitment(proof.A);
         beta_transcript.add_poly_commitment(proof.B);
         beta_transcript.add_poly_commitment(proof.C);
@@ -361,13 +387,65 @@ impl PlonkVerifier of PVerifier {
     fn compute_E(proof: PlonkProof, challenges: PlonkChallenge, r0: Fq) -> AffineG1 {
         let mut res: AffineG1 = g1(1, 2);
         let neg_r0 = neg_o(r0.c0);
-        let mut e = add_nz(neg_r0, mul_nz(challenges.v1.c0, proof.eval_a.c0, ORDER_NZ), ORDER_NZ);
 
-        e = add_nz(e, mul_nz(challenges.v2.c0, proof.eval_b.c0, ORDER_NZ), ORDER_NZ);
-        e = add_nz(e, mul_nz(challenges.v3.c0, proof.eval_c.c0, ORDER_NZ), ORDER_NZ);
-        e = add_nz(e, mul_nz(challenges.v4.c0, proof.eval_s1.c0, ORDER_NZ), ORDER_NZ);
-        e = add_nz(e, mul_nz(challenges.v5.c0, proof.eval_s2.c0, ORDER_NZ), ORDER_NZ);
-        e = add_nz(e, mul_nz(challenges.u.c0, proof.eval_zw.c0, ORDER_NZ), ORDER_NZ);
+        let n_r0 = CircuitElement::<CircuitInput<0>> {};
+        let v1 = CircuitElement::<CircuitInput<1>> {};
+        let v2 = CircuitElement::<CircuitInput<2>> {};
+        let v3 = CircuitElement::<CircuitInput<3>> {};
+        let v4 = CircuitElement::<CircuitInput<4>> {};
+        let v5 = CircuitElement::<CircuitInput<5>> {};
+        let u = CircuitElement::<CircuitInput<6>> {};
+        let a = CircuitElement::<CircuitInput<7>> {};
+        let b = CircuitElement::<CircuitInput<8>> {};
+        let c = CircuitElement::<CircuitInput<9>> {};
+        let s1 = CircuitElement::<CircuitInput<10>> {};
+        let s2 = CircuitElement::<CircuitInput<11>> {};
+        let zw = CircuitElement::<CircuitInput<12>> {};
+
+        let e0_inner = circuit_mul(v1, a);
+        let e0 = circuit_add(n_r0, e0_inner); 
+        let e1_inner = circuit_mul(v2, b);
+        let e1 = circuit_add(e0, e1_inner); 
+        let e2_inner = circuit_mul(v3, c);
+        let e2 = circuit_add(e1, e2_inner); 
+        let e3_inner = circuit_mul(v4, s1);
+        let e3 = circuit_add(e2, e3_inner); 
+        let e4_inner = circuit_mul(v5, s2);
+        let e4 = circuit_add(e3, e4_inner); 
+        let e5_inner = circuit_mul(u, zw);
+        let e5 = circuit_add(e4, e5_inner); 
+
+        let modulus = TryInto::<_, CircuitModulus>::try_into(ORDER_U384).unwrap();
+
+        let outputs =
+            match (e5, )
+                .new_inputs()
+                .next(from_u256(neg_r0))
+                .next(from_u256(challenges.v1.c0))
+                .next(from_u256(challenges.v2.c0))
+                .next(from_u256(challenges.v3.c0))
+                .next(from_u256(challenges.v4.c0))
+                .next(from_u256(challenges.v5.c0))
+                .next(from_u256(challenges.u.c0))
+                .next(from_u256(proof.eval_a.c0))
+                .next(from_u256(proof.eval_b.c0))
+                .next(from_u256(proof.eval_c.c0))
+                .next(from_u256(proof.eval_s1.c0))
+                .next(from_u256(proof.eval_s2.c0))
+                .next(from_u256(proof.eval_zw.c0))
+                .done()
+                .eval(modulus) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
+        };
+        let e: u256 = outputs.get_output(e5).try_into().unwrap(); 
+        
+        // let mut e = add_nz(neg_r0, mul_nz(challenges.v1.c0, proof.eval_a.c0, ORDER_NZ), ORDER_NZ);
+        // e = add_nz(e, mul_nz(challenges.v2.c0, proof.eval_b.c0, ORDER_NZ), ORDER_NZ);
+        // e = add_nz(e, mul_nz(challenges.v3.c0, proof.eval_c.c0, ORDER_NZ), ORDER_NZ);
+        // e = add_nz(e, mul_nz(challenges.v4.c0, proof.eval_s1.c0, ORDER_NZ), ORDER_NZ);
+        // e = add_nz(e, mul_nz(challenges.v5.c0, proof.eval_s2.c0, ORDER_NZ), ORDER_NZ);
+        // e = add_nz(e, mul_nz(challenges.u.c0, proof.eval_zw.c0, ORDER_NZ), ORDER_NZ);
 
         res = res.multiply(e);
 

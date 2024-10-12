@@ -12,7 +12,7 @@ use plonk_verifier::curve::constants::{ORDER, get_order_nz};
 use plonk_verifier::curve::groups::{g1, g2, AffineG1, AffineG2};
 use plonk_verifier::fields::{fq, Fq, FqIntoU256};
 use plonk_verifier::traits::FieldMulShortcuts;
-use plonk_verifier::plonk::utils::{convert_le_to_be, hex_to_decimal, decimal_to_byte_array};
+use plonk_verifier::plonk::utils::{convert_le_to_be, hex_to_decimal, byte_array_to_decimal_without_ascii_without_rev, decimal_to_byte_array, decimal_to_byte_array_reverse_order};
 use plonk_verifier::curve::{mul_nz};
 
 #[derive(Drop)]
@@ -53,10 +53,7 @@ impl Transcript of Keccak256Transcript<PlonkTranscript> {
         }
 
         let mut buffer: ByteArray = "";
-
-        let mut i = 0;
-
-        while i < self.data.len() {
+        for i in 0..self.data.len() {
             match self.data.at(i) {
                 TranscriptElement::Polynomial(pt) => {
                     let x = pt.x.c0.clone();
@@ -72,13 +69,11 @@ impl Transcript of Keccak256Transcript<PlonkTranscript> {
                     buffer.append(@s_bytes);
                 },
             };
-            i += 1;
         };
 
         let le_value = keccak::compute_keccak_byte_array(@buffer);
-
-        let be_value = convert_le_to_be(le_value);
-        let be_u256: u256 = hex_to_decimal(be_value);
+        let mut be: ByteArray = decimal_to_byte_array_reverse_order(le_value); 
+        let mut be_u256: u256 = byte_array_to_decimal_without_ascii_without_rev(be); 
         let challenge: Fq = fq(mul_nz(be_u256, 1, get_order_nz()));
 
         challenge
