@@ -88,27 +88,6 @@ fn mul_nz(a: u256, b: u256, modulo: NonZero<u256>) -> u256 {
 // returns modded u256
 #[inline(always)]
 fn mul(a: u256, b: u256, modulo: u256) -> u256 {
-    // let in1 = CircuitElement::<CircuitInput<0>> {};
-    // let in2 = CircuitElement::<CircuitInput<1>> {};
-    // let mul = circuit_mul(in1, in2);
-    // let a: u384 = a.into(); 
-    // let b: u384 = b.into(); 
-    // let modulus: u384 = modulo.into();
-    // let modulus: [u96; 4] = [modulus.limb0, modulus.limb1, modulus.limb2, modulus.limb3]; 
-    // let modulus = TryInto::<_, CircuitModulus>::try_into(modulus).unwrap(); 
-    // let outputs =
-    //     match (mul, )
-    //         .new_inputs()
-    //         .next(a)
-    //         .next(b)
-    //         .done()
-    //         .eval(modulus) {
-    //     Result::Ok(outputs) => { outputs },
-    //     Result::Err(_) => { panic!("Expected success") }
-    // };
-    
-    // let out: u256 = outputs.get_output(mul).try_into().unwrap(); 
-    // out
     mul_nz(a, b, modulo.try_into().unwrap())
 }
 
