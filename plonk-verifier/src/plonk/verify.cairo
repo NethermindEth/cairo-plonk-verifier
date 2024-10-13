@@ -269,7 +269,6 @@ impl PlonkVerifier of PVerifier {
         fq(r0)
     }
 
-
     // step 9: Compute first part of batched polynomial commitment D
     fn compute_D(
         proof: PlonkProof, challenges: PlonkChallenge, vk: PlonkVerificationKey, l1: Fq

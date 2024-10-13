@@ -8,7 +8,7 @@ use core::to_byte_array::{FormatAsByteArray, AppendFormattedToByteArray};
 use core::fmt::{Display, Formatter, Error};
 use debug::PrintTrait;
 
-use plonk_verifier::curve::constants::{ORDER, ORDER_NZ, get_order_nz};
+use plonk_verifier::curve::constants::{ORDER, ORDER_NZ};
 use plonk_verifier::curve::groups::{g1, g2, AffineG1, AffineG2};
 use plonk_verifier::fields::{fq, Fq, FqIntoU256};
 use plonk_verifier::traits::FieldMulShortcuts;

@@ -35,14 +35,17 @@ mod fields {
     mod print;
 
     #[cfg(test)]
-    mod tests { // mod fq;
+    mod tests {
+        // mod fq;
         // mod fq2;
-// mod fq6;
-// mod fq12;
-// mod fq12_expo;
-// mod fq_sparse;
-// mod u512;
-// mod frobenius;
+        // mod fq6;
+        // mod fq12;
+        // mod fq12_expo;
+        // mod fq_sparse;
+        // mod u512;
+        // mod frobenius;
+
+
     }
 
     use fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};

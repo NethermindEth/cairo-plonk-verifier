@@ -8,13 +8,6 @@ fn u128_add_with_carry(a: u128, b: u128) -> (u128, u128) nopanic {
         Result::Err(v) => (v, 1),
     }
 }
-// fn u128_add_with_carry(a: u128, b: u128) -> (u128, u128) {
-//     let (v, carry) = a.overflowing_add(b);
-//     match carry {
-//         true => (v, 1),
-//         false => (v, 0),
-//     }
-// }
 
 #[inline(always)]
 fn u256_overflow_add(lhs: u256, rhs: u256) -> Result<u256, u256> implicits(RangeCheck) nopanic {
