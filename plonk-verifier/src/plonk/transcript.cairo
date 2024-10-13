@@ -12,9 +12,7 @@ use plonk_verifier::curve::constants::{ORDER, ORDER_NZ};
 use plonk_verifier::curve::groups::{g1, g2, AffineG1, AffineG2};
 use plonk_verifier::fields::{fq, Fq, FqIntoU256};
 use plonk_verifier::traits::FieldMulShortcuts;
-use plonk_verifier::plonk::utils::{
-    convert_le_to_be, hex_to_decimal, decimal_to_byte_array, reverse_endianness
-};
+use plonk_verifier::plonk::utils::{decimal_to_byte_array, reverse_endianness};
 use plonk_verifier::curve::{mul_nz};
 
 #[derive(Drop)]
