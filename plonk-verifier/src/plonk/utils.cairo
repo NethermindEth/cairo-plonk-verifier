@@ -63,24 +63,28 @@ fn hex_to_decimal(mut hex_string: ByteArray) -> u256 {
     result
 }
 
+// Converts a ByteArray into Ascii without reversing the ByteArray and without converting to ASCII
+fn byte_array_to_decimal_without_ascii_without_rev(mut hex_string: ByteArray) -> u256 {
+    let mut result: u256 = 0;
+    let mut power: u256 = 1;
+    let mut i = 0;
+    hex_string = hex_string.rev();
+
+    while i < hex_string.len() {
+        let u256_byte_value: u256 = hex_string[i].into();
+
+        result += u256_byte_value * power;
+        if i != hex_string.len() - 1 {
+            power *= 16;
+        }
+        i += 1;
+    };
+    result
+}
+
 fn decimal_to_byte_array(mut n: u256) -> ByteArray {
     let mut byte_array: ByteArray = "";
-    let mut hex_ba_n = n.format_as_byte_array(16_u256.try_into().unwrap());
-
-    if hex_ba_n.len() < 64 {
-        hex_ba_n = left_padding_32_bytes(hex_ba_n);
-    }
-    let mut i = 0;
-    while i < hex_ba_n.len() {
-        let first_byte = ascii_to_dec(hex_ba_n[i]);
-        let second_byte = ascii_to_dec(hex_ba_n[i + 1]);
-        let mut value: u32 = first_byte * 16_u32;
-
-        value = value + second_byte;
-        let byte_word: felt252 = value.into();
-        byte_array.append_word(byte_word, 1);
-        i += 2;
-    };
+    append_formatted_to_byte_array_as_hex(@n, ref byte_array, 16_u256.try_into().unwrap());
     byte_array
 }
 
@@ -102,3 +106,47 @@ fn reverse_endianness(value: u256) -> u256 {
     u256 { low: new_low, high: new_high }
 }
 
+// This helper function assumes that combining both low and high < u8
+// It should always be true, therefore no error assert check needed
+fn combine_low_and_high_u8_as_hex(low: u8, high: u8) -> u8 { 
+    low + high * 16
+}
+
+fn append_formatted_to_byte_array_as_hex
+(
+    mut value: @u256, ref byte_array: ByteArray, base_nz: NonZero<u256>,
+) {
+    let base: u256 = base_nz.into(); 
+    assert(base == 16, 'base must be == 16');
+
+    let mut reversed_digits = array![];
+
+    loop {
+        let (new_value, digit) = DivRem::div_rem(*value, base_nz);
+        value = @new_value;
+        let digit_as_u8_low: u8 = digit.try_into().unwrap();
+
+        let (new_value, digit) = DivRem::div_rem(*value, base_nz);
+        value = @new_value;
+        let digit_as_u8_high: u8 = digit.try_into().unwrap();
+
+        reversed_digits.append(combine_low_and_high_u8_as_hex(digit_as_u8_low, digit_as_u8_high));
+        if (*value).is_zero() {
+            break;
+        };
+    };
+
+    // Pad to 32 bytes
+    for _ in 0..32 - reversed_digits.len() {
+        reversed_digits.append(0); 
+    };
+
+    // Reverse to change back to original endianness
+    let mut span = reversed_digits.span();
+    loop {
+        match span.pop_back() {
+            Option::Some(byte) => { byte_array.append_byte(*byte); },
+            Option::None => { break; },
+        };
+    };
+}
