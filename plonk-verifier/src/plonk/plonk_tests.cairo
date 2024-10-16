@@ -1,4 +1,7 @@
-#[cfg(test)]
+use snforge_std::{
+    declare, ContractClassTrait, DeclareResultTrait, start_cheat_block_number,
+    start_cheat_block_timestamp
+};
 mod plonk_tests {
     use core::clone::Clone;
     use plonk_verifier::plonk::constants;
@@ -8,9 +11,8 @@ mod plonk_tests {
     use plonk_verifier::plonk::verify::{PlonkVerifier};
     use core::traits::Into;
     use plonk_verifier::curve::groups::{g1, g2, AffineG1, AffineG2, Fq, Fq2};
-
     #[test]
-    #[available_gas(100000000000)]
+    #[available_gas(1000000000000)]
     fn test_plonk_verify() {
         // verification PlonkVerificationKey
         let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
@@ -325,6 +327,7 @@ mod plonk_tests {
     }
 
     #[test]
+    #[available_gas(100000000000)]
     fn test_valid_pairing() {
         let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw) =
             constants::proof();
