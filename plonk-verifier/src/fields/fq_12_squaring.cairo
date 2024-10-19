@@ -7,6 +7,13 @@ use plonk_verifier::curve::{u512_add, u512_sub, u512_high_add, u512_high_sub, U5
 use plonk_verifier::fields::{FieldUtils, FieldOps, fq, Fq, Fq2, ufq2_inv, Fq6, Fq12, fq12, Fq12Frobenius};
 use plonk_verifier::fields::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 use plonk_verifier::fields::print::{Fq2Display, FqDisplay, u512Display};
+use core::circuit::{
+    CircuitElement, CircuitInput, circuit_add, circuit_sub,
+    circuit_mul, circuit_inverse, EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus,
+    AddInputResultTrait, CircuitInputs, EvalCircuitResult,
+};
+use core::circuit::conversions::from_u256;
+use plonk_verifier::curve::constants::FIELD_U384;
 
 #[derive(Copy, Drop,)]
 struct Krbn2345 {
@@ -228,6 +235,81 @@ impl Fq12Squaring of Fq12SquaringTrait {
     fn cyclotomic_sqr(self: Fq12, field_nz: NonZero<u256>) -> Fq12 {
         core::internal::revoke_ap_tracking();
 
+        let z0_0 = CircuitElement::<CircuitInput<0>> {};
+        let z0_1 = CircuitElement::<CircuitInput<1>> {};
+        let z1_0 = CircuitElement::<CircuitInput<2>> {};
+        let z1_1 = CircuitElement::<CircuitInput<3>> {};
+
+        let tmp_T0 = circuit_mul(z0_0, z1_0); // z0 * z1;
+        let tmp_T1 = circuit_mul(z0_1, z1_1);
+        let tmp_T2_0 = circuit_add(z0_0, z0_1);
+        let tmp_T2_1 = circuit_add(z1_0, z1_1); 
+        let tmp_T2 = circuit_mul(tmp_T2_0, tmp_T2_1); 
+        let tmp_T3_0 = circuit_add(tmp_T0, tmp_T1); 
+        let tmp_c1 = circuit_sub(tmp_T2, tmp_T3_0);
+        let tmp_c0 = circuit_sub(tmp_T0, tmp_T1); 
+        
+        let T0_0_c0 = circuit_add(z0_0, z0_1); // (z0 + z1)
+        let T0_0_c1 = circuit_add(z1_0, z1_1); 
+
+        let a0_scale_9_2 = circuit_add(z1_0, z1_0); // z1.mul_by_nonresidue()
+        let a0_scale_9_4 = circuit_add(a0_scale_9_2, a0_scale_9_2);
+        let a0_scale_9 = circuit_add(a0_scale_9_4, z1_0); 
+        let a1_scale_9_2 = circuit_add(z1_1, z1_1);
+        let a1_scale_9_4 = circuit_add(a1_scale_9_2, a1_scale_9_2);
+        let a1_scale_9 = circuit_add(a1_scale_9_4, z1_1); 
+        let T0_1_c0 = circuit_sub(a0_scale_9, z1_1);
+        let T0_1_c1 = circuit_add(a1_scale_9, z1_0); 
+
+        let T0_2_c0 = circuit_add(T0_1_c0, z0_0); // (z1.mul_by_nonresidue() + z0)
+        let T0_2_c1 = circuit_add(T0_1_c1, z0_1); 
+    
+        let tmp_T0 = circuit_mul(T0_0_c0, T0_2_c0); // (z0 + z1) * (z1.mul_by_nonresidue() + z0)
+        let tmp_T1 = circuit_sub(T0_0_c1, T0_2_c1);
+        let tmp_T2_0 = circuit_add(T0_0_c0, T0_0_c1);
+        let tmp_T2_1 = circuit_add(T0_2_c0, T0_2_c1); 
+        let tmp_T2 = circuit_mul(tmp_T2_0, tmp_T2_1); 
+        let tmp_T3_0 = circuit_add(tmp_T0, tmp_T1); 
+        let T0_3_c1 = circuit_sub(tmp_T2, tmp_T3_0);
+        let T0_3_c0 = circuit_sub(tmp_T0, tmp_T1); 
+
+        let a0_scale_9_2 = circuit_add(tmp_c0, tmp_c0); // tmp.mul_by_nonresidue()
+        let a0_scale_9_4 = circuit_add(a0_scale_9_2, a0_scale_9_2);
+        let a0_scale_9 = circuit_add(a0_scale_9_4, tmp_c0); 
+        let a1_scale_9_2 = circuit_add(tmp_c1, tmp_c1);
+        let a1_scale_9_4 = circuit_add(a1_scale_9_2, a1_scale_9_2);
+        let a1_scale_9 = circuit_add(a1_scale_9_4, tmp_c1); 
+        let T0_4_c0 = circuit_sub(a0_scale_9, tmp_c1);
+        let T0_4_c1 = circuit_add(a1_scale_9, tmp_c0); 
+
+        let T0_5_c0 = circuit_sub(T0_3_c0, tmp_c0); // (z0 + z1) * (z1.mul_by_nonresidue() + z0) - tmp
+        let T0_5_c1 = circuit_sub(T0_3_c1, tmp_c1);
+
+        let T0_c0 = circuit_sub(T0_5_c0, T0_4_c0);
+        let T0_c1 = circuit_sub(T0_5_c1, T0_4_c1);
+
+        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+        let z0_0 = from_u256(self.c0.c0.c0.c0);
+        let z0_1 = from_u256(self.c0.c0.c1.c0);
+        let z1_0 = from_u256(self.c1.c1.c0.c0);
+        let z1_1 = from_u256(self.c1.c1.c1.c0);
+        
+        let outputs =
+            match (T0_c0, T0_c1, )
+                .new_inputs()
+                .next(z0_0)
+                .next(z0_1)
+                .next(z1_0)
+                .next(z1_1)
+                .done()
+                .eval(modulus) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
+        };
+        let fq_c0: u256 = outputs.get_output(tmp_c0).try_into().unwrap();
+        let fq_c1: u256 = outputs.get_output(tmp_c1).try_into().unwrap();
+        println!("Test Tmp: {:?}, {:?}", fq_c0, fq_c1); 
+
         let z0 = self.c0.c0;
         let z4 = self.c0.c1;
         let z3 = self.c0.c2;
@@ -240,6 +322,8 @@ impl Fq12Squaring of Fq12SquaringTrait {
         let T0 = z0.u_add(z1).u_mul(z1.mul_by_nonresidue().u_add(z0))
             - Tmp
             - mul_by_xi_nz(Tmp, field_nz);
+        let t_0: Fq2 = Tmp.to_fq(field_nz);
+        println!("Real T0: {:?}, {:?}", t_0.c0, t_0.c1); 
         // let t1 = tmp + tmp;
         let T1 = Tmp + Tmp;
 

@@ -442,4 +442,296 @@ mod plonk_tests {
         let dec_3 = ascii_to_dec(test_3);
         assert_eq!(dec_3, 15);
     }
+
+    use plonk_verifier::curve::groups::{ECOperations, ECOperationsCircuitFq};
+    #[test]
+    fn test_affine_multiply() {
+        let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw) =
+            constants::proof();
+        let proof = PlonkProof {
+            A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
+        };
+        let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
+            constants::verification_key();
+        let verification_key = PlonkVerificationKey {
+            n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
+        };
+        let challenges: PlonkChallenge = PlonkChallenge {
+            beta: fq(14498736666711970908375456476345180774162405747758964362513385423508335735322),
+            gamma: fq(
+                12473575158495020584075331747768007427040808349100262643951655593347205212105
+            ),
+            alpha: fq(1638659385023515386554508818708523991148437210157968065970684882752976352387),
+            xi: fq(11882213808513143293994894265765176245869305285611379364593291279901519522928),
+            xin: fq(2547969369229319030019457190033843677010987911599058423863006450250883277211),
+            zh: fq(2547969369229319030019457190033843677010987911599058423863006450250883277210),
+            v1: fq(15525246157134916236476400018821255884822413269025828374216029504649227137669),
+            v2: fq(21132627888087099743804979172433285392556642515445679407925856696706183143931),
+            v3: fq(14811188092632618134958606395686769465009218042016000324383312979839817536369),
+            v4: fq(4108746516280855064593980008751272222578296515181456478736767522256005393754),
+            v5: fq(21273923665773393693442929292304958706950228002872333898227188355663509830744),
+            u: fq(6089190548497707896050173528768502095987431640910795526240399704164855396906)
+        };
+        let L1 = fq(2620616904154172175670395853552055689556084771717235903725482226645091308782);
+
+        let out = verification_key.Qm.multiply(proof.eval_a.c0);
+        //println!("{:?}, {:?}", out.x, out.y); 
+    }
+
+    use plonk_verifier::fields::fq_1::sqr;
+    use plonk_verifier::curve::constants::FIELD_U384;
+    use core::circuit::{
+        RangeCheck96, AddMod, MulMod, u96, CircuitElement, CircuitInput, circuit_add, circuit_sub,
+        circuit_mul, circuit_inverse, EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus,
+        AddInputResultTrait, CircuitInputs,EvalCircuitResult,
+    };
+    use core::circuit::conversions::from_u256;
+
+    #[test]
+    fn test_affine_multiply_circuits() {
+        let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw) =
+            constants::proof();
+        let proof = PlonkProof {
+            A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
+        };
+        let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
+            constants::verification_key();
+        let verification_key = PlonkVerificationKey {
+            n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
+        };
+        let challenges: PlonkChallenge = PlonkChallenge {
+            beta: fq(14498736666711970908375456476345180774162405747758964362513385423508335735322),
+            gamma: fq(
+                12473575158495020584075331747768007427040808349100262643951655593347205212105
+            ),
+            alpha: fq(1638659385023515386554508818708523991148437210157968065970684882752976352387),
+            xi: fq(11882213808513143293994894265765176245869305285611379364593291279901519522928),
+            xin: fq(2547969369229319030019457190033843677010987911599058423863006450250883277211),
+            zh: fq(2547969369229319030019457190033843677010987911599058423863006450250883277210),
+            v1: fq(15525246157134916236476400018821255884822413269025828374216029504649227137669),
+            v2: fq(21132627888087099743804979172433285392556642515445679407925856696706183143931),
+            v3: fq(14811188092632618134958606395686769465009218042016000324383312979839817536369),
+            v4: fq(4108746516280855064593980008751272222578296515181456478736767522256005393754),
+            v5: fq(21273923665773393693442929292304958706950228002872333898227188355663509830744),
+            u: fq(6089190548497707896050173528768502095987431640910795526240399704164855396906)
+        };
+        let L1 = fq(2620616904154172175670395853552055689556084771717235903725482226645091308782);
+        let out = verification_key.Qm.multiply_as_circuit(proof.eval_a.c0);
+        //println!("{:?}, {:?}", out.x, out.y); 
+    }
+    
+
+    #[test] 
+    fn test_chord() {
+        let zh = fq(2547969369229319030019457190033843677010987911599058423863006450250883277210);
+        let v1 = fq(15525246157134916236476400018821255884822413269025828374216029504649227137669);
+        let v2 = fq(21132627888087099743804979172433285392556642515445679407925856696706183143931);
+        let v3 = fq(14811188092632618134958606395686769465009218042016000324383312979839817536369);
+
+        // λ = (y2-y1) / (x2-x1)
+        //let temp = (zh - v1);
+        //println!("REAL OUT: {:?}", temp); 
+        let out = (zh - v1) / (v2 - v3);
+        
+        //println!("{:?}", out); 
+        
+    }
+
+    #[test] 
+    fn test_chord_individual() {
+        let zh = fq(2547969369229319030019457190033843677010987911599058423863006450250883277210);
+        let v1 = fq(15525246157134916236476400018821255884822413269025828374216029504649227137669);
+        let v2 = fq(21132627888087099743804979172433285392556642515445679407925856696706183143931);
+        let v3 = fq(14811188092632618134958606395686769465009218042016000324383312979839817536369);
+
+        // λ = (y2-y1) / (x2-x1)
+
+        let zh_in = CircuitElement::<CircuitInput<0>> {};
+        let v1_in = CircuitElement::<CircuitInput<1>> {};
+        let v2_in = CircuitElement::<CircuitInput<0>> {};
+        let v3_in = CircuitElement::<CircuitInput<1>> {};
+        let in_1 = CircuitElement::<CircuitInput<0>> {};
+        let in_2 = CircuitElement::<CircuitInput<1>> {};
+        let inv = CircuitElement::<CircuitInput<0>> {};
+
+        let zh_v1 = circuit_sub(zh_in, v1_in);
+        let v2_v3 = circuit_sub(v2_in, v3_in);
+        let v2_v3_inv = circuit_inverse(inv); 
+        let mul_inv = circuit_mul(in_1, in_2); 
+        
+        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+        let zh = from_u256(zh.c0);
+        let v1 = from_u256(v1.c0);
+        let v2 = from_u256(v2.c0);
+        let v3 = from_u256(v3.c0);
+        
+
+        let outputs =
+            match (zh_v1, )
+                .new_inputs()
+                .next(zh)
+                .next(v1)
+                .done()
+                .eval(modulus) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
+        };
+        let out_1 = outputs.get_output(zh_v1);
+        //let temp: u256 = out_1.try_into().unwrap(); 
+        //println!("OUT: {:?}", temp); 
+
+        let outputs =
+            match (v2_v3, )
+                .new_inputs()
+                .next(v2)
+                .next(v3)
+                .done()
+                .eval(modulus) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
+        };
+        let out_2 = outputs.get_output(v2_v3); 
+
+        let outputs =
+            match (v2_v3_inv, )
+                .new_inputs()
+                .next(out_2)
+                .done()
+                .eval(modulus) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
+        };
+        let out_3 = outputs.get_output(v2_v3_inv); 
+
+        let outputs =
+            match (mul_inv, )
+                .new_inputs()
+                .next(out_1)
+                .next(out_3)
+                .done()
+                .eval(modulus) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
+        };
+        let out_2: u256 = outputs.get_output(mul_inv).try_into().unwrap(); 
+        //println!("{:?}", out_2); 
+
+    }
+
+    #[test] 
+    fn test_chord_all() {
+        let zh = fq(2547969369229319030019457190033843677010987911599058423863006450250883277210);
+        let v1 = fq(15525246157134916236476400018821255884822413269025828374216029504649227137669);
+        let v2 = fq(21132627888087099743804979172433285392556642515445679407925856696706183143931);
+        let v3 = fq(14811188092632618134958606395686769465009218042016000324383312979839817536369);
+
+        // λ = (y2-y1) / (x2-x1)
+        let zh_in = CircuitElement::<CircuitInput<0>> {};
+        let v1_in = CircuitElement::<CircuitInput<1>> {};
+        let v2_in = CircuitElement::<CircuitInput<2>> {};
+        let v3_in = CircuitElement::<CircuitInput<3>> {};
+
+        let zh_v1 = circuit_sub(zh_in, v1_in);
+        let v2_v3 = circuit_sub(v2_in, v3_in);
+        let v2_v3_inv = circuit_inverse(v2_v3); 
+        let mul = circuit_mul(zh_v1, v2_v3_inv); 
+        
+        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+        let zh = from_u256(zh.c0);
+        let v1 = from_u256(v1.c0);
+        let v2 = from_u256(v2.c0);
+        let v3 = from_u256(v3.c0);
+        
+
+        let outputs =
+            match (mul, )
+                .new_inputs()
+                .next(zh)
+                .next(v1)
+                .next(v2)
+                .next(v3)
+                .done()
+                .eval(modulus) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
+        };
+        let out: u256 = outputs.get_output(mul).try_into().unwrap();
+        //println!("{:?}", out); 
+    }
+
+    #[test]
+    fn test_add_3() {
+        let zh = fq(2547969369229319030019457190033843677010987911599058423863006450250883277210);
+        let v1 = fq(15525246157134916236476400018821255884822413269025828374216029504649227137669);
+
+        let x1 = CircuitElement::<CircuitInput<0>> {};
+
+        let x1_sqr = circuit_mul(x1, x1); 
+        let x1_mul_x1_3 = circuit_add(x1_sqr, x1_sqr); 
+        let add = circuit_add(x1_mul_x1_3, x1_sqr); 
+        
+        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+        let x1 = from_u256(zh.c0);
+
+        let outputs =
+                match (add, )
+                    .new_inputs()
+                    .next(x1)
+                    .done()
+                    .eval(modulus) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
+            };
+            
+        let x = Fq{c0: outputs.get_output(add).try_into().unwrap()};
+    }
+    #[test]
+    fn test_add_3_mul() {
+        let zh = fq(2547969369229319030019457190033843677010987911599058423863006450250883277210);
+        let v1 = fq(15525246157134916236476400018821255884822413269025828374216029504649227137669);
+
+        let x1 = CircuitElement::<CircuitInput<0>> {};
+        let three = CircuitElement::<CircuitInput<1>> {};
+
+
+        let x1_sqr = circuit_mul(x1, x1); 
+        let x1_mul_x1_3 = circuit_mul(x1_sqr, three); 
+        
+        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+        let x1 = from_u256(zh.c0);
+        let three = from_u256(3);
+
+        let outputs =
+                match (x1_mul_x1_3, )
+                    .new_inputs()
+                    .next(x1)
+                    .next(three)
+                    .done()
+                    .eval(modulus) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
+            };
+            
+        let x = Fq{c0: outputs.get_output(x1_mul_x1_3).try_into().unwrap()};
+    }
+
+    use plonk_verifier::curve::pairing::optimal_ate::{single_ate_pairing, ate_miller_loop, test_single_ate_loop};
+    use plonk_verifier::fields::fq_12::Fq12; 
+    #[test]
+    fn test_test_pairing() {
+        let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw) =
+            constants::proof();
+        let proof = PlonkProof {
+            A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
+        };
+        let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
+            constants::verification_key();
+        let vk = PlonkVerificationKey {
+            n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
+        };
+        let mut A1: AffineG1 = proof.Wxi;
+
+        let e_A1_vk_x2: Fq12 = single_ate_pairing(A1, vk.X_2);
+
+    }
 }
