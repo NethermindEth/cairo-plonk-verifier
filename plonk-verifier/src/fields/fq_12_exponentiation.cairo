@@ -281,6 +281,14 @@ impl Fq12ExponentiationCircuit of PairingExponentiationTraitCircuit {
         let z0_1 = CircuitElement::<CircuitInput<1>> {};
         let z1_0 = CircuitElement::<CircuitInput<2>> {};
         let z1_1 = CircuitElement::<CircuitInput<3>> {};
+        let z2_0 = CircuitElement::<CircuitInput<4>> {};
+        let z2_1 = CircuitElement::<CircuitInput<5>> {};
+        let z3_0 = CircuitElement::<CircuitInput<6>> {};
+        let z3_1 = CircuitElement::<CircuitInput<7>> {};
+        let z4_0 = CircuitElement::<CircuitInput<8>> {};
+        let z4_1 = CircuitElement::<CircuitInput<9>> {};
+        let z5_0 = CircuitElement::<CircuitInput<10>> {};
+        let z5_1 = CircuitElement::<CircuitInput<11>> {};
 
         let tmp_T0 = circuit_mul(z0_0, z1_0); // z0 * z1;
         let tmp_T1 = circuit_mul(z0_1, z1_1);
@@ -333,6 +341,199 @@ impl Fq12ExponentiationCircuit of PairingExponentiationTraitCircuit {
         let T1_c0 = circuit_add(tmp_c0, tmp_c0);
         let T1_c1 = circuit_add(tmp_c1, tmp_c1);
 
+        // Step 1: tmp = z2 * z3
+        let tmp_T0 = circuit_mul(z2_0, z3_0);
+        let tmp_T1 = circuit_mul(z2_1, z3_1);
+        let tmp_T2_0 = circuit_add(z2_0, z2_1);
+        let tmp_T2_1 = circuit_add(z3_0, z3_1);
+        let tmp_T2 = circuit_mul(tmp_T2_0, tmp_T2_1);
+        let tmp_T3_0 = circuit_add(tmp_T0, tmp_T1);
+        let tmp_c1 = circuit_sub(tmp_T2, tmp_T3_0);
+        let tmp_c0 = circuit_sub(tmp_T0, tmp_T1);
+
+        // Step 2: T2_0 = z2 + z3
+        let T2_0_c0 = circuit_add(z2_0, z3_0);
+        let T2_0_c1 = circuit_add(z2_1, z3_1);
+
+        // Step 3: T2_1 = z3.mul_by_nonresidue()
+        let a0_scale_9_2 = circuit_add(z3_0, z3_0);
+        let a0_scale_9_4 = circuit_add(a0_scale_9_2, a0_scale_9_2);
+        let a0_scale_9 = circuit_add(a0_scale_9_4, z3_0);
+        let a1_scale_9_2 = circuit_add(z3_1, z3_1);
+        let a1_scale_9_4 = circuit_add(a1_scale_9_2, a1_scale_9_2);
+        let a1_scale_9 = circuit_add(a1_scale_9_4, z3_1);
+        let T2_1_c0 = circuit_sub(a0_scale_9, z3_1);
+        let T2_1_c1 = circuit_add(a1_scale_9, z3_0);
+
+        // Step 4: T2_2 = T2_1 + z2
+        let T2_2_c0 = circuit_add(T2_1_c0, z2_0);
+        let T2_2_c1 = circuit_add(T2_1_c1, z2_1);
+
+        // Step 5: T2_3 = (T2_0) * (T2_2)
+        let tmp_T0 = circuit_mul(T2_0_c0, T2_2_c0);
+        let tmp_T1 = circuit_mul(T2_0_c1, T2_2_c1);
+        let tmp_T2_0 = circuit_add(T2_0_c0, T2_0_c1);
+        let tmp_T2_1 = circuit_add(T2_2_c0, T2_2_c1);
+        let tmp_T2 = circuit_mul(tmp_T2_0, tmp_T2_1);
+        let tmp_T3_0 = circuit_add(tmp_T0, tmp_T1);
+        let T2_3_c1 = circuit_sub(tmp_T2, tmp_T3_0);
+        let T2_3_c0 = circuit_sub(tmp_T0, tmp_T1);
+
+        // Step 6: T2_5 = T2_3 - tmp
+        let T2_5_c0 = circuit_sub(T2_3_c0, tmp_c0);
+        let T2_5_c1 = circuit_sub(T2_3_c1, tmp_c1);
+
+        // Step 7: T2_4 = tmp.mul_by_nonresidue()
+        let a0_scale_9_2 = circuit_add(tmp_c0, tmp_c0);
+        let a0_scale_9_4 = circuit_add(a0_scale_9_2, a0_scale_9_2);
+        let a0_scale_9 = circuit_add(a0_scale_9_4, tmp_c0);
+        let a1_scale_9_2 = circuit_add(tmp_c1, tmp_c1);
+        let a1_scale_9_4 = circuit_add(a1_scale_9_2, a1_scale_9_2);
+        let a1_scale_9 = circuit_add(a1_scale_9_4, tmp_c1);
+        let T2_4_c0 = circuit_sub(a0_scale_9, tmp_c1);
+        let T2_4_c1 = circuit_add(a1_scale_9, tmp_c0);
+
+        // Step 8: T2 = T2_5 - T2_4
+        let T2_c0 = circuit_sub(T2_5_c0, T2_4_c0);
+        let T2_c1 = circuit_sub(T2_5_c1, T2_4_c1);
+
+        // Step 9: T3 = tmp + tmp
+        let T3_c0 = circuit_add(tmp_c0, tmp_c0);
+        let T3_c1 = circuit_add(tmp_c1, tmp_c1);
+
+        // Step 1: tmp = z4 * z5
+        let tmp_T0 = circuit_mul(z4_0, z5_0); // T0 = z4_0 * z5_0
+        let tmp_T1 = circuit_mul(z4_1, z5_1); // T1 = z4_1 * z5_1
+
+        let tmp_T2_0 = circuit_add(z4_0, z4_1); // (z4_0 + z4_1)
+        let tmp_T2_1 = circuit_add(z5_0, z5_1); // (z5_0 + z5_1)
+        let tmp_T2 = circuit_mul(tmp_T2_0, tmp_T2_1); // T2 = (z4_0 + z4_1) * (z5_0 + z5_1)
+
+        let tmp_T3_0 = circuit_add(tmp_T0, tmp_T1); // T3_0 = T0 + T1
+        let tmp_c1 = circuit_sub(tmp_T2, tmp_T3_0); // tmp_c1 = T2 - (T0 + T1)
+        let tmp_c0 = circuit_sub(tmp_T0, tmp_T1);   // tmp_c0 = T0 - T1
+
+        // tmp = (tmp_c0, tmp_c1)
+
+        // Step 2: T4_0 = z4 + z5
+        let T4_0_c0 = circuit_add(z4_0, z5_0); // T4_0_c0 = z4_0 + z5_0
+        let T4_0_c1 = circuit_add(z4_1, z5_1); // T4_0_c1 = z4_1 + z5_1
+
+        // Step 3: T4_1 = z5.mul_by_nonresidue()
+        let a0_scale_9_2 = circuit_add(z5_0, z5_0); // 2 * z5_0
+        let a0_scale_9_4 = circuit_add(a0_scale_9_2, a0_scale_9_2); // 4 * z5_0
+        let a0_scale_9 = circuit_add(a0_scale_9_4, z5_0); // 5 * z5_0
+
+        let a1_scale_9_2 = circuit_add(z5_1, z5_1); // 2 * z5_1
+        let a1_scale_9_4 = circuit_add(a1_scale_9_2, a1_scale_9_2); // 4 * z5_1
+        let a1_scale_9 = circuit_add(a1_scale_9_4, z5_1); // 5 * z5_1
+
+        let T4_1_c0 = circuit_sub(a0_scale_9, z5_1); // T4_1_c0 = a0_scale_9 - z5_1
+        let T4_1_c1 = circuit_add(a1_scale_9, z5_0); // T4_1_c1 = a1_scale_9 + z5_0
+
+        // Step 4: T4_2 = T4_1 + z4
+        let T4_2_c0 = circuit_add(T4_1_c0, z4_0); // T4_2_c0 = T4_1_c0 + z4_0
+        let T4_2_c1 = circuit_add(T4_1_c1, z4_1); // T4_2_c1 = T4_1_c1 + z4_1
+
+        // Step 5: T4_3 = (T4_0) * (T4_2)
+        let tmp_T0 = circuit_mul(T4_0_c0, T4_2_c0); // T0 = T4_0_c0 * T4_2_c0
+        let tmp_T1 = circuit_mul(T4_0_c1, T4_2_c1); // T1 = T4_0_c1 * T4_2_c1
+
+        let tmp_T2_0 = circuit_add(T4_0_c0, T4_0_c1); // (T4_0_c0 + T4_0_c1)
+        let tmp_T2_1 = circuit_add(T4_2_c0, T4_2_c1); // (T4_2_c0 + T4_2_c1)
+        let tmp_T2 = circuit_mul(tmp_T2_0, tmp_T2_1); // T2 = sum1 * sum2
+
+        let tmp_T3_0 = circuit_add(tmp_T0, tmp_T1); // T3_0 = T0 + T1
+        let T4_3_c1 = circuit_sub(tmp_T2, tmp_T3_0); // T4_3_c1 = T2 - (T0 + T1)
+        let T4_3_c0 = circuit_sub(tmp_T0, tmp_T1);   // T4_3_c0 = T0 - T1
+
+        // T4_3 = (T4_3_c0, T4_3_c1)
+
+        // Step 6: T4_5 = T4_3 - tmp
+        let T4_5_c0 = circuit_sub(T4_3_c0, tmp_c0); // T4_5_c0 = T4_3_c0 - tmp_c0
+        let T4_5_c1 = circuit_sub(T4_3_c1, tmp_c1); // T4_5_c1 = T4_3_c1 - tmp_c1
+
+        // Step 7: T4_4 = tmp.mul_by_nonresidue()
+        let a0_scale_9_2 = circuit_add(tmp_c0, tmp_c0); // 2 * tmp_c0
+        let a0_scale_9_4 = circuit_add(a0_scale_9_2, a0_scale_9_2); // 4 * tmp_c0
+        let a0_scale_9 = circuit_add(a0_scale_9_4, tmp_c0); // 5 * tmp_c0
+
+        let a1_scale_9_2 = circuit_add(tmp_c1, tmp_c1); // 2 * tmp_c1
+        let a1_scale_9_4 = circuit_add(a1_scale_9_2, a1_scale_9_2); // 4 * tmp_c1
+        let a1_scale_9 = circuit_add(a1_scale_9_4, tmp_c1); // 5 * tmp_c1
+
+        let T4_4_c0 = circuit_sub(a0_scale_9, tmp_c1); // T4_4_c0 = a0_scale_9 - tmp_c1
+        let T4_4_c1 = circuit_add(a1_scale_9, tmp_c0); // T4_4_c1 = a1_scale_9 + tmp_c0
+
+        // Step 8: T4 = T4_5 - T4_4
+        let T4_c0 = circuit_sub(T4_5_c0, T4_4_c0); // T4_c0 = T4_5_c0 - T4_4_c0
+        let T4_c1 = circuit_sub(T4_5_c1, T4_4_c1); // T4_c1 = T4_5_c1 - T4_4_c1
+
+        // T4 = (T4_c0, T4_c1)
+
+        // Step 9: T5 = tmp + tmp
+        let T5_c0 = circuit_add(tmp_c0, tmp_c0); // T5_c0 = tmp_c0 + tmp_c0
+        let T5_c1 = circuit_add(tmp_c1, tmp_c1); // T5_c1 = tmp_c1 + tmp_c1
+
+        // Z0
+        let Z0_0 = circuit_sub(T0_c0, z0_0);
+        let Z0_1 = circuit_sub(T0_c1, z0_1);
+        let Z0_0 = circuit_add(Z0_0, Z0_0); 
+        let Z0_1 = circuit_add(Z0_1, Z0_1);
+        let Z0_0 = circuit_add(Z0_0, T0_c0);
+        let Z0_1 = circuit_add(Z0_1, T0_c1);
+        
+        // Z1
+        let Z1_0 = circuit_add(T1_c0, z1_0);
+        let Z1_1 = circuit_add(T1_c1, z1_1);
+        let Z1_0 = circuit_add(Z1_0, Z1_0); 
+        let Z1_1 = circuit_add(Z1_1, Z1_1);
+        let Z1_0 = circuit_add(Z1_0, T1_c0);
+        let Z1_1 = circuit_add(Z1_1, T1_c1);
+
+        // Z2
+        let a0_scale_9_2 = circuit_add(T5_c0, T5_c0); // 2 * z5_0
+        let a0_scale_9_4 = circuit_add(a0_scale_9_2, a0_scale_9_2); // 4 * z5_0
+        let a0_scale_9 = circuit_add(a0_scale_9_4, T5_c0); // 5 * z5_0
+
+        let a1_scale_9_2 = circuit_add(T5_c1, T5_c1); // 2 * z5_1
+        let a1_scale_9_4 = circuit_add(a1_scale_9_2, a1_scale_9_2); // 4 * z5_1
+        let a1_scale_9 = circuit_add(a1_scale_9_4, T5_c1); // 5 * z5_1
+
+        let tmp_0 = circuit_sub(a0_scale_9, T5_c1); // T4_1_c0 = a0_scale_9 - z5_1
+        let tmp_1 = circuit_add(a1_scale_9, T5_c0); // T4_1_c1 = a1_scale_9 + z5_0
+        
+        let Z2_0 = circuit_add(tmp_0, z2_0);
+        let Z2_1 = circuit_add(tmp_1, z2_1);
+        let Z2_0 = circuit_add(Z2_0, Z2_0); 
+        let Z2_1 = circuit_add(Z2_1, Z2_1);
+        let Z2_0 = circuit_add(Z2_0, tmp_0);
+        let Z2_1 = circuit_add(Z2_1, tmp_1);
+
+        // Z3
+        let Z3_0 = circuit_sub(T4_c0, z3_0);
+        let Z3_1 = circuit_sub(T4_c1, z3_1);
+        let Z3_0 = circuit_add(Z3_0, Z3_0); 
+        let Z3_1 = circuit_add(Z3_1, Z3_1);
+        let Z3_0 = circuit_add(Z3_0, T4_c0);
+        let Z3_1 = circuit_add(Z3_1, T4_c1);
+
+        // Z4
+        let Z4_0 = circuit_sub(T2_c0, z4_0);
+        let Z4_1 = circuit_sub(T2_c1, z4_1);
+        let Z4_0 = circuit_add(Z4_0, Z4_0); 
+        let Z4_1 = circuit_add(Z4_1, Z4_1);
+        let Z4_0 = circuit_add(Z4_0, T2_c0);
+        let Z4_1 = circuit_add(Z4_1, T2_c1);
+
+        // Z5
+        let Z5_0 = circuit_add(T3_c0, z5_0);
+        let Z5_1 = circuit_add(T3_c1, z5_1);
+        let Z5_0 = circuit_add(Z5_0, Z5_0); 
+        let Z5_1 = circuit_add(Z5_1, Z5_1);
+        let Z5_0 = circuit_add(Z5_0, T3_c0);
+        let Z5_1 = circuit_add(Z5_1, T3_c1);
+
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let z0_0 = from_u256(self.c0.c0.c0.c0);
         let z0_1 = from_u256(self.c0.c0.c1.c0);
@@ -348,20 +549,39 @@ impl Fq12ExponentiationCircuit of PairingExponentiationTraitCircuit {
         let z5_1 = from_u256(self.c1.c2.c1.c0);
 
         let outputs =
-            match (T0_c0, T0_c1, )
+            match (Z0_0, Z0_1, Z1_0, Z1_1, Z2_0, Z2_1, Z3_0, Z3_1, Z4_0, Z4_1, Z5_0, Z5_1,)
                 .new_inputs()
                 .next(z0_0)
                 .next(z0_1)
                 .next(z1_0)
                 .next(z1_1)
+                .next(z2_0)
+                .next(z2_1)
+                .next(z3_0)
+                .next(z3_1)
+                .next(z4_0)
+                .next(z4_1)
+                .next(z5_0)
+                .next(z5_1)
                 .done()
                 .eval(modulus) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
-        let fq_c0: u256 = outputs.get_output(T0_c1).try_into().unwrap();
-        let fq_c1: u256 = outputs.get_output(T0_c0).try_into().unwrap();
-        println!("Test T0: {:?}, {:?}", fq_c0, fq_c1); 
+        let z0_0: u256 = outputs.get_output(Z0_0).try_into().unwrap();
+        let z0_1: u256 = outputs.get_output(Z0_1).try_into().unwrap();
+        let z1_0: u256 = outputs.get_output(Z1_0).try_into().unwrap();
+        let z1_1: u256 = outputs.get_output(Z1_1).try_into().unwrap();
+        let z2_0: u256 = outputs.get_output(Z2_0).try_into().unwrap();
+        let z2_1: u256 = outputs.get_output(Z2_1).try_into().unwrap();
+        let z3_0: u256 = outputs.get_output(Z3_0).try_into().unwrap();
+        let z3_1: u256 = outputs.get_output(Z3_1).try_into().unwrap();
+        let z4_0: u256 = outputs.get_output(Z4_0).try_into().unwrap();
+        let z4_1: u256 = outputs.get_output(Z4_1).try_into().unwrap();
+        let z5_0: u256 = outputs.get_output(Z5_0).try_into().unwrap();
+        let z5_1: u256 = outputs.get_output(Z5_1).try_into().unwrap();
+        println!("Test Z0: {:?}, {:?}", z0_0, z0_1); 
+        println!("Test Z4: {:?}, {:?}", z4_0, z4_1); 
 
         // let tmp = z0 * z1;
         let Tmp = z0.u_mul(z1);
@@ -390,7 +610,7 @@ impl Fq12ExponentiationCircuit of PairingExponentiationTraitCircuit {
         // let t5 = tmp + tmp;
         let T5 = Tmp + Tmp;
 
-        let Z0 = T0.u512_sub_fq(z0);
+       let Z0 = T0.u512_sub_fq(z0);
         let Z0 = Z0 + Z0;
         let Z0 = Z0 + T0;
 
@@ -415,6 +635,11 @@ impl Fq12ExponentiationCircuit of PairingExponentiationTraitCircuit {
         let Z5 = Z5 + Z5;
         let Z5 = Z5 + T3;
 
+        let z0: Fq2 = Z0.to_fq(field_nz);
+        let z4: Fq2 = Z4.to_fq(field_nz);
+
+        println!("real Z0_0: {:?}, Z0_1: {:?}", z0.c0.c0, z0.c1.c0);
+        println!("real Z4_0: {:?}, Z4_1: {:?}", z4.c0.c0, z4.c1.c0);
         Fq12 {
             c0: Fq6 { c0: Z0.to_fq(field_nz), c1: Z4.to_fq(field_nz), c2: Z3.to_fq(field_nz) },
             c1: Fq6 { c0: Z2.to_fq(field_nz), c1: Z1.to_fq(field_nz), c2: Z5.to_fq(field_nz) },
