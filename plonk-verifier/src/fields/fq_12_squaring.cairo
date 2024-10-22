@@ -234,6 +234,77 @@ impl Fq12Squaring of Fq12SquaringTrait {
     // Cyclotomic squaring 
     fn cyclotomic_sqr(self: Fq12, field_nz: NonZero<u256>) -> Fq12 {
         core::internal::revoke_ap_tracking();
+
+        let z0 = self.c0.c0;
+        let z4 = self.c0.c1;
+        let z3 = self.c0.c2;
+        let z2 = self.c1.c0;
+        let z1 = self.c1.c1;
+        let z5 = self.c1.c2;
+        // let tmp = z0 * z1;
+        let Tmp = z0.u_mul(z1);
+        // let t0 = (z0 + z1) * (z1.mul_by_nonresidue() + z0) - tmp - tmp.mul_by_nonresidue();
+        let T0 = z0.u_add(z1).u_mul(z1.mul_by_nonresidue().u_add(z0))
+            - Tmp
+            - mul_by_xi_nz(Tmp, field_nz);
+        // let t1 = tmp + tmp;
+        let T1 = Tmp + Tmp;
+
+        // let tmp = z2 * z3;
+        let Tmp = z2.u_mul(z3);
+        // let t2 = (z2 + z3) * (z3.mul_by_nonresidue() + z2) - tmp - tmp.mul_by_nonresidue();
+        let T2 = z2.u_add(z3).u_mul(z3.mul_by_nonresidue().u_add(z2))
+            - Tmp
+            - mul_by_xi_nz(Tmp, field_nz);
+        // let t3 = tmp + tmp;
+        let T3 = Tmp + Tmp;
+
+        // let tmp = z4 * z5;
+        let Tmp = z4.u_mul(z5);
+        // let t4 = (z4 + z5) * (z5.mul_by_nonresidue() + z4) - tmp - tmp.mul_by_nonresidue();
+        let T4 = z4.u_add(z5).u_mul(z5.mul_by_nonresidue().u_add(z4))
+            - Tmp
+            - mul_by_xi_nz(Tmp, field_nz);
+        // let t5 = tmp + tmp;
+        let T5 = Tmp + Tmp;
+
+        let Z0 = T0.u512_sub_fq(z0);
+        let Z0 = Z0 + Z0;
+        let Z0 = Z0 + T0;
+
+        let Z1 = T1.u512_add_fq(z1);
+        let Z1 = Z1 + Z1;
+        let Z1 = Z1 + T1;
+
+        let Tmp = mul_by_xi_nz(T5, field_nz);
+        let Z2 = Tmp.u512_add_fq(z2);
+        let Z2 = Z2 + Z2;
+        let Z2 = Z2 + Tmp;
+
+        let Z3 = T4.u512_sub_fq(z3);
+        let Z3 = Z3 + Z3;
+        let Z3 = Z3 + T4;
+
+        let Z4 = T2.u512_sub_fq(z4);
+        let Z4 = Z4 + Z4;
+        let Z4 = Z4 + T2;
+
+        let Z5 = T3.u512_add_fq(z5);
+        let Z5 = Z5 + Z5;
+        let Z5 = Z5 + T3;
+
+        Fq12 {
+            c0: Fq6 { c0: Z0.to_fq(field_nz), c1: Z4.to_fq(field_nz), c2: Z3.to_fq(field_nz) },
+            c1: Fq6 { c0: Z2.to_fq(field_nz), c1: Z1.to_fq(field_nz), c2: Z5.to_fq(field_nz) },
+        }
+    }
+}
+
+#[generate_trait]
+impl Fq12SquaringCircuit of Fq12SquaringCircuitTrait {
+    // Cyclotomic squaring 
+    fn cyclotomic_sqr_circuit(self: Fq12, field_nz: NonZero<u256>) -> Fq12 {
+        core::internal::revoke_ap_tracking();
         
         let z0_0 = CircuitElement::<CircuitInput<0>> {};
         let z0_1 = CircuitElement::<CircuitInput<1>> {};
