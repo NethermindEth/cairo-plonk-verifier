@@ -1,5 +1,13 @@
 use core::option::OptionTrait;
 use core::traits::TryInto;
+use core::circuit::{
+    CircuitElement, CircuitInput, AddMod, circuit_add, circuit_sub, circuit_mul, circuit_inverse,
+    EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus, AddInputResultTrait, CircuitInputs,
+    EvalCircuitResult
+};
+
+use plonk_verifier::curve::constants::{FIELD_U384, ORDER_U384};
+use core::circuit::conversions::{from_u128, from_u256};
 mod constants;
 mod groups;
 
@@ -41,10 +49,34 @@ use f::{SixU512};
 #[inline(always)]
 fn scale_9(a: f::Fq) -> f::Fq {
     // addchain for a to 9a
+    println!("a {:?}", a);
     let a2 = a + a;
     let a4 = a2 + a2;
+    println!("a2 {:?}", a2);
+    println!("a4 {:?}", a4);
+    println!("a9 {:?}", a4 + a4 + a);
     a4 + a4 + a
 }
+#[inline(always)]
+fn circuit_scale_9(a: f::Fq) -> f::Fq {
+    // addchain for a to 9a
+    let a_in = CircuitElement::<CircuitInput<0>> {};
+
+    let a2 = circuit_add(a_in, a_in);
+    let a4 = circuit_add(a2, a2);
+    let a8 = circuit_add(a4, a4);
+    let a9 = circuit_add(a8, a_in);
+    let a_in = from_u256(a.c0);
+    let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+    let outputs = match (a9,).new_inputs().next(a_in).done().eval(modulus) {
+        Result::Ok(outputs) => { outputs },
+        Result::Err(_) => { panic!("Expected success") }
+    };
+    let fq_a9 = f::Fq { c0: outputs.get_output(a9).try_into().unwrap() };
+
+    fq_a9
+}
+
 
 #[inline(always)]
 fn u512_high_add(lhs: u512, rhs: u256) -> u512 {
