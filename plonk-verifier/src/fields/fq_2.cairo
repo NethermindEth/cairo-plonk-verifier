@@ -64,7 +64,36 @@ impl Fq2Utils of FieldUtils<Fq2, Fq> {
 
     #[inline(always)]
     fn scale(self: Fq2, by: Fq) -> Fq2 {
-        Fq2 { c0: self.c0 * by, c1: self.c1 * by, }
+        let a_c0 = CircuitElement::<CircuitInput<0>> {};
+        let a_c1 = CircuitElement::<CircuitInput<1>> {};
+        let scalar = CircuitElement::<CircuitInput<2>> {};
+
+        let a_c0_scale = circuit_mul(a_c0, scalar);
+        let a_c1_scale = circuit_mul(a_c1, scalar);
+
+        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+
+        let a0 = from_u256(self.c0.c0);
+        let a1 = from_u256(self.c1.c0);
+        let scalar = from_u256(by.c0);
+
+        let outputs =
+            match (a_c0_scale, a_c1_scale,)
+                .new_inputs()
+                .next(a0)
+                .next(a1)
+                .next(scalar)
+                .done()
+                .eval(modulus) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
+        };
+
+        let fq_c0 = Fq { c0: outputs.get_output(a_c0_scale).try_into().unwrap() };
+        let fq_c1 = Fq { c0: outputs.get_output(a_c1_scale).try_into().unwrap() };
+
+        let res = Fq2 { c0: fq_c0, c1: fq_c1 };
+        res
     }
 
     #[inline(always)]
@@ -173,27 +202,6 @@ impl Fq2MulShort of FieldMulShortcuts<Fq2, (u512, u512)> {
         let T1 = t0.u_mul(a1);
         // 5: return C = (T0 + T1i)
         (T0, T1)
-        // let a0 = CircuitElement::<CircuitInput<0>> {};
-    // let a1 = CircuitElement::<CircuitInput<1>> {};
-    // let t0 = circuit_add(a0, a1);
-    // let t1 = circuit_sub(a0, a1);
-    // let T0 = circuit_mul(t0, t1);
-    // let t0 = circuit_add(a0, a0);
-    // let T1 = circuit_mul(t0, a1);
-    // let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-    // let a0 = from_u256(self.c0.c0);
-    // let a1 = from_u256(self.c1.c0);
-
-        // let outputs = match (T0, T1,).new_inputs().next(a0).next(a1).done().eval(modulus) {
-    //     Result::Ok(outputs) => { outputs },
-    //     Result::Err(_) => { panic!("Expected success") }
-    // };
-    // let T_0 = outputs.get_output(T0);
-    // let T_1 = outputs.get_output(T1);
-
-        // let fq_T0: u512 = into_u512(T_0);
-    // let fq_T1: u512 = into_u512(T_1);
-    // (fq_T0, fq_T1)
     }
 
     #[inline(always)]
@@ -243,16 +251,18 @@ impl Fq2Ops of FieldOps<Fq2> {
             Result::Err(_) => { panic!("Expected success") }
         };
 
-        let fq_t0 = Fq { c0: outputs.get_output(t4).try_into().unwrap() };
-        let fq_t1 = Fq { c0: outputs.get_output(t3).try_into().unwrap() };
+        let fq_c0 = Fq { c0: outputs.get_output(t4).try_into().unwrap() };
+        let fq_c1 = Fq { c0: outputs.get_output(t3).try_into().unwrap() };
 
-        let fq_t = Fq2 { c0: fq_t0, c1: fq_t1 };
+        let fq_t = Fq2 { c0: fq_c0, c1: fq_c1 };
         fq_t
     }
 
     #[inline(always)]
     fn div(self: Fq2, rhs: Fq2) -> Fq2 {
-        self.mul(rhs.inv(get_field_nz()))
+        let inv_rhs = rhs.inv(get_field_nz());
+        let res = Self::mul(self, inv_rhs);
+        res
     }
 
     #[inline(always)]
@@ -266,7 +276,8 @@ impl Fq2Ops of FieldOps<Fq2> {
     }
 
     #[inline(always)]
-    fn sqr(self: Fq2) -> Fq2 { // Aranha sqr_u + 2r
+    fn sqr(self: Fq2) -> Fq2 {
+        // // Aranha sqr_u + 2r
         let a0 = CircuitElement::<CircuitInput<0>> {};
         let a1 = CircuitElement::<CircuitInput<1>> {};
         let t0 = circuit_add(a0, a1);
@@ -289,6 +300,7 @@ impl Fq2Ops of FieldOps<Fq2> {
         let fq_t = Fq2 { c0: fq_t0, c1: fq_t1 };
         fq_t
     }
+
 
     #[inline(always)]
     fn inv(self: Fq2, field_nz: NonZero<u256>) -> Fq2 {
