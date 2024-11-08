@@ -3,7 +3,9 @@ use core::traits::TryInto;
 use plonk_verifier::traits::FieldMulShortcuts;
 use plonk_verifier::traits::{FieldUtils, FieldOps};
 use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
-use plonk_verifier::fields::{Fq6, fq6, Fq6Utils, fq, fq2, Fq6Frobenius, Fq6MulShort, Fq6Short};
+use plonk_verifier::fields::{
+    fq, fq2, Fq2Ops, Fq6, fq6, Fq6Utils, Fq6Frobenius, Fq6MulShort, Fq6Short, Fq6Ops
+};
 use plonk_verifier::fields::frobenius::fp12 as frob;
 use plonk_verifier::fields::print::{Fq6Display};
 use plonk_verifier::curve::{FIELD, get_field_nz};
