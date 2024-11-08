@@ -290,6 +290,16 @@ fn mul_by_v_nz(
     (mul_by_xi_nz(t2, field_nz), t0, t1)
 }
 
+
+#[inline(always)]
+fn mul_by_v_nz_as_circuit(t: f::Fq6) -> f::Fq6 {
+    let t0 = t.c0;
+    let t1 = t.c1;
+    let t2 = t.c2;
+
+    f::Fq6 { c0: mul_by_xi_nz_as_circuit(t2.c0, t2.c1), c1: t0, c2: t1 }
+}
+
 #[inline(always)]
 fn mul(a: u256, b: u256) -> u256 {
     m::mul_nz(a, b, get_field_nz())

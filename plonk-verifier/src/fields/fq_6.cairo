@@ -1,5 +1,3 @@
-use core::traits::TryInto;
-use core::circuit::conversions::from_u256;
 use plonk_verifier::curve::{FIELD, get_field_nz};
 use plonk_verifier::curve::{
     U512Fq2Ops, u512, U512BnAdd, Tuple2Add, U512BnSub, Tuple2Sub, mul_by_xi, mul_by_xi_nz,
@@ -12,6 +10,9 @@ use plonk_verifier::fields::frobenius::fp6 as frob;
 use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 use plonk_verifier::fields::print::{u512Display, Fq2Display, Fq6Display};
 use plonk_verifier::curve::constants::FIELD_U384;
+
+use core::traits::TryInto;
+use core::circuit::conversions::from_u256;
 use core::circuit::{
     CircuitElement, CircuitInput, circuit_add, circuit_sub, circuit_mul, circuit_inverse,
     EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus, AddInputResultTrait, CircuitInputs,
@@ -307,84 +308,6 @@ impl Fq6Ops of FieldOps<Fq6> {
 
         let res = Fq6 { c0: c0, c1: c1, c2: c2 };
         res
-        // self
-    // let a0_0 = CircuitElement::<CircuitInput<0>> {};
-    // let a0_1 = CircuitElement::<CircuitInput<1>> {};
-    // let a1_0 = CircuitElement::<CircuitInput<2>> {};
-    // let a1_1 = CircuitElement::<CircuitInput<3>> {};
-    // let a2_0 = CircuitElement::<CircuitInput<4>> {};
-    // let a2_1 = CircuitElement::<CircuitInput<5>> {};
-
-        // lhs
-    // let b0_0 = CircuitElement::<CircuitInput<6>> {};
-    // let b0_1 = CircuitElement::<CircuitInput<7>> {};
-    // let b1_0 = CircuitElement::<CircuitInput<8>> {};
-    // let b1_1 = CircuitElement::<CircuitInput<9>> {};
-    // let b2_0 = CircuitElement::<CircuitInput<10>> {};
-    // let b2_1 = CircuitElement::<CircuitInput<11>> {};
-
-        // v0: fq2 mul: a0 mul b0
-    // let t00 = circuit_mul(a0_0, b0_0);
-    // let t01 = circuit_mul(a0_1, b0_1);
-    // let a00_add_a01 = circuit_add(a0_0, a0_1);
-    // let b00_add_b01 = circuit_add(b0_0, b0_1);
-    // let t02 = circuit_mul(a00_add_a01, b00_add_b01);
-    // let t03 = circuit_add(t00, t01);
-    // let t03 = circuit_sub(t02, t03); // -> output: a0.c1
-    // let t04 = circuit_sub(t00, t01); // -> output: a0.c0
-
-        // v1: fq2 mul: a1 mul b1
-    // let t10 = circuit_mul(a1_0, b1_0);
-    // let t11 = circuit_mul(a1_1, b1_1);
-    // let a10_add_a11 = circuit_add(a1_0, a1_1);
-    // let b10_add_b11 = circuit_add(b1_0, b1_1);
-    // let t12 = circuit_mul(a10_add_a11, b10_add_b11);
-    // let t13 = circuit_add(t10, t11);
-    // let t13 = circuit_sub(t12, t13); // -> output: a1.c1
-    // let t14 = circuit_sub(t10, t11); // -> output: a1.c0
-
-        // v2: fq2 mul: a2 mul b2
-    // let t20 = circuit_mul(a2_0, b2_0);
-    // let t21 = circuit_mul(a2_1, b2_1);
-    // let a20_add_a21 = circuit_add(a2_0, a2_1);
-    // let b20_add_b21 = circuit_add(b2_0, b2_1);
-    // let t22 = circuit_mul(a20_add_a21, b20_add_b21);
-    // let t23 = circuit_add(t20, t21);
-    // let t23 = circuit_sub(t22, t23); // -> output: a2.c1
-    // let t24 = circuit_sub(t20, t21); // -> output: a2.c0
-
-        // let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-
-        // let a0_0 = from_u256(self.c0.c0.c0);
-    // let a0_1 = from_u256(self.c0.c1.c0);
-    // let a1_0 = from_u256(self.c1.c0.c0);
-    // let a1_1 = from_u256(self.c1.c1.c0);
-    // let a2_0 = from_u256(self.c2.c0.c0);
-    // let a2_1 = from_u256(self.c2.c1.c0);
-
-        // let b0_0 = from_u256(rhs.c0.c0.c0);
-    // let b0_1 = from_u256(rhs.c0.c1.c0);
-    // let b1_0 = from_u256(rhs.c1.c0.c0);
-    // let b1_1 = from_u256(rhs.c1.c1.c0);
-    // let b2_0 = from_u256(rhs.c2.c0.c0);
-    // let b2_1 = from_u256(rhs.c2.c1.c0);
-
-        // let outputs = match (mul,).new_inputs().next(a).next(b).done().eval(modulus) {
-    //     Result::Ok(outputs) => { outputs },
-    //     Result::Err(_) => { panic!("Expected success") }
-    // };
-
-        // let fq_c0 = Fq { c0: outputs.get_output(mul).try_into().unwrap() };
-
-        // let field_nz = FIELD.try_into().unwrap();
-    // let res: Fq6 = self.u_mul(rhs).to_fq(field_nz);
-    // println!("res: {:?}", res.c0.c0);
-    // println!("res: {:?}", res.c0.c1);
-    // println!("res: {:?}", res.c1.c0);
-    // println!("res: {:?}", res.c1.c1);
-    // println!("res: {:?}", res.c2.c0);
-    // println!("res: {:?}", res.c2.c1);
-    // res
     }
     #[inline(always)]
     fn div(self: Fq6, rhs: Fq6) -> Fq6 {
@@ -416,9 +339,6 @@ impl Fq6Ops of FieldOps<Fq6> {
         let c2 = Fq2Ops::sub(Fq2Ops::add(Fq2Ops::add(s1, s2), s3), Fq2Ops::add(s0, s4));
         let res = Fq6 { c0: c0, c1: c1, c2: c2 };
         res
-        // core::internal::revoke_ap_tracking();
-    // let field_nz = FIELD.try_into().unwrap();
-    // self.u_sqr().to_fq(field_nz)
     }
 
     #[inline(always)]

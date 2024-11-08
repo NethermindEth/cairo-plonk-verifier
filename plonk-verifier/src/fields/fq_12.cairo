@@ -11,8 +11,16 @@ use plonk_verifier::fields::print::{Fq6Display};
 use plonk_verifier::curve::{FIELD, get_field_nz};
 use plonk_verifier::curve::{
     u512, U512BnAdd, Tuple2Add, Tuple3Add, U512BnSub, Tuple2Sub, Tuple3Sub, u512_reduce,
-    mul_by_v_nz, U512Fq6Ops
+    mul_by_v_nz, mul_by_v_nz_as_circuit, U512Fq6Ops
 };
+
+use core::circuit::conversions::from_u256;
+use core::circuit::{
+    CircuitElement, CircuitInput, circuit_add, circuit_sub, circuit_mul, circuit_inverse,
+    EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus, AddInputResultTrait, CircuitInputs,
+    EvalCircuitResult,
+};
+
 use debug::PrintTrait;
 
 #[derive(Copy, Drop, Serde, Debug)]
@@ -182,34 +190,32 @@ impl Fq12Ops of FieldOps<Fq12> {
 
     fn mul(self: Fq12, rhs: Fq12) -> Fq12 {
         core::internal::revoke_ap_tracking();
-        // Input: a = (a0 + a1i) and b = (b0 + b1i) ∈ Fp2 Output: c = a·b = (c0 +c1i) ∈ Fp2
-        let field_nz = FIELD.try_into().unwrap();
 
         let Fq12 { c0: a0, c1: a1 } = self;
         let Fq12 { c0: b0, c1: b1 } = rhs;
 
-        let U = a0.u_mul(b0);
-        let V = a1.u_mul(b1);
+        let U = Fq6Ops::mul(a0, b0);
+        let V = Fq6Ops::mul(a1, b1);
+        let c0 = Fq6Ops::add(mul_by_v_nz_as_circuit(V), U);
+        let c1 = Fq6Ops::sub(Fq6Ops::sub(Fq6Ops::mul(a0 + a1, b0 + b1), U), V);
 
-        let C0 = mul_by_v_nz(V, field_nz) + U;
-        let C1 = (a0 + a1).u_mul(b0 + b1) - U - V;
-        Fq12 { //
-         c0: C0.to_fq(field_nz), //
-         c1: C1.to_fq(field_nz), //
-         }
+        Fq12 { c0: c0, c1: c1 }
     }
 
     fn sqr(self: Fq12) -> Fq12 {
         core::internal::revoke_ap_tracking();
-        let field_nz = FIELD.try_into().unwrap();
+
         let Fq12 { c0: a0, c1: a1 } = self;
-        // Complex squaring
-        let V = a0.u_mul(a1);
-        // (a0 + a1) * (a0 + βa1) - v - βv
-        let C0 = (a0 + a1).u_mul(a0 + a1.mul_by_nonresidue()) - V - mul_by_v_nz(V, field_nz);
-        // 2v
-        let C1 = V + V;
-        Fq12 { c0: C0.to_fq(field_nz), c1: C1.to_fq(field_nz) }
+        let V = Fq6Ops::mul(a0, a1);
+        let c0 = Fq6Ops::sub(
+            Fq6Ops::sub(
+                Fq6Ops::mul(Fq6Ops::add(a0, a1), Fq6Ops::add(a0, a1.mul_by_nonresidue())), V
+            ),
+            mul_by_v_nz_as_circuit(V)
+        );
+        let c1 = Fq6Ops::add(V, V);
+
+        Fq12 { c0: c0, c1: c1 }
     }
 
     fn inv(self: Fq12, field_nz: NonZero<u256>) -> Fq12 {
