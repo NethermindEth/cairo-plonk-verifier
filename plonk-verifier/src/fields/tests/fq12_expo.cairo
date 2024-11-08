@@ -10,7 +10,7 @@ use plonk_verifier::curve::{
     FIELD, get_field_nz, u512, Tuple2Add, Tuple2Sub, U512BnAdd, U512BnSub, u512_sub_u256, u512_add,
     u512_sub
 };
-use plonk_verifier::fields::fq_12_squaring::{x2, x4, X2, mul_by_xi_nz, Krbn2345, Fq12Squaring};
+use plonk_verifier::fields::fq_12_squaring::{x2, x4, X2, Krbn2345, Fq12Squaring};
 use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 use plonk_verifier::fields::print::{Fq12Display, Fq2Display};
 use debug::PrintTrait;

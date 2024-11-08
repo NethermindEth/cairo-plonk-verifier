@@ -49,12 +49,8 @@ use f::{SixU512};
 #[inline(always)]
 fn scale_9(a: f::Fq) -> f::Fq {
     // addchain for a to 9a
-    println!("a {:?}", a);
     let a2 = a + a;
     let a4 = a2 + a2;
-    println!("a2 {:?}", a2);
-    println!("a4 {:?}", a4);
-    println!("a9 {:?}", a4 + a4 + a);
     a4 + a4 + a
 }
 #[inline(always)]
@@ -241,6 +237,39 @@ fn mul_by_xi_nz(t: (u512, u512), field_nz: NonZero<u256>) -> (u512, u512) {
     let (t0, t1): (u512, u512) = t;
     (u512_scl_9(t0, field_nz) - t1, //
      t0 + u512_scl_9(t1, field_nz))
+}
+
+fn mul_by_xi_nz_as_circuit(a: f::Fq, b: f::Fq) -> f::Fq2 {
+    let t0 = CircuitElement::<CircuitInput<0>> {};
+    let t1 = CircuitElement::<CircuitInput<1>> {};
+    let scl = CircuitElement::<CircuitInput<2>> {};
+
+    let t0_mul_9 = circuit_mul(t0, scl);
+    let t1_mul_9 = circuit_mul(t1, scl);
+    let t0_mul_9_sub_t1 = circuit_sub(t0_mul_9, t1);
+    let t0_add_t1_mul_9 = circuit_add(t0, t1_mul_9);
+
+    let t0 = from_u256(a.c0);
+    let t1 = from_u256(b.c0);
+    let scl = [9, 0, 0, 0];
+
+    let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+
+    let outputs =
+        match (t0_mul_9_sub_t1, t0_add_t1_mul_9,)
+            .new_inputs()
+            .next(t0)
+            .next(t1)
+            .next(scl)
+            .done()
+            .eval(modulus) {
+        Result::Ok(outputs) => { outputs },
+        Result::Err(_) => { panic!("Expected success") }
+    };
+    let fq2_c0 = f::Fq { c0: outputs.get_output(t0_mul_9_sub_t1).try_into().unwrap() };
+    let fq2_c1 = f::Fq { c0: outputs.get_output(t0_add_t1_mul_9).try_into().unwrap() };
+    let res = f::Fq2 { c0: fq2_c0, c1: fq2_c1 };
+    res
 }
 
 #[inline(always)]
