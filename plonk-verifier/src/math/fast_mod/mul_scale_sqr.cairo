@@ -3,6 +3,8 @@ use integer::{u512, u128_wide_mul};
 use core::num::traits::{WideMul};
 use core::num::traits::{OverflowingAdd, OverflowingSub, WrappingAdd};
 
+use u::{u128_circuit_wrapping_add};
+
 use super::{utils as u, reduce, u512_reduce};
 // scale u512 by u128 (for smaller numbers)
 // unreduced, returns u512 plus u128 (fifth limb) which needs handling
@@ -16,6 +18,7 @@ fn u512_scl(a: u512, x: u128) -> (u512, u128) {
     let result3 = limb3.wide_mul(x);
 
     let limb1 = result0.high.wrapping_add(result1.low);
+    // let limb1 = u128_circuit_wrapping_add(result0.high, result1.low);
     let limb2 = result1.high.wrapping_add(result2.low);
     let limb3 = result2.high.wrapping_add(result3.low);
     let limb4 = result3.high;

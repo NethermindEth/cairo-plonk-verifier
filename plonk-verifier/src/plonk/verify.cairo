@@ -8,7 +8,7 @@ use core::debug::{PrintTrait, print_byte_array_as_string};
 use core::array::ArrayTrait;
 use core::cmp::max;
 use core::circuit::{
-    RangeCheck96, AddMod, MulMod, u96, CircuitElement, CircuitInput, circuit_add, circuit_sub,
+    RangeCheck96, AddMod, u96, CircuitElement, CircuitInput, circuit_add, circuit_sub,
     circuit_mul, circuit_inverse, EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus,
     AddInputResultTrait, CircuitInputs,EvalCircuitResult,
 };

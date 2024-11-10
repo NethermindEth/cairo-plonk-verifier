@@ -1,4 +1,4 @@
-use plonk_verifier::curve::{scale_9, FIELD};
+use plonk_verifier::curve::{circuit_scale_9, FIELD};
 use plonk_verifier::fields::{
     FieldUtils, FieldOps, FieldShortcuts, fq, Fq, Fq2, Fq6, Fq12, fq12, FS01234, FS034, FS01
 };
@@ -30,17 +30,17 @@ fn direct_to_tower(x: Fq12) -> Fq12 {
     let Fq2 { c0: a10, c1: a11 } = b5;
 
     fq12_from_fq(
-        a0 + scale_9(a6),
+        a0 + circuit_scale_9(a6),
         a6,
-        a2 + scale_9(a8),
+        a2 + circuit_scale_9(a8),
         a8,
-        a4 + scale_9(a10),
+        a4 + circuit_scale_9(a10),
         a10,
-        a1 + scale_9(a7),
+        a1 + circuit_scale_9(a7),
         a7,
-        a3 + scale_9(a9),
+        a3 + circuit_scale_9(a9),
         a9,
-        a5 + scale_9(a11),
+        a5 + circuit_scale_9(a11),
         a11,
     )
 }
@@ -82,12 +82,12 @@ fn tower_to_direct(x: Fq12) -> Fq12Direct {
     let Fq2 { c0: a10, c1: a11 } = b5;
 
     (
-        a0 - scale_9(a1),
-        a6 - scale_9(a7),
-        a2 - scale_9(a3),
-        a8 - scale_9(a9),
-        a4 - scale_9(a5),
-        a10 - scale_9(a11),
+        a0 - circuit_scale_9(a1),
+        a6 - circuit_scale_9(a7),
+        a2 - circuit_scale_9(a3),
+        a8 - circuit_scale_9(a9),
+        a4 - circuit_scale_9(a5),
+        a10 - circuit_scale_9(a11),
         a1,
         a7,
         a3,
@@ -107,11 +107,11 @@ fn tower01234_to_direct(x: FS01234) -> ((Fq, Fq, Fq, Fq, Fq), (Fq, Fq, Fq, Fq, F
     let Fq2 { c0: a6, c1: a7 } = b3;
     let Fq2 { c0: a8, c1: a9 } = b4;
 
-    let a1x9 = scale_9(a1);
-    let a7x9 = scale_9(a7);
-    let a3x9 = scale_9(a3);
-    let a9x9 = scale_9(a9);
-    let a5x9 = scale_9(a5);
+    let a1x9 = circuit_scale_9(a1);
+    let a7x9 = circuit_scale_9(a7);
+    let a3x9 = circuit_scale_9(a3);
+    let a9x9 = circuit_scale_9(a9);
+    let a5x9 = circuit_scale_9(a5);
     ((a0 - a1x9, a6 - a7x9, a2 - a3x9, a8 - a9x9, a4 - a5x9,), (a1, a7, a3, a9, a5,),)
 }
 
@@ -125,7 +125,7 @@ struct FS034Direct {
 fn tower034_to_direct(x: FS034) -> FS034Direct {
     let FS034 { c3: Fq2 { c0: a6, c1: a7 }, c4: Fq2 { c0: a8, c1: a9 } } = x;
 
-    FS034Direct { c1: a6 - scale_9(a7), c3: a8 - scale_9(a9), c7: a7, c9: a9, }
+    FS034Direct { c1: a6 - circuit_scale_9(a7), c3: a8 - circuit_scale_9(a9), c7: a7, c9: a9, }
 }
 
 #[cfg(test)]

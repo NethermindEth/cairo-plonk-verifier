@@ -1,10 +1,18 @@
 use core::result::ResultTrait;
 use super::{utils as u, reduce};
-use u::{u128_overflowing_add, u128_overflowing_sub, u256_overflow_sub, u256_wrapping_add};
+use u::{
+    u128_overflowing_add, u128_overflowing_sub, u256_overflow_sub, u256_wrapping_add,
+    u256_circuit_wrapping_add
+};
+use core::circuit::{
+    CircuitElement, CircuitInput, AddMod, circuit_add, circuit_sub, circuit_mul, circuit_inverse,
+    EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus, AddInputResultTrait, CircuitInputs,
+    EvalCircuitResult
+};
+use core::circuit::conversions::{from_u128, from_u256};
 use integer::u512;
 use core::panic_with_felt252;
 use result::Result;
-
 #[inline(always)]
 fn neg(b: u256, modulo: u256) -> u256 {
     modulo - b

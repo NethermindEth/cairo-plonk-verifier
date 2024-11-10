@@ -2,3 +2,4 @@ target
 .env
 commands.md
 .snfoundry_cache*
+bench.md

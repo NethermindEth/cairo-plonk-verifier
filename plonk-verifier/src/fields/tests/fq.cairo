@@ -1,8 +1,10 @@
+use debug::PrintTrait;
+
 use plonk_verifier::traits::FieldOps;
-use plonk_verifier::fields::{fq, Fq, fq2, Fq2, FieldUtils};
+use plonk_verifier::fields::{fq, Fq, fq2, Fq2, FieldUtils, FqMulShort};
 use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 use plonk_verifier::curve::{FIELD, get_field_nz};
-use debug::PrintTrait;
+
 
 fn ops() -> Array<Fq> {
     array![ //
@@ -14,11 +16,11 @@ fn ops() -> Array<Fq> {
     ]
 }
 
-use plonk_verifier::curve::{sub, add, mul, div, neg,};
+use plonk_verifier::curve::{sub_u, add, mul, div, neg,};
 
 fn u256_mod_ops() -> Array<u256> {
     array![ //
-    sub(256, 56), //
+    sub_u(256, 56), //
      add(256, 56), //
      mul(256, 56), //
      div(256, 56), //
@@ -47,4 +49,32 @@ fn test_main() {
     };
     assert((fq(256) == fq(56)) == false, 'incorrect eq');
     assert((fq(3294587623987546) == fq(3294587623987546)) == true, 'incorrect eq');
+}
+
+#[test]
+fn test_fq_u_mul() {
+    // Test case 1: Basic multiplication
+    let a = fq(1_u256);
+    let b = fq(2_u256);
+    let result = FqMulShort::u_mul(a, b);
+    assert_eq!(result.limb0, 2_u128, "1 * 2 should equal 2");
+    assert_eq!(result.limb1, 0_u128, "Higher limbs should be 0");
+    assert_eq!(result.limb2, 0_u128, "Higher limbs should be 0");
+    assert_eq!(result.limb3, 0_u128, "Higher limbs should be 0");
+
+    // Test case 2: Larger numbers
+    let a = fq(0xFFFFFFFF_u256);
+    let b = fq(0xFFFFFFFF_u256);
+    let result = FqMulShort::u_mul(a, b);
+    assert_eq!(result.limb0, 0xFFFFFFFE00000001_u128, "FFFFFFFF * FFFFFFFF calculation");
+    assert_eq!(result.limb1, 0_u128, "Higher limbs should match");
+
+    // Test case 3: Zero multiplication
+    let a = fq(0_u256);
+    let b = fq(123_u256);
+    let result = FqMulShort::u_mul(a, b);
+    assert_eq!(result.limb0, 0_u128, "0 * 123 should be 0");
+    assert_eq!(result.limb1, 0_u128, "Higher limbs should be 0");
+    assert_eq!(result.limb2, 0_u128, "Higher limbs should be 0");
+    assert_eq!(result.limb3, 0_u128, "Higher limbs should be 0");
 }
