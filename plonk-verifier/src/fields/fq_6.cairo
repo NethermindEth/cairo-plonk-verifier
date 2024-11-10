@@ -288,7 +288,7 @@ impl Fq6Ops of FieldOps<Fq6> {
         let t0 = Fq2Ops::mul(a1_add_a2, b1_add_b2);
         let t0 = Fq2Ops::sub(t0, v1);
         let t0 = Fq2Ops::sub(t0, v2);
-        let t0_scaled = mul_by_xi_nz_as_circuit(t0.c0, t0.c1);
+        let t0_scaled = mul_by_xi_nz_as_circuit(t0);
         let c0 = Fq2Ops::add(v0, t0_scaled);
 
         let a0_add_a1 = Fq2Ops::add(self.c0, self.c1);
@@ -296,7 +296,7 @@ impl Fq6Ops of FieldOps<Fq6> {
         let t1 = Fq2Ops::mul(a0_add_a1, b0_add_b1);
         let t1 = Fq2Ops::sub(t1, v0);
         let t1 = Fq2Ops::sub(t1, v1);
-        let t1_scaled = mul_by_xi_nz_as_circuit(v2.c0, v2.c1);
+        let t1_scaled = mul_by_xi_nz_as_circuit(v2);
         let c1 = Fq2Ops::add(t1, t1_scaled);
 
         let a0_add_a2 = Fq2Ops::add(self.c0, self.c2);
@@ -360,15 +360,14 @@ impl Fq6Ops of FieldOps<Fq6> {
         // Fq6 { c0: t * v0, c1: t * v1, c2: t * v2, }
         let Fq6 { c0, c1, c2 } = self;
         let c1_mul_c2 = Fq2Ops::mul(c1, c2);
-        let v0 = Fq2Ops::sqr(c0) - mul_by_xi_nz_as_circuit(c1_mul_c2.c0, c1_mul_c2.c1);
+        let v0 = Fq2Ops::sqr(c0) - mul_by_xi_nz_as_circuit(c1_mul_c2);
         let c2_sqr = Fq2Ops::sqr(c2);
-        let v1 = Fq2Ops::sub(mul_by_xi_nz_as_circuit(c2_sqr.c0, c2_sqr.c1), Fq2Ops::mul(c0, c1));
+        let v1 = Fq2Ops::sub(mul_by_xi_nz_as_circuit(c2_sqr), Fq2Ops::mul(c0, c1));
         let v2 = Fq2Ops::sub(Fq2Ops::sqr(c1), Fq2Ops::mul(c0, c2));
         let c2_mul_v1 = Fq2Ops::mul(c2, v1);
         let c1_mul_v2 = Fq2Ops::mul(c1, v2);
         let c2_mul_v1_add_c1_mul_v2 = Fq2Ops::add(c2_mul_v1, c1_mul_v2);
-        let t = mul_by_xi_nz_as_circuit(c2_mul_v1_add_c1_mul_v2.c0, c2_mul_v1_add_c1_mul_v2.c1)
-            + Fq2Ops::mul(c0, v0);
+        let t = mul_by_xi_nz_as_circuit(c2_mul_v1_add_c1_mul_v2) + Fq2Ops::mul(c0, v0);
         let t_inv = Fq2Ops::inv(t, field_nz);
         let c0 = Fq2Ops::mul(v0, t_inv);
         let c1 = Fq2Ops::mul(v1, t_inv);

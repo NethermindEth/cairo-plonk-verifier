@@ -74,7 +74,7 @@ fn s01_mul_01() {
     let (Fq12 { c0: _, c1: b }, b_s) = set_b();
     let _b_s = sparse_fq6(b_s.c3, b_s.c4);
     let c = a * b;
-    let c_s: Fq6 = b.u_mul_01(a_s, field_nz).to_fq(field_nz);
+    let c_s: Fq6 = b.mul_01(a_s,);
     assert(c == c_s, 'mul0101 incorrect failed');
 }
 
@@ -85,7 +85,7 @@ fn fq6_mul_01() {
     let a_s = sparse_fq6(a_s.c3, a_s.c4);
     let Fq12 { c0: b, c1: _ } = a_12();
     let c = a * b;
-    let c_s: Fq6 = b.u_mul_01(a_s, field_nz).to_fq(field_nz);
+    let c_s: Fq6 = b.mul_01(a_s,);
     assert(c.c0 == c_s.c0, 'mul034034 c0 failed');
     assert(c.c1 == c_s.c1, 'mul034034 c1 failed');
     assert(c.c2 == c_s.c2, 'mul034034 c2 failed');
@@ -95,7 +95,7 @@ fn fq6_mul_01() {
 fn s034_sqr() {
     let field_nz = get_field_nz();
     let (_, a) = set_a();
-    assert(a.sqr_034(field_nz) == a.mul_034_by_034(a, field_nz), '');
+    assert(a.sqr_034() == a.mul_034_by_034(a), '');
 }
 
 #[test]
@@ -104,7 +104,7 @@ fn s034_mul_034() {
     let (a, a_s) = set_a();
     let (b, b_s) = set_b();
     let c = a * b;
-    let c_s = a_s.mul_034_by_034(b_s, field_nz);
+    let c_s = a_s.mul_034_by_034(b_s);
 
     assert(c.c0.c0 == c_s.c0, 'mul034034 c0 failed');
     assert(c.c0.c1 == c_s.c1, 'mul034034 c1 failed');
@@ -119,7 +119,7 @@ fn fq12_mul_034() {
     let a = a_12();
     let (b, b_s) = set_b();
     let c = a * b;
-    let c_s = a.mul_034(b_s, field_nz);
+    let c_s = a.mul_034(b_s);
 
     assert(c == c_s, 'mul034034 c0.c0 failed');
 }
@@ -131,7 +131,7 @@ fn s01234_mul_034() {
     let (b, b_s) = set_b();
 
     let c = a * b;
-    let c_s = a_s.mul_01234_034(b_s, field_nz);
+    let c_s = a_s.mul_01234_034(b_s);
     assert(c == c_s, 'mul_01234_034 incorrect');
 }
 
@@ -141,7 +141,7 @@ fn fq12_mul_01234() {
     let a = a_12();
     let (b, b_s) = set_01234();
     let c = a * b;
-    let c_s = a.mul_01234(b_s, field_nz);
+    let c_s = a.mul_01234(b_s);
     assert(c == c_s, 'mul01234 incorrect');
 }
 
@@ -150,7 +150,7 @@ fn miller_test_034_034_fq12() {
     let field_nz = get_field_nz();
     let (_a, a) = set_a();
     let (_b, b) = set_b();
-    a_12().mul_01234(a.mul_034_by_034(b, field_nz), field_nz);
+    a_12().mul_01234(a.mul_034_by_034(b));
 }
 
 #[test]
@@ -158,5 +158,5 @@ fn miller_test_s034_fq12_x2() {
     let field_nz = get_field_nz();
     let (_a, a) = set_a();
     let (_b, b) = set_b();
-    a_12().mul_034(a, field_nz).mul_034(b, field_nz);
+    a_12().mul_034(a).mul_034(b);
 }

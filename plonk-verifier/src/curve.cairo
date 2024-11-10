@@ -239,7 +239,7 @@ fn mul_by_xi_nz(t: (u512, u512), field_nz: NonZero<u256>) -> (u512, u512) {
      t0 + u512_scl_9(t1, field_nz))
 }
 
-fn mul_by_xi_nz_as_circuit(a: f::Fq, b: f::Fq) -> f::Fq2 {
+fn mul_by_xi_nz_as_circuit(t: f::Fq2) -> f::Fq2 {
     let t0 = CircuitElement::<CircuitInput<0>> {};
     let t1 = CircuitElement::<CircuitInput<1>> {};
     let scl = CircuitElement::<CircuitInput<2>> {};
@@ -249,8 +249,8 @@ fn mul_by_xi_nz_as_circuit(a: f::Fq, b: f::Fq) -> f::Fq2 {
     let t0_mul_9_sub_t1 = circuit_sub(t0_mul_9, t1);
     let t0_add_t1_mul_9 = circuit_add(t0, t1_mul_9);
 
-    let t0 = from_u256(a.c0);
-    let t1 = from_u256(b.c0);
+    let t0 = from_u256(t.c0.c0);
+    let t1 = from_u256(t.c1.c0);
     let scl = [9, 0, 0, 0];
 
     let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
@@ -297,7 +297,7 @@ fn mul_by_v_nz_as_circuit(t: f::Fq6) -> f::Fq6 {
     let t1 = t.c1;
     let t2 = t.c2;
 
-    f::Fq6 { c0: mul_by_xi_nz_as_circuit(t2.c0, t2.c1), c1: t0, c2: t1 }
+    f::Fq6 { c0: mul_by_xi_nz_as_circuit(t2), c1: t0, c2: t1 }
 }
 
 #[inline(always)]
