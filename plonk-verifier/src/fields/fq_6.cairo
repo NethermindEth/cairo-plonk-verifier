@@ -170,13 +170,6 @@ fn u512_dud() -> u512 {
     u512 { limb0: 1, limb1: 0, limb2: 0, limb3: 0, }
 }
 
-use core::circuit::{
-    CircuitElement, CircuitInput, circuit_add, circuit_sub, circuit_mul, circuit_inverse,
-    EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus, AddInputResultTrait, CircuitInputs,
-    EvalCircuitResult,
-};
-use core::circuit::conversions::from_u256;
-use plonk_verifier::curve::constants::FIELD_U384;
 
 impl Fq6MulShort of FieldMulShortcuts<Fq6, SixU512> {
     #[inline(always)]
