@@ -62,7 +62,7 @@ mod fields {
     pub type FS034 = Fq12Sparse034;
     pub type FS01234 = Fq12Sparse01234;
     pub type FS01 = Fq6Sparse01;
-    use fq_12_squaring::{Fq12Squaring, Krbn2345};
+    use fq_12_squaring::{Fq12Squaring, Fq12SquaringCircuit, Krbn2345};
     use plonk_verifier::traits::{FieldUtils, FieldOps, FieldShortcuts, FieldMulShortcuts};
 }
 

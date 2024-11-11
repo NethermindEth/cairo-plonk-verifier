@@ -20,7 +20,7 @@ use plonk_verifier::traits::FieldUtils;
 use plonk_verifier::traits::FieldMulShortcuts;
 use plonk_verifier::plonk::transcript::Keccak256Transcript;
 use plonk_verifier::curve::groups::{g1, g2, AffineG1, AffineG2, AffineG2Impl};
-use plonk_verifier::curve::groups::ECOperations;
+use plonk_verifier::curve::groups::{ECOperations, ECOperationsCircuitFq};
 use plonk_verifier::fields::{fq, Fq, Fq12, Fq12Exponentiation, Fq12Utils};
 use plonk_verifier::curve::constants::{ORDER, ORDER_NZ, get_field_nz, FIELD_U384, ORDER_U384};
 use plonk_verifier::plonk::types::{PlonkProof, PlonkVerificationKey, PlonkChallenge};
@@ -295,10 +295,10 @@ impl PlonkVerifier of PVerifier {
     fn compute_D(
         proof: PlonkProof, challenges: PlonkChallenge, vk: PlonkVerificationKey, l1: Fq
     ) -> AffineG1 {
-        let mut d1 = vk.Qm.multiply((mul_nz(proof.eval_a.c0, proof.eval_b.c0, ORDER_NZ)));
-        d1 = d1.add(vk.Ql.multiply(proof.eval_a.c0));
-        d1 = d1.add(vk.Qr.multiply(proof.eval_b.c0));
-        d1 = d1.add(vk.Qo.multiply(proof.eval_c.c0));
+        let mut d1 = vk.Qm.multiply_as_circuit((mul_nz(proof.eval_a.c0, proof.eval_b.c0, ORDER_NZ)));
+        d1 = d1.add(vk.Ql.multiply_as_circuit(proof.eval_a.c0));
+        d1 = d1.add(vk.Qr.multiply_as_circuit(proof.eval_b.c0));
+        d1 = d1.add(vk.Qo.multiply_as_circuit(proof.eval_c.c0));
         d1 = d1.add(vk.Qc);
 
         let betaxi = mul_nz(challenges.beta.c0, challenges.xi.c0, ORDER_NZ);
@@ -319,7 +319,7 @@ impl PlonkVerifier of PVerifier {
 
         let d2b = mul_nz(l1.c0, sqr_nz(challenges.alpha.c0, ORDER_NZ), ORDER_NZ);
 
-        let d2 = proof.Z.multiply(add_nz(add_nz(d2a, d2b, ORDER_NZ), challenges.u.c0, ORDER_NZ));
+        let d2 = proof.Z.multiply_as_circuit(add_nz(add_nz(d2a, d2b, ORDER_NZ), challenges.u.c0, ORDER_NZ));
 
         let d3a = add_nz(
             add_nz(
@@ -341,17 +341,17 @@ impl PlonkVerifier of PVerifier {
             mul_nz(challenges.alpha.c0, challenges.beta.c0, ORDER_NZ), proof.eval_zw.c0, ORDER_NZ
         );
 
-        let d3 = vk.S3.multiply(mul_nz(mul_nz(d3a, d3b, ORDER_NZ), d3c, ORDER_NZ));
+        let d3 = vk.S3.multiply_as_circuit(mul_nz(mul_nz(d3a, d3b, ORDER_NZ), d3c, ORDER_NZ));
 
         let d4low = proof.T1;
-        let d4mid = proof.T2.multiply(challenges.xin.c0);
-        let d4high = proof.T3.multiply(sqr_nz(challenges.xin.c0, ORDER_NZ));
-        let mut d4 = d4mid.add(d4high);
-        d4 = d4.add(d4low);
-        d4 = d4.multiply(challenges.zh.c0);
+        let d4mid = proof.T2.multiply_as_circuit(challenges.xin.c0);
+        let d4high = proof.T3.multiply_as_circuit(sqr_nz(challenges.xin.c0, ORDER_NZ));
+        let mut d4 = d4mid.add_as_circuit(d4high);
+        d4 = d4.add_as_circuit(d4low);
+        d4 = d4.multiply_as_circuit(challenges.zh.c0);
 
-        let mut d = d1.add(d2);
-        d = d.add(d3.neg());
+        let mut d = d1.add_as_circuit(d2);
+        d = d.add_as_circuit(d3.neg());
         d = d.add(d4.neg());
 
         d
@@ -361,20 +361,20 @@ impl PlonkVerifier of PVerifier {
     fn compute_F(
         proof: PlonkProof, challenges: PlonkChallenge, vk: PlonkVerificationKey, D: AffineG1
     ) -> AffineG1 {
-        let mut v1a = proof.A.multiply(challenges.v1.c0);
-        let res_add_d = v1a.add(D);
+        let mut v1a = proof.A.multiply_as_circuit(challenges.v1.c0);
+        let res_add_d = v1a.add_as_circuit(D);
 
-        let v2b = proof.B.multiply(challenges.v2.c0);
-        let res_add_v2b = res_add_d.add(v2b);
+        let v2b = proof.B.multiply_as_circuit(challenges.v2.c0);
+        let res_add_v2b = res_add_d.add_as_circuit(v2b);
 
-        let v3c = proof.C.multiply(challenges.v3.c0);
-        let res_add_v3c = res_add_v2b.add(v3c);
+        let v3c = proof.C.multiply_as_circuit(challenges.v3.c0);
+        let res_add_v3c = res_add_v2b.add_as_circuit(v3c);
 
-        let v4s1 = vk.S1.multiply(challenges.v4.c0);
-        let res_add_v4s1 = res_add_v3c.add(v4s1);
+        let v4s1 = vk.S1.multiply_as_circuit(challenges.v4.c0);
+        let res_add_v4s1 = res_add_v3c.add_as_circuit(v4s1);
 
-        let v5s2 = vk.S2.multiply(challenges.v5.c0);
-        let res = res_add_v4s1.add(v5s2);
+        let v5s2 = vk.S2.multiply_as_circuit(challenges.v5.c0);
+        let res = res_add_v4s1.add_as_circuit(v5s2);
 
         res
     }
@@ -436,7 +436,7 @@ impl PlonkVerifier of PVerifier {
         };
         let e: u256 = outputs.get_output(e5).try_into().unwrap(); 
 
-        res = res.multiply(e);
+        res = res.multiply_as_circuit(e);
 
         res
     }
@@ -451,18 +451,18 @@ impl PlonkVerifier of PVerifier {
     ) -> bool {
         let mut A1 = proof.Wxi;
 
-        let Wxiw_mul_u = proof.Wxiw.multiply(challenges.u.c0);
-        A1 = A1.add(Wxiw_mul_u);
+        let Wxiw_mul_u = proof.Wxiw.multiply_as_circuit(challenges.u.c0);
+        A1 = A1.add_as_circuit(Wxiw_mul_u);
 
-        let mut B1 = proof.Wxi.multiply(challenges.xi.c0);
+        let mut B1 = proof.Wxi.multiply_as_circuit(challenges.xi.c0);
         let s = mul_nz(mul_nz(challenges.u.c0, challenges.xi.c0, ORDER_NZ), vk.w, ORDER_NZ);
 
-        let Wxiw_mul_s = proof.Wxiw.multiply(s);
-        B1 = B1.add(Wxiw_mul_s);
+        let Wxiw_mul_s = proof.Wxiw.multiply_as_circuit(s);
+        B1 = B1.add_as_circuit(Wxiw_mul_s);
 
-        B1 = B1.add(F);
+        B1 = B1.add_as_circuit(F);
 
-        B1 = B1.add(E.neg());
+        B1 = B1.add_as_circuit(E.neg());
 
         let g2_one = AffineG2Impl::one();
 

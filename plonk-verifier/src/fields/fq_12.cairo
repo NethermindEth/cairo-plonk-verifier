@@ -1,4 +1,5 @@
 use plonk_verifier::traits::FieldShortcuts;
+use core::circuit::conversions::from_u256;
 use core::traits::TryInto;
 use plonk_verifier::traits::FieldMulShortcuts;
 use plonk_verifier::traits::{FieldUtils, FieldOps};
@@ -6,10 +7,16 @@ use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg
 use plonk_verifier::fields::{Fq6, fq6, Fq6Utils, fq, fq2, Fq6Frobenius, Fq6MulShort, Fq6Short};
 use plonk_verifier::fields::frobenius::fp12 as frob;
 use plonk_verifier::fields::print::{Fq6Display};
+use plonk_verifier::curve::constants::FIELD_U384;
 use plonk_verifier::curve::{FIELD, get_field_nz};
 use plonk_verifier::curve::{
     u512, U512BnAdd, Tuple2Add, Tuple3Add, U512BnSub, Tuple2Sub, Tuple3Sub, u512_reduce,
     mul_by_v_nz, U512Fq6Ops
+};
+use core::circuit::{
+    CircuitElement, CircuitInput, circuit_add, circuit_sub,
+    circuit_mul, circuit_inverse, EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus,
+    AddInputResultTrait, CircuitInputs, EvalCircuitResult,
 };
 use debug::PrintTrait;
 
@@ -199,6 +206,24 @@ impl Fq12Ops of FieldOps<Fq12> {
 
     fn sqr(self: Fq12) -> Fq12 {
         core::internal::revoke_ap_tracking();
+
+        let c0 = CircuitElement::<CircuitInput<0>> {};
+        let c1 = CircuitElement::<CircuitInput<1>> {};
+        let c2 = CircuitElement::<CircuitInput<2>> {};
+        let c3 = CircuitElement::<CircuitInput<3>> {};
+        let c4 = CircuitElement::<CircuitInput<4>> {};
+        let c5 = CircuitElement::<CircuitInput<5>> {};
+        let c6 = CircuitElement::<CircuitInput<6>> {};
+        let c7 = CircuitElement::<CircuitInput<7>> {};
+        let c8 = CircuitElement::<CircuitInput<8>> {};
+        let c9 = CircuitElement::<CircuitInput<9>> {};
+        let c10 = CircuitElement::<CircuitInput<10>> {};
+        let c11 = CircuitElement::<CircuitInput<11>> {};
+        let c12 = CircuitElement::<CircuitInput<12>> {};
+        let c13 = CircuitElement::<CircuitInput<13>> {};
+        let c14 = CircuitElement::<CircuitInput<14>> {};
+        let c15 = CircuitElement::<CircuitInput<15>> {};
+
         let field_nz = FIELD.try_into().unwrap();
         let Fq12 { c0: a0, c1: a1 } = self;
         // Complex squaring
