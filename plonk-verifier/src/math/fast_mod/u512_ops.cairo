@@ -198,7 +198,8 @@ fn u512_high_add(lhs: u512, rhs: u256) -> Result<u512, u512> {
 }
 
 // subtracts u256 from high limbs of u512
-// this beautiful beautiful function can convert an overflown `2**512 + x mod rhs` to equivalent `y mod rhs`
+// this beautiful beautiful function can convert an overflown `2**512 + x mod rhs` to equivalent `y
+// mod rhs`
 #[inline(always)]
 fn u512_high_sub(lhs: u512, rhs: u256) -> Result<u512, u512> {
     let u512 { limb0, limb1, limb2: low, limb3: high } = lhs;

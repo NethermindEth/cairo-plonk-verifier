@@ -1,4 +1,11 @@
 use core::traits::TryInto;
+use core::circuit::conversions::from_u256;
+use plonk_verifier::curve::constants::FIELD_U384;
+use core::circuit::{
+    CircuitElement, CircuitInput, circuit_add, circuit_sub, circuit_mul, circuit_inverse,
+    EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus, AddInputResultTrait, CircuitInputs,
+    EvalCircuitResult,
+};
 use plonk_verifier::curve::{FIELD, get_field_nz, add, sub_field, mul, scl, sqr, div, neg, inv};
 use plonk_verifier::curve::{
     add_u, sub_u, mul_u, sqr_u, scl_u, u512_reduce, u512_add_u256, u512_sub_u256
@@ -47,6 +54,7 @@ impl FqShort of FieldShortcuts<Fq> {
 impl FqMulShort of FieldMulShortcuts<Fq, u512> {
     #[inline(always)]
     fn u_mul(self: Fq, rhs: Fq) -> u512 {
+        core::internal::revoke_ap_tracking();
         mul_u(self.c0, rhs.c0)
     }
 
@@ -122,7 +130,22 @@ impl FqOps of FieldOps<Fq> {
 
     #[inline(always)]
     fn mul(self: Fq, rhs: Fq) -> Fq {
-        fq(mul(self.c0, rhs.c0))
+        let a = CircuitElement::<CircuitInput<0>> {};
+        let b = CircuitElement::<CircuitInput<1>> {};
+        let mul = circuit_mul(a, b);
+
+        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+
+        let a = from_u256(self.c0);
+        let b = from_u256(rhs.c0);
+
+        let outputs = match (mul,).new_inputs().next(a).next(b).done().eval(modulus) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
+        };
+
+        let fq_c0 = Fq { c0: outputs.get_output(mul).try_into().unwrap() };
+        fq_c0
     }
 
     #[inline(always)]
@@ -142,7 +165,21 @@ impl FqOps of FieldOps<Fq> {
 
     #[inline(always)]
     fn sqr(self: Fq) -> Fq {
-        fq(sqr(self.c0))
+        let a0 = CircuitElement::<CircuitInput<0>> {};
+        let a1 = CircuitElement::<CircuitInput<1>> {};
+        let sqr = circuit_mul(a0, a1);
+
+        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+
+        let a = from_u256(self.c0);
+
+        let outputs = match (sqr,).new_inputs().next(a).next(a).done().eval(modulus) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
+        };
+
+        let fq_c0 = Fq { c0: outputs.get_output(sqr).try_into().unwrap() };
+        fq_c0
     }
 
     #[inline(always)]
