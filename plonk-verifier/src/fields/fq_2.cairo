@@ -305,7 +305,6 @@ impl Fq2Ops of FieldOps<Fq2> {
     #[inline(always)]
     fn inv(self: Fq2, field_nz: NonZero<u256>) -> Fq2 {
         let Fq2 { c0, c1 } = self;
-        // let t = u512_add(c0.u_sqr(), c1.u_sqr()).to_fq(field_nz).inv(field_nz);
         let t = FqOps::inv(c0.sqr() + c1.sqr(), field_nz);
         Fq2 { c0: c0.mul(t), c1: c1.mul(-t) }
     }
@@ -315,6 +314,8 @@ impl Fq2Ops of FieldOps<Fq2> {
 #[inline(always)]
 fn ufq2_inv(self: Fq2, field_nz: NonZero<u256>) -> Fq2 {
     let Fq2 { c0, c1 } = self;
-    let t = (c0.u_sqr() + c1.u_sqr()).to_fq(field_nz).inv(field_nz);
-    Fq2 { c0: c0 * t, c1: c1 * -t, }
+    let t = FqOps::inv((c0.sqr() + c1.sqr()), field_nz);
+
+    Fq2 { c0: c0.mul(t), c1: c1.mul(-t) }
 }
+
