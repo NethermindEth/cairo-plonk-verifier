@@ -12,7 +12,7 @@ use plonk_verifier::fast_mod::{u512_high_add};
 use plonk_verifier::curve::{u512, U512BnAdd, U512BnSub, u512_reduce, u512_add, u512_sub};
 use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 use plonk_verifier::curve::{FIELD, get_field_nz, scale_9, circuit_scale_9};
-use plonk_verifier::fields::{Fq, fq};
+use plonk_verifier::fields::{Fq, fq, FqOps};
 use plonk_verifier::fields::print::u512Display;
 use plonk_verifier::curve::constants::FIELD_U384;
 use plonk_verifier::fields::utils::conversions::into_u512;
@@ -305,8 +305,9 @@ impl Fq2Ops of FieldOps<Fq2> {
     #[inline(always)]
     fn inv(self: Fq2, field_nz: NonZero<u256>) -> Fq2 {
         let Fq2 { c0, c1 } = self;
-        let t = u512_add(c0.u_sqr(), c1.u_sqr()).to_fq(field_nz).inv(field_nz);
-        Fq2 { c0: c0 * t, c1: c1 * -t, }
+        // let t = u512_add(c0.u_sqr(), c1.u_sqr()).to_fq(field_nz).inv(field_nz);
+        let t = FqOps::inv(c0.sqr() + c1.sqr(), field_nz);
+        Fq2 { c0: c0.mul(t), c1: c1.mul(-t) }
     }
 }
 
