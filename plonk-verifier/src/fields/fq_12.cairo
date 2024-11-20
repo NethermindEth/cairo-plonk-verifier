@@ -1,4 +1,5 @@
 use plonk_verifier::traits::FieldShortcuts;
+use core::circuit::conversions::from_u256;
 use core::traits::TryInto;
 use plonk_verifier::traits::FieldMulShortcuts;
 use plonk_verifier::traits::{FieldUtils, FieldOps};
@@ -8,6 +9,7 @@ use plonk_verifier::fields::{
 };
 use plonk_verifier::fields::frobenius::fp12 as frob;
 use plonk_verifier::fields::print::{Fq6Display};
+use plonk_verifier::curve::constants::FIELD_U384;
 use plonk_verifier::curve::{FIELD, get_field_nz};
 use plonk_verifier::curve::{
     u512, U512BnAdd, Tuple2Add, Tuple3Add, U512BnSub, Tuple2Sub, Tuple3Sub, u512_reduce,
@@ -204,7 +206,6 @@ impl Fq12Ops of FieldOps<Fq12> {
 
     fn sqr(self: Fq12) -> Fq12 {
         core::internal::revoke_ap_tracking();
-
         let Fq12 { c0: a0, c1: a1 } = self;
         let V = Fq6Ops::mul(a0, a1);
         let c0 = Fq6Ops::sub(
