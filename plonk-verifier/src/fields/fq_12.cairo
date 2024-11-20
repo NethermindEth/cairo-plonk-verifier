@@ -1,6 +1,4 @@
 use plonk_verifier::traits::FieldShortcuts;
-use core::circuit::conversions::from_u256;
-use core::traits::TryInto;
 use plonk_verifier::traits::FieldMulShortcuts;
 use plonk_verifier::traits::{FieldUtils, FieldOps};
 use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
@@ -17,6 +15,7 @@ use plonk_verifier::curve::{
 };
 
 use core::circuit::conversions::from_u256;
+use core::traits::TryInto;
 use core::circuit::{
     CircuitElement, CircuitInput, circuit_add, circuit_sub, circuit_mul, circuit_inverse,
     EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus, AddInputResultTrait, CircuitInputs,

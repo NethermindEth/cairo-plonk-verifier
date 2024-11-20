@@ -170,14 +170,6 @@ fn u512_dud() -> u512 {
     u512 { limb0: 1, limb1: 0, limb2: 0, limb3: 0, }
 }
 
-use core::circuit::{
-    CircuitElement, CircuitInput, circuit_add, circuit_sub,
-    circuit_mul, circuit_inverse, EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus,
-    AddInputResultTrait, CircuitInputs, EvalCircuitResult,
-};
-use core::circuit::conversions::from_u256;
-use plonk_verifier::curve::constants::FIELD_U384;
-
 impl Fq6MulShort of FieldMulShortcuts<Fq6, SixU512> {
     #[inline(always)]
     fn u512_add_fq(self: SixU512, rhs: Fq6) -> SixU512 {
@@ -190,7 +182,7 @@ impl Fq6MulShort of FieldMulShortcuts<Fq6, SixU512> {
         let (C0, C1, C2) = self;
         (C0.u512_sub_fq(rhs.c0), C1.u512_sub_fq(rhs.c1), C2.u512_sub_fq(rhs.c2))
     }
-    
+
     // A reimplementation in Karatsuba multiplication with lazy reduction
     // Faster Explicit Formulas for Computing Pairings over Ordinary Curves
     // uppercase vars are u512, lower case are u256
@@ -199,10 +191,10 @@ impl Fq6MulShort of FieldMulShortcuts<Fq6, SixU512> {
         core::internal::revoke_ap_tracking();
         // Input:a = (a0 + a1v + a2v2) and b = (b0 + b1v + b2v2) ∈ Fp6
         // Output:c = a · b = (c0 + c1v + c2v2) ∈ Fp6
-        
+
         let Fq6 { c0: a0, c1: a1, c2: a2 } = self;
         let Fq6 { c0: b0, c1: b1, c2: b2 } = rhs;
-        let field_nz = get_field_nz(); 
+        let field_nz = get_field_nz();
 
         // v0 = a0b0, v1 = a1b1, v2 = a2b2
         let (V0, V1, V2,) = (a0.u_mul(b0), a1.u_mul(b1), a2.u_mul(b2),);
@@ -214,7 +206,7 @@ impl Fq6MulShort of FieldMulShortcuts<Fq6, SixU512> {
         // c2 = (a0 + a2)(b0 + b2) - v0 + v1 - v2,
         let C2 = a0.u_add(a2).u_mul(b0.u_add(b2)) - V0 + V1 - V2;
 
-        //let temp: Fq2 = C0.to_fq(field_nz); 
+        //let temp: Fq2 = C0.to_fq(field_nz);
         //println!("Real C0: {:?}",temp);
         (C0, C1, C2)
     }
