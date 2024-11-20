@@ -15,7 +15,7 @@ use plonk_verifier::fields::frobenius::pi;
 // This implementation follows the paper at https://eprint.iacr.org/2022/1162
 // Pairings in Rank-1 Constraint Systems, Youssef El Housni et al.
 // Section 6.1 Miller loop
-// 
+//
 // Parts about miller steps implementations and line function evaluations
 //
 // Miller steps
@@ -34,7 +34,7 @@ use plonk_verifier::fields::frobenius::pi;
 // gψₛ(P) = 1 − λ·xₚ/yₚ·w + (λxₛ − yₛ)/yₚ·w³
 // Represented by a 034 sparse element in Fq12 over Fq2
 // (1, 0, 0, -λ·xₚ/yₚ, (λxₛ − yₛ)/yₚ, 0)
-// 
+//
 
 #[derive(Copy, Drop, Serde)]
 struct PPrecompute {
@@ -64,7 +64,9 @@ mod line_fn {
     use plonk_verifier::curve::groups::ECOperations;
     use plonk_verifier::curve::groups::{g1, g2, ECGroup};
     use plonk_verifier::curve::groups::{Affine, AffineG1 as PtG1, AffineG2 as PtG2, AffineOps};
-    use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
+    use plonk_verifier::fields::fq_generics::{
+        TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,
+    };
     use plonk_verifier::fields::{
         Fq, fq, Fq2, fq2, Fq6, Fq12, Fq12Utils, Fq12Ops, FqOps, Fq2Utils, Fq2Ops,
         Fq12Exponentiation,
@@ -181,7 +183,8 @@ mod line_fn {
         let d = step_add(ref acc, q1, field_nz);
 
         // e ← (gT,−Q2)(P), T ← T − Q2
-        // we can skip the T ← T − Q2 step coz we don't need the final point, just the line function
+        // we can skip the T ← T − Q2 step coz we don't need the final point, just the line
+        // function
         let slope = acc.chord(q2);
         let e = line_fn(slope, acc);
 
@@ -204,7 +207,7 @@ fn line_evaluation_at_p(slope: Fq2, p_pre: @PPre, s: PtG2) -> F034 {
 #[inline(always)]
 fn step_dbl_add_to_f(ref acc: PtG2, ref f: Fq12, p_pre: @PPre, p: PtG1, q: PtG2, field_nz: NZNum) {
     let (l1, l2) = step_dbl_add(ref acc, p_pre, p, q, field_nz);
-    f = f.mul_01234(l1.mul_034_by_034(l2, field_nz), field_nz);
+    f = f.mul_01234(l1.mul_034_by_034(l2));
 }
 
 fn step_dbl_add(ref acc: PtG2, p_pre: @PPre, p: PtG1, q: PtG2, field_nz: NZNum) -> (F034, F034) {
@@ -214,7 +217,7 @@ fn step_dbl_add(ref acc: PtG2, p_pre: @PPre, p: PtG1, q: PtG2, field_nz: NZNum) 
 
 #[inline(always)]
 fn step_double_to_f(ref acc: PtG2, ref f: Fq12, p_pre: @PPre, p: PtG1, field_nz: NZNum) {
-    f = f.mul_034(step_double(ref acc, p_pre, p, field_nz), field_nz);
+    f = f.mul_034(step_double(ref acc, p_pre, p, field_nz));
 }
 
 #[inline(always)]
@@ -236,7 +239,7 @@ fn correction_step_to_f(
     // Realm of pairings, Algorithm 1, lines 10 mul into f
     // f ← f·(d·e)
     let (l1, l2) = correction_step(ref acc, p_pre, p, q, field_nz);
-    f = f.mul_01234(l1.mul_034_by_034(l2, field_nz), field_nz);
+    f = f.mul_01234(l1.mul_034_by_034(l2));
 }
 
 #[inline(always)]

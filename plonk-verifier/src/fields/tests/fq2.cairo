@@ -173,7 +173,6 @@ fn non_residue() {
     let a_nr = a().mul_by_nonresidue();
     assert(a_nr == a() * fq2(9, 1), 'incorrect non_residue mul')
 }
-
 #[test]
 fn non_residue_u512() {
     let field_nz = get_field_nz();

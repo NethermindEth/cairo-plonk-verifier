@@ -1,5 +1,13 @@
+use core::num::traits::WrappingAdd;
 use integer::{u128_overflowing_add, u128_overflowing_sub, u512};
 use core::num::traits::{OverflowingAdd, OverflowingSub};
+use core::circuit::{
+    CircuitElement, CircuitInput, AddMod, circuit_add, circuit_sub, circuit_mul, circuit_inverse,
+    EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus, AddInputResultTrait, CircuitInputs,
+    EvalCircuitResult
+};
+use core::circuit::conversions::{from_u128, from_u256};
+use core::num::traits::bounded::Bounded;
 
 #[inline(always)]
 fn u128_add_with_carry(a: u128, b: u128) -> (u128, u128) nopanic {
@@ -59,6 +67,26 @@ fn u256_overflow_sub(lhs: u256, rhs: u256) -> Result<u256, u256> implicits(Range
     }
 }
 
+
+fn u256_circcuit_overflow_sub(lhs: u256, rhs: u256) -> u256 {
+    let a = CircuitElement::<CircuitInput<0>> {};
+    let b = CircuitElement::<CircuitInput<1>> {};
+    let a_sub_b = circuit_sub(a, b);
+    let u256_max = from_u256(Bounded::<u256>::MAX);
+    let modulus = TryInto::<
+        _, CircuitModulus
+    >::try_into([u256_max.limb0, u256_max.limb1, u256_max.limb2, u256_max.limb3])
+        .unwrap();
+    let x1 = from_u256(lhs);
+    let y1 = from_u256(rhs);
+
+    let outputs = match (a_sub_b,).new_inputs().next(x1).next(y1).done().eval(modulus) {
+        Result::Ok(outputs) => { outputs },
+        Result::Err(_) => { panic!("Expected success") }
+    };
+
+    outputs.get_output(a_sub_b).try_into().unwrap()
+}
 #[inline(always)]
 fn u256_wrapping_add(lhs: u256, rhs: u256) -> u256 implicits(RangeCheck) nopanic {
     let high = match u128_overflowing_add(lhs.high, rhs.high) {
@@ -171,3 +199,43 @@ impl Tuple3Sub<
     }
 }
 
+
+fn u128_circuit_wrapping_add(lhs: u128, rhs: u128) -> u128 {
+    let a = CircuitElement::<CircuitInput<0>> {};
+    let b = CircuitElement::<CircuitInput<1>> {};
+    let a_add_b = circuit_add(a, b);
+    let u128_max = from_u128(Bounded::<u128>::MAX);
+    let modulus = TryInto::<
+        _, CircuitModulus
+    >::try_into([u128_max.limb0, u128_max.limb1, u128_max.limb2, u128_max.limb3])
+        .unwrap();
+    let x1 = from_u128(lhs);
+    let y1 = from_u128(rhs);
+
+    let outputs = match (a_add_b,).new_inputs().next(x1).next(y1).done().eval(modulus) {
+        Result::Ok(outputs) => { outputs },
+        Result::Err(_) => { panic!("Expected success") }
+    };
+
+    outputs.get_output(a_add_b).try_into().unwrap()
+}
+
+fn u256_circuit_wrapping_add(lhs: u256, rhs: u256) -> u256 {
+    let a = CircuitElement::<CircuitInput<0>> {};
+    let b = CircuitElement::<CircuitInput<1>> {};
+    let a_add_b = circuit_add(a, b);
+    let u256_max = from_u256(Bounded::<u256>::MAX);
+    let modulus = TryInto::<
+        _, CircuitModulus
+    >::try_into([u256_max.limb0, u256_max.limb1, u256_max.limb2, u256_max.limb3])
+        .unwrap();
+    let x1 = from_u256(lhs);
+    let y1 = from_u256(rhs);
+
+    let outputs = match (a_add_b,).new_inputs().next(x1).next(y1).done().eval(modulus) {
+        Result::Ok(outputs) => { outputs },
+        Result::Err(_) => { panic!("Expected success") }
+    };
+
+    outputs.get_output(a_add_b).try_into().unwrap()
+}
