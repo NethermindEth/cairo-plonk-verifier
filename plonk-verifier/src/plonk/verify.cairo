@@ -1,83 +1,140 @@
 use core::option::OptionTrait;
+use core::result::ResultTrait;
 use core::traits::TryInto;
-use core::fmt::Display;
-use core::traits::Destruct;
-use core::clone::Clone;
 use core::traits::Into;
-use core::debug::{PrintTrait, print_byte_array_as_string};
+use core::debug::PrintTrait;
 use core::array::ArrayTrait;
 use core::cmp::max;
-use core::circuit::{
-    RangeCheck96, AddMod, u96, CircuitElement, CircuitInput, circuit_add, circuit_sub,
-    circuit_mul, circuit_inverse, EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus,
-    AddInputResultTrait, CircuitInputs,EvalCircuitResult,
-};
-use core::circuit::conversions::from_u256;
 
-use plonk_verifier::traits::FieldShortcuts;
-use plonk_verifier::traits::FieldOps;
-use plonk_verifier::traits::FieldUtils;
-use plonk_verifier::traits::FieldMulShortcuts;
-use plonk_verifier::plonk::transcript::Keccak256Transcript;
-use plonk_verifier::curve::groups::{g1, g2, AffineG1, AffineG2, AffineG2Impl};
-use plonk_verifier::curve::groups::{ECOperations, ECOperationsCircuitFq};
-use plonk_verifier::fields::{fq, Fq, Fq12, Fq12Exponentiation, Fq12Utils};
-use plonk_verifier::curve::constants::{ORDER, ORDER_NZ, get_field_nz, FIELD_U384, ORDER_U384};
+use plonk_verifier::curve::groups::{AffineG1, AffineG2};
+use plonk_verifier::fields::{Fq, Fq12};
+use plonk_verifier::curve::constants::{ORDER, ORDER_NZ};
 use plonk_verifier::plonk::types::{PlonkProof, PlonkVerificationKey, PlonkChallenge};
-use plonk_verifier::plonk::transcript::{Transcript, TranscriptElement};
-use plonk_verifier::curve::{u512, neg_o, sqr_nz, mul, mul_u, mul_nz, div_nz, add_nz, sub_u, sub};
-use plonk_verifier::pairing::tate_bkls::{tate_pairing, tate_miller_loop};
-use plonk_verifier::pairing::optimal_ate::{single_ate_pairing, ate_miller_loop};
+use plonk_verifier::plonk::transcript::{TranscriptTrait, Keccak256Transcript};
+use plonk_verifier::errors::{PlonkError, Result};
 
 #[generate_trait]
 impl PlonkVerifier of PVerifier {
     fn verify(
         verification_key: PlonkVerificationKey, proof: PlonkProof, publicSignals: Array<u256>
-    ) -> bool {
-        let mut result = true;
-        result = result
-            && Self::is_on_curve(proof.A)
-            && Self::is_on_curve(proof.B)
-            && Self::is_on_curve(proof.C)
-            && Self::is_on_curve(proof.Z)
-            && Self::is_on_curve(proof.T1)
-            && Self::is_on_curve(proof.T2)
-            && Self::is_on_curve(proof.T3)
-            && Self::is_on_curve(proof.Wxi)
-            && Self::is_on_curve(proof.Wxiw);
+    ) -> Result<bool> {
+        // Validate curve points
+        if !Self::is_on_curve(proof.A) {
+            return Result::Err(PlonkError::InvalidCurvePoint('Point A is not on curve'));
+        }
+        if !Self::is_on_curve(proof.B) {
+            return Result::Err(PlonkError::InvalidCurvePoint('Point B is not on curve'));
+        }
+        if !Self::is_on_curve(proof.C) {
+            return Result::Err(PlonkError::InvalidCurvePoint('Point C is not on curve'));
+        }
+        if !Self::is_on_curve(proof.Z) {
+            return Result::Err(PlonkError::InvalidCurvePoint('Point Z is not on curve'));
+        }
+        if !Self::is_on_curve(proof.T1) {
+            return Result::Err(PlonkError::InvalidCurvePoint('Point T1 is not on curve'));
+        }
+        if !Self::is_on_curve(proof.T2) {
+            return Result::Err(PlonkError::InvalidCurvePoint('Point T2 is not on curve'));
+        }
+        if !Self::is_on_curve(proof.T3) {
+            return Result::Err(PlonkError::InvalidCurvePoint('Point T3 is not on curve'));
+        }
+        if !Self::is_on_curve(proof.Wxi) {
+            return Result::Err(PlonkError::InvalidCurvePoint('Point Wxi is not on curve'));
+        }
+        if !Self::is_on_curve(proof.Wxiw) {
+            return Result::Err(PlonkError::InvalidCurvePoint('Point Wxiw is not on curve'));
+        }
 
-        result = result
-            && Self::is_in_field(proof.eval_a)
-            && Self::is_in_field(proof.eval_b)
-            && Self::is_in_field(proof.eval_c)
-            && Self::is_in_field(proof.eval_s1)
-            && Self::is_in_field(proof.eval_s2)
-            && Self::is_in_field(proof.eval_zw);
+        // Validate field elements
+        if !Self::is_in_field(proof.eval_a) {
+            return Result::Err(PlonkError::InvalidFieldElement('eval_a not in field'));
+        }
+        if !Self::is_in_field(proof.eval_b) {
+            return Result::Err(PlonkError::InvalidFieldElement('eval_b not in field'));
+        }
+        if !Self::is_in_field(proof.eval_c) {
+            return Result::Err(PlonkError::InvalidFieldElement('eval_c not in field'));
+        }
+        if !Self::is_in_field(proof.eval_s1) {
+            return Result::Err(PlonkError::InvalidFieldElement('eval_s1 not in field'));
+        }
+        if !Self::is_in_field(proof.eval_s2) {
+            return Result::Err(PlonkError::InvalidFieldElement('eval_s2 not in field'));
+        }
+        if !Self::is_in_field(proof.eval_zw) {
+            return Result::Err(PlonkError::InvalidFieldElement('eval_zw not in field'));
+        }
 
-        result = result
-            && Self::check_public_inputs_length(
-                verification_key.nPublic, publicSignals.len().into()
-            );
-        let mut challenges: PlonkChallenge = Self::compute_challenges(
-            verification_key, proof, publicSignals.clone()
-        );
+        // Validate public inputs
+        if !Self::check_public_inputs_length(verification_key.nPublic, publicSignals.len().into()) {
+            return Result::Err(PlonkError::InvalidPublicInput('Public inputs length mismatch'));
+        }
 
-        let (L, challenges) = Self::compute_lagrange_evaluations(verification_key, challenges);
+        // Compute challenges
+        let mut transcript = Keccak256Transcript::new();
+        
+        // Add public inputs to transcript
+        let mut i = 0;
+        while i < publicSignals.len() {
+            match publicSignals.get(i) {
+                Option::Some(signal) => transcript.update_with_u256(*signal)?,
+                Option::None => return Result::Err(PlonkError::InvalidPublicInput('Failed to get public signal')),
+            }
+            i += 1;
+        }
 
-        let PI = Self::compute_PI(publicSignals.clone(), L.clone());
+        // Add proof elements to transcript
+        transcript.update_with_g1(proof.A)?;
+        transcript.update_with_g1(proof.B)?;
+        transcript.update_with_g1(proof.C)?;
 
-        let R0 = Self::compute_R0(proof, challenges, PI, L[1].clone());
+        let beta = transcript.get_challenge()?;
+        let gamma = transcript.get_challenge()?;
 
-        let D = Self::compute_D(proof, challenges, verification_key, L[1].clone());
+        transcript.update_with_g1(proof.Z)?;
 
-        let F = Self::compute_F(proof, challenges, verification_key, D);
+        let alpha = transcript.get_challenge()?;
 
-        let E = Self::compute_E(proof, challenges, R0);
+        transcript.update_with_g1(proof.T1)?;
+        transcript.update_with_g1(proof.T2)?;
+        transcript.update_with_g1(proof.T3)?;
 
-        let valid_pairing = Self::valid_pairing(proof, challenges, verification_key, E, F);
-        result = result && valid_pairing;
+        let xi = transcript.get_challenge()?;
 
-        result
+        let mut challenges = PlonkChallenge {
+            beta, gamma, alpha, xi,
+            xin: fq(0), zh: fq(0),
+            v1: fq(0), v2: fq(0), v3: fq(0), v4: fq(0), v5: fq(0),
+            u: fq(0)
+        };
+
+        // Compute Lagrange evaluations
+        let (L, challenges) = Self::compute_lagrange_evaluations(verification_key, challenges)?;
+
+        // Compute PI
+        let PI = Self::compute_PI(publicSignals.clone(), L.clone())?;
+
+        // Compute R0
+        let R0 = Self::compute_R0(proof, challenges, PI, L[1].clone())?;
+
+        // Compute D
+        let D = Self::compute_D(proof, challenges, verification_key, L[1].clone())?;
+
+        // Compute F
+        let F = Self::compute_F(proof, challenges, verification_key, D)?;
+
+        // Compute E
+        let E = Self::compute_E(proof, challenges, R0)?;
+
+        // Verify pairing
+        let valid_pairing = Self::valid_pairing(proof, challenges, verification_key, E, F)?;
+        if !valid_pairing {
+            return Result::Err(PlonkError::VerificationFailed('Pairing check failed'));
+        }
+
+        Result::Ok(true)
     }
 
     // step 1: check if the points are on the bn254 curve
@@ -209,7 +266,7 @@ impl PlonkVerifier of PVerifier {
     // step 5,6: compute zero polynomial and calculate the lagrange evaluations
     fn compute_lagrange_evaluations(
         verification_key: PlonkVerificationKey, mut challenges: PlonkChallenge
-    ) -> (Array<Fq>, PlonkChallenge) {
+    ) -> Result<(Array<Fq>, PlonkChallenge)> {
         let mut xin = challenges.xi;
         let mut domain_size = 1;
 
@@ -245,11 +302,11 @@ impl PlonkVerifier of PVerifier {
             j += 1;
         };
 
-        (lagrange_evaluations, challenges)
+        Result::Ok((lagrange_evaluations, challenges))
     }
 
     // step 7: compute public input polynomial evaluation
-    fn compute_PI(publicSignals: Array<u256>, L: Array<Fq>) -> Fq {
+    fn compute_PI(publicSignals: Array<u256>, L: Array<Fq>) -> Result<Fq> {
         let mut PI: Fq = fq(0);
         let mut i = 0;
 
@@ -262,11 +319,11 @@ impl PlonkVerifier of PVerifier {
             i += 1;
         };
 
-        PI
+        Result::Ok(PI)
     }
 
     // step 8: compute r constant
-    fn compute_R0(proof: PlonkProof, challenges: PlonkChallenge, PI: Fq, L1: Fq) -> Fq {
+    fn compute_R0(proof: PlonkProof, challenges: PlonkChallenge, PI: Fq, L1: Fq) -> Result<Fq> {
         let e1: u256 = PI.c0;
         let e2: u256 = mul_nz(L1.c0, sqr_nz(challenges.alpha.c0, ORDER_NZ), ORDER_NZ);
 
@@ -288,13 +345,13 @@ impl PlonkVerifier of PVerifier {
 
         let r0 = sub(sub(e1, e2, ORDER), e3, ORDER);
 
-        fq(r0)
+        Result::Ok(fq(r0))
     }
 
     // step 9: Compute first part of batched polynomial commitment D
     fn compute_D(
         proof: PlonkProof, challenges: PlonkChallenge, vk: PlonkVerificationKey, l1: Fq
-    ) -> AffineG1 {
+    ) -> Result<AffineG1> {
         let mut d1 = vk.Qm.multiply_as_circuit((mul_nz(proof.eval_a.c0, proof.eval_b.c0, ORDER_NZ)));
         d1 = d1.add(vk.Ql.multiply_as_circuit(proof.eval_a.c0));
         d1 = d1.add(vk.Qr.multiply_as_circuit(proof.eval_b.c0));
@@ -354,13 +411,13 @@ impl PlonkVerifier of PVerifier {
         d = d.add_as_circuit(d3.neg());
         d = d.add(d4.neg());
 
-        d
+        Result::Ok(d)
     }
 
     // step 10: Compute full batched polynomial commitment F
     fn compute_F(
         proof: PlonkProof, challenges: PlonkChallenge, vk: PlonkVerificationKey, D: AffineG1
-    ) -> AffineG1 {
+    ) -> Result<AffineG1> {
         let mut v1a = proof.A.multiply_as_circuit(challenges.v1.c0);
         let res_add_d = v1a.add_as_circuit(D);
 
@@ -376,11 +433,11 @@ impl PlonkVerifier of PVerifier {
         let v5s2 = vk.S2.multiply_as_circuit(challenges.v5.c0);
         let res = res_add_v4s1.add_as_circuit(v5s2);
 
-        res
+        Result::Ok(res)
     }
 
     // step 11: Compute group-encoded batch evaluation E
-    fn compute_E(proof: PlonkProof, challenges: PlonkChallenge, r0: Fq) -> AffineG1 {
+    fn compute_E(proof: PlonkProof, challenges: PlonkChallenge, r0: Fq) -> Result<AffineG1> {
         let mut res: AffineG1 = g1(1, 2);
         let neg_r0 = neg_o(r0.c0);
         
@@ -438,7 +495,7 @@ impl PlonkVerifier of PVerifier {
 
         res = res.multiply_as_circuit(e);
 
-        res
+        Result::Ok(res)
     }
 
     //step 12: Elliptic Curve Pairing: Batch validate all evaluations
@@ -448,7 +505,7 @@ impl PlonkVerifier of PVerifier {
         vk: PlonkVerificationKey,
         E: AffineG1,
         F: AffineG1
-    ) -> bool {
+    ) -> Result<bool> {
         let mut A1 = proof.Wxi;
 
         let Wxiw_mul_u = proof.Wxiw.multiply_as_circuit(challenges.u.c0);
@@ -471,6 +528,6 @@ impl PlonkVerifier of PVerifier {
 
         let res: bool = e_A1_vk_x2.c0 == e_B1_g2_1.c0;
 
-        res
+        Result::Ok(res)
     }
 }
