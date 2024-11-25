@@ -41,7 +41,12 @@ pub async fn verify(
     // Perform verification
     println!("\nVerifying proof...");
     
+    // println!("Verification key: {:?}", vk);
+    // println!("Proof: {:?}", proof);
+    // println!("Public inputs: {:?}", public);
+    
     // Add your verification logic here
+    
     println!("✅ Proof is valid!");
 
     Ok(())
