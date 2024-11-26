@@ -1,4 +1,4 @@
-mod plonk {
+pub mod plonk {
     mod verify;
     mod constants;
     mod types;
