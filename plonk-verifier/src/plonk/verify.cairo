@@ -273,7 +273,7 @@ impl PlonkVerifier of PVerifier {
             j += 1;
         };
 
-        Result::Ok((lagrange_evaluations, challenges))
+        Ok((lagrange_evaluations, challenges))
     }
 
     // step 7: compute public input polynomial evaluation
@@ -290,7 +290,7 @@ impl PlonkVerifier of PVerifier {
             i += 1;
         };
 
-        Result::Ok(PI)
+        Ok(PI)
     }
 
     // step 8: compute r constant
@@ -316,7 +316,7 @@ impl PlonkVerifier of PVerifier {
 
         let r0 = sub(sub(e1, e2, ORDER), e3, ORDER);
 
-        Result::Ok(fq(r0))
+        Ok(fq(r0))
     }
 
     // step 9: Compute first part of batched polynomial commitment D
@@ -382,7 +382,7 @@ impl PlonkVerifier of PVerifier {
         d = d.add_as_circuit(d3.neg());
         d = d.add(d4.neg());
 
-        Result::Ok(d)
+        Ok(d)
     }
 
     // step 10: Compute full batched polynomial commitment F
@@ -404,7 +404,7 @@ impl PlonkVerifier of PVerifier {
         let v5s2 = vk.S2.multiply_as_circuit(challenges.v5.c0);
         let res = res_add_v4s1.add_as_circuit(v5s2);
 
-        Result::Ok(res)
+        Ok(res)
     }
 
     // step 11: Compute group-encoded batch evaluation E
@@ -466,7 +466,7 @@ impl PlonkVerifier of PVerifier {
 
         res = res.multiply_as_circuit(e);
 
-        Result::Ok(res)
+        Ok(res)
     }
 
     //step 12: Elliptic Curve Pairing: Batch validate all evaluations
@@ -499,6 +499,6 @@ impl PlonkVerifier of PVerifier {
 
         let res: bool = e_A1_vk_x2.c0 == e_B1_g2_1.c0;
 
-        Result::Ok(res)
+        Ok(res)
     }
 }
