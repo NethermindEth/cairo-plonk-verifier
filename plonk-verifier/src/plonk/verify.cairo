@@ -5,72 +5,45 @@ use core::traits::Into;
 use core::debug::PrintTrait;
 use core::array::ArrayTrait;
 use core::cmp::max;
+use core::result::Result::{Ok, Err};
+use plonk_verifier::errors::{PlonkError, Result, validate_curve_point, validate_field_element, validate_public_input, validate_verification};
 
 use plonk_verifier::curve::groups::{AffineG1, AffineG2};
 use plonk_verifier::fields::{Fq, Fq12};
 use plonk_verifier::curve::constants::{ORDER, ORDER_NZ};
 use plonk_verifier::plonk::types::{PlonkProof, PlonkVerificationKey, PlonkChallenge};
 use plonk_verifier::plonk::transcript::{TranscriptTrait, Keccak256Transcript};
-use plonk_verifier::errors::{PlonkError, Result};
+use plonk_verifier::errors::{PlonkError, Result, PlonkError::InvalidCurvePoint, validate_curve_point, validate_field_element, validate_public_input, validate_verification};
 
 #[generate_trait]
 impl PlonkVerifier of PVerifier {
     fn verify(
         verification_key: PlonkVerificationKey, proof: PlonkProof, publicSignals: Array<u256>
-    ) -> Result<bool> {
+    ) -> Result<()> {
         // Validate curve points
-        if !Self::is_on_curve(proof.A) {
-            return Result::Err(PlonkError::InvalidCurvePoint('Point A is not on curve'));
-        }
-        if !Self::is_on_curve(proof.B) {
-            return Result::Err(PlonkError::InvalidCurvePoint('Point B is not on curve'));
-        }
-        if !Self::is_on_curve(proof.C) {
-            return Result::Err(PlonkError::InvalidCurvePoint('Point C is not on curve'));
-        }
-        if !Self::is_on_curve(proof.Z) {
-            return Result::Err(PlonkError::InvalidCurvePoint('Point Z is not on curve'));
-        }
-        if !Self::is_on_curve(proof.T1) {
-            return Result::Err(PlonkError::InvalidCurvePoint('Point T1 is not on curve'));
-        }
-        if !Self::is_on_curve(proof.T2) {
-            return Result::Err(PlonkError::InvalidCurvePoint('Point T2 is not on curve'));
-        }
-        if !Self::is_on_curve(proof.T3) {
-            return Result::Err(PlonkError::InvalidCurvePoint('Point T3 is not on curve'));
-        }
-        if !Self::is_on_curve(proof.Wxi) {
-            return Result::Err(PlonkError::InvalidCurvePoint('Point Wxi is not on curve'));
-        }
-        if !Self::is_on_curve(proof.Wxiw) {
-            return Result::Err(PlonkError::InvalidCurvePoint('Point Wxiw is not on curve'));
-        }
+        validate_curve_point(Self::is_on_curve(proof.A), 'Point A is not on curve')?;
+        validate_curve_point(Self::is_on_curve(proof.B), 'Point B is not on curve')?;
+        validate_curve_point(Self::is_on_curve(proof.C), 'Point C is not on curve')?;
+        validate_curve_point(Self::is_on_curve(proof.Z), 'Point Z is not on curve')?;
+        validate_curve_point(Self::is_on_curve(proof.T1), 'Point T1 is not on curve')?;
+        validate_curve_point(Self::is_on_curve(proof.T2), 'Point T2 is not on curve')?;
+        validate_curve_point(Self::is_on_curve(proof.T3), 'Point T3 is not on curve')?;
+        validate_curve_point(Self::is_on_curve(proof.Wxi), 'Point Wxi is not on curve')?;
+        validate_curve_point(Self::is_on_curve(proof.Wxiw), 'Point Wxiw is not on curve')?;
 
         // Validate field elements
-        if !Self::is_in_field(proof.eval_a) {
-            return Result::Err(PlonkError::InvalidFieldElement('eval_a not in field'));
-        }
-        if !Self::is_in_field(proof.eval_b) {
-            return Result::Err(PlonkError::InvalidFieldElement('eval_b not in field'));
-        }
-        if !Self::is_in_field(proof.eval_c) {
-            return Result::Err(PlonkError::InvalidFieldElement('eval_c not in field'));
-        }
-        if !Self::is_in_field(proof.eval_s1) {
-            return Result::Err(PlonkError::InvalidFieldElement('eval_s1 not in field'));
-        }
-        if !Self::is_in_field(proof.eval_s2) {
-            return Result::Err(PlonkError::InvalidFieldElement('eval_s2 not in field'));
-        }
-        if !Self::is_in_field(proof.eval_zw) {
-            return Result::Err(PlonkError::InvalidFieldElement('eval_zw not in field'));
-        }
+        validate_field_element(Self::is_in_field(proof.eval_a), 'eval_a not in field')?;
+        validate_field_element(Self::is_in_field(proof.eval_b), 'eval_b not in field')?;
+        validate_field_element(Self::is_in_field(proof.eval_c), 'eval_c not in field')?;
+        validate_field_element(Self::is_in_field(proof.eval_s1), 'eval_s1 not in field')?;
+        validate_field_element(Self::is_in_field(proof.eval_s2), 'eval_s2 not in field')?;
+        validate_field_element(Self::is_in_field(proof.eval_zw), 'eval_zw not in field')?;
 
         // Validate public inputs
-        if !Self::check_public_inputs_length(verification_key.nPublic, publicSignals.len().into()) {
-            return Result::Err(PlonkError::InvalidPublicInput('Public inputs length mismatch'));
-        }
+        validate_public_input(
+            Self::check_public_inputs_length(verification_key.nPublic, publicSignals.len().into()),
+            'Public inputs length mismatch'
+        )?;
 
         // Compute challenges
         let mut transcript = Keccak256Transcript::new();
@@ -80,7 +53,7 @@ impl PlonkVerifier of PVerifier {
         while i < publicSignals.len() {
             match publicSignals.get(i) {
                 Option::Some(signal) => transcript.update_with_u256(*signal)?,
-                Option::None => return Result::Err(PlonkError::InvalidPublicInput('Failed to get public signal')),
+                Option::None => return Err(PlonkError::InvalidPublicInput('Failed to get public signal')),
             }
             i += 1;
         }
@@ -130,11 +103,9 @@ impl PlonkVerifier of PVerifier {
 
         // Verify pairing
         let valid_pairing = Self::valid_pairing(proof, challenges, verification_key, E, F)?;
-        if !valid_pairing {
-            return Result::Err(PlonkError::VerificationFailed('Pairing check failed'));
-        }
+        validate_verification(valid_pairing, 'Pairing check failed')?;
 
-        Result::Ok(true)
+        Ok(())
     }
 
     // step 1: check if the points are on the bn254 curve
