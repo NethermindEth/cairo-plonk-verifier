@@ -19,7 +19,7 @@ use plonk_verifier::errors::{PlonkError, Result, PlonkError::InvalidCurvePoint, 
 impl PlonkVerifier of PVerifier {
     fn verify(
         verification_key: PlonkVerificationKey, proof: PlonkProof, publicSignals: Array<u256>
-    ) -> Result<()> {
+    ) -> Result<bool> {
         // Validate curve points
         validate_curve_point(Self::is_on_curve(proof.A), 'Point A is not on curve')?;
         validate_curve_point(Self::is_on_curve(proof.B), 'Point B is not on curve')?;
@@ -105,8 +105,7 @@ impl PlonkVerifier of PVerifier {
         let valid_pairing = Self::valid_pairing(proof, challenges, verification_key, E, F)?;
         validate_verification(valid_pairing, 'Pairing check failed')?;
 
-        let result = valid_pairing;
-        Ok(result)
+        Ok(valid_pairing)
     }
 
     // step 1: check if the points are on the bn254 curve
