@@ -104,8 +104,7 @@ impl PlonkVerifier of PVerifier {
         // Verify pairing
         let valid_pairing = Self::valid_pairing(proof, challenges, verification_key, E, F)?;
         validate_verification(valid_pairing, 'Pairing check failed')?;
-
-        Ok(valid_pairing)
+        Ok(true)
     }
 
     // step 1: check if the points are on the bn254 curve
