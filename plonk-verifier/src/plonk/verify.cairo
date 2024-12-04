@@ -54,30 +54,56 @@ impl PlonkVerifier of PVerifier {
             && Self::is_in_field(proof.eval_s2)
             && Self::is_in_field(proof.eval_zw);
 
-        result = result
-            && Self::check_public_inputs_length(
-                verification_key.nPublic, publicSignals.len().into()
-            );
+        // result = result
+        //     && Self::check_public_inputs_length(
+        //         verification_key.nPublic, publicSignals.len().into()
+        //     );
         let mut challenges: PlonkChallenge = Self::compute_challenges(
             verification_key, proof, publicSignals.clone()
         );
 
+        // Test
+        let mut challenges = PlonkChallenge {
+            beta: fq(0),
+            gamma: fq(0),
+            alpha: fq(0),
+            xi: fq(0),
+            xin: fq(0),
+            zh: fq(0),
+            v1: fq(0),
+            v2: fq(0),
+            v3: fq(0),
+            v4: fq(0),
+            v5: fq(0),
+            u: fq(0)
+        };
+
         let (L, challenges) = Self::compute_lagrange_evaluations(verification_key, challenges);
 
-        let PI = Self::compute_PI(publicSignals.clone(), L.clone());
+        // Test Produce Error
+        Self::produce_error();
 
-        let R0 = Self::compute_R0(proof, challenges, PI, L[1].clone());
+        // let PI = Self::compute_PI(publicSignals.clone(), L.clone());
 
-        let D = Self::compute_D(proof, challenges, verification_key, L[1].clone());
+        // let R0 = Self::compute_R0(proof, challenges, PI, L[1].clone());
 
-        let F = Self::compute_F(proof, challenges, verification_key, D);
+        // test (This Errors when above two lines are commented...)
+        // let R0 = Self::compute_R0(proof, challenges, Fq{c0: 0}, Fq{c0: 0});
 
-        let E = Self::compute_E(proof, challenges, R0);
+        // let D = Self::compute_D(proof, challenges, verification_key, L[1].clone());
 
-        let valid_pairing = Self::valid_pairing(proof, challenges, verification_key, E, F);
-        result = result && valid_pairing;
+        // let F = Self::compute_F(proof, challenges, verification_key, D);
 
-        result
+        // let E = Self::compute_E(proof, challenges, R0);
+        
+        // let valid_pairing = Self::valid_pairing(proof, challenges, verification_key, E, F);
+
+        // result = result && valid_pairing;
+
+        // result
+
+        //test
+        true
     }
 
     // step 1: check if the points are on the bn254 curve
@@ -141,7 +167,9 @@ impl PlonkVerifier of PVerifier {
             u: fq(0)
         };
 
-        // Challenge round 2: beta and gamma
+        // Comment out 4 and it works
+
+        // Challenge round 2: beta and gamma 
         let mut beta_transcript = Transcript::new();
         beta_transcript.add_poly_commitment(verification_key.Qm);
         beta_transcript.add_poly_commitment(verification_key.Ql);
@@ -273,6 +301,23 @@ impl PlonkVerifier of PVerifier {
         let mut e3a = add_nz(
             proof.eval_a.c0, mul_nz(challenges.beta.c0, proof.eval_s1.c0, ORDER_NZ), ORDER_NZ
         );
+
+        // test
+        // let e2: u256 = mul_nz(L1.c0, challenges.alpha.c0, ORDER_NZ); // works
+        // let e2: u256 = sqr_nz(challenges.alpha.c0, ORDER_NZ); // works
+
+        // let e2_1: u256 = sqr_nz(1, ORDER_NZ); // errors 
+        // let e2_2: u256 = mul_nz(1, 1, ORDER_NZ);
+
+        // let mut e3a = add_nz(
+        //     0, mul_nz(0, 0, ORDER_NZ), ORDER_NZ
+        // );
+
+        // ==========
+        let mut e3a = add_nz(
+            proof.eval_a.c0, mul_nz(challenges.beta.c0, proof.eval_s1.c0, ORDER_NZ), ORDER_NZ
+        );
+
         e3a = add_nz(e3a, challenges.gamma.c0, ORDER_NZ);
 
         let mut e3b = add_nz(
@@ -289,6 +334,7 @@ impl PlonkVerifier of PVerifier {
         let r0 = sub(sub(e1, e2, ORDER), e3, ORDER);
 
         fq(r0)
+        //fq(0)
     }
 
     // step 9: Compute first part of batched polynomial commitment D
@@ -451,26 +497,55 @@ impl PlonkVerifier of PVerifier {
     ) -> bool {
         let mut A1 = proof.Wxi;
 
-        let Wxiw_mul_u = proof.Wxiw.multiply_as_circuit(challenges.u.c0);
-        A1 = A1.add_as_circuit(Wxiw_mul_u);
+        // let Wxiw_mul_u = proof.Wxiw.multiply_as_circuit(challenges.u.c0);
+        // A1 = A1.add_as_circuit(Wxiw_mul_u);
 
-        let mut B1 = proof.Wxi.multiply_as_circuit(challenges.xi.c0);
-        let s = mul_nz(mul_nz(challenges.u.c0, challenges.xi.c0, ORDER_NZ), vk.w, ORDER_NZ);
+        // let mut B1 = proof.Wxi.multiply_as_circuit(challenges.xi.c0);
+        // let s = mul_nz(mul_nz(challenges.u.c0, challenges.xi.c0, ORDER_NZ), vk.w, ORDER_NZ);
 
-        let Wxiw_mul_s = proof.Wxiw.multiply_as_circuit(s);
-        B1 = B1.add_as_circuit(Wxiw_mul_s);
+        // let Wxiw_mul_s = proof.Wxiw.multiply_as_circuit(s);
+        // B1 = B1.add_as_circuit(Wxiw_mul_s);
 
-        B1 = B1.add_as_circuit(F);
+        // B1 = B1.add_as_circuit(F);
 
-        B1 = B1.add_as_circuit(E.neg());
+        // B1 = B1.add_as_circuit(E.neg());
 
-        let g2_one = AffineG2Impl::one();
+        // let g2_one = AffineG2Impl::one();
 
-        let e_A1_vk_x2 = single_ate_pairing(A1, vk.X_2);
-        let e_B1_g2_1 = single_ate_pairing(B1, g2_one);
+        // let e_A1_vk_x2 = single_ate_pairing(A1, vk.X_2);
+        // let e_B1_g2_1 = single_ate_pairing(B1, g2_one);
 
-        let res: bool = e_A1_vk_x2.c0 == e_B1_g2_1.c0;
+        // let res: bool = e_A1_vk_x2.c0 == e_B1_g2_1.c0;
 
-        res
+        // res
+        
+        // =====================
+        // test
+        let field_nz = get_field_nz();
+
+        let t1: Fq12 = Default::default();
+        let t2: Fq12 = Default::default();//.frob2();
+        // let t3 = t1 / t2; 
+        let t3 = t2.inv(get_field_nz());
+        let t4 = t1 * t1;
+
+        true
+    }
+
+    fn produce_error() {
+        let e2_1: u256 = sqr_nz(1, ORDER_NZ);
+        let e2_2: u256 = mul_nz(1, 1, ORDER_NZ);
+
+        let mut e3a = add_nz(
+            0, mul_nz(0, 0, ORDER_NZ), ORDER_NZ
+        );
+
+        let field_nz = get_field_nz();
+
+        let t1: Fq12 = Default::default();
+        let t2: Fq12 = Default::default();//.frob2();
+        // let t3 = t1 / t2; 
+        t2.inv(get_field_nz());
+        t1 * t1;
     }
 }

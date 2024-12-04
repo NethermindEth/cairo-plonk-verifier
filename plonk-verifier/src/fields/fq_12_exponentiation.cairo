@@ -130,7 +130,14 @@ impl Fq12Exponentiation of PairingExponentiationTrait {
 
     fn final_exponentiation(self: Fq12) -> Fq12 {
         let field_nz = get_field_nz();
-        self.final_exponentiation_easy_part().final_exponentiation_hard_part(field_nz)
+
+        let t1: Fq12 = Default::default();
+        let t2: Fq12 = Default::default();//.frob2();
+        // let t3 = t1 / t2; 
+        let t3 = t2.inv(get_field_nz());
+        let t4 = t1 * t1;
+        self
+        // self.final_exponentiation_easy_part() //.final_exponentiation_hard_part(field_nz)
     }
 
     // p^4 - p^2 + 1

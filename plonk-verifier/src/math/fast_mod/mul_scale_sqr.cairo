@@ -97,7 +97,7 @@ fn mul(a: u256, b: u256, modulo: u256) -> u256 {
 
 // squares a u256
 // unreduced, returns u512
-// #[inline(always)]
+#[inline(always)]
 fn sqr_u(a: u256) -> u512 {
     let (limb1, limb0) = u128_wide_mul(a.low, a.low);
     let (limb2, limb1_part) = u128_wide_mul(a.low, a.high);

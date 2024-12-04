@@ -17,7 +17,7 @@ use plonk_verifier::fields::print::u512Display;
 use plonk_verifier::curve::constants::FIELD_U384;
 use plonk_verifier::fields::utils::conversions::into_u512;
 
-#[derive(Copy, Drop, Serde, Debug)]
+#[derive(Default, Copy, Drop, Serde, Debug)]
 struct Fq2 {
     c0: Fq,
     c1: Fq,
