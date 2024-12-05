@@ -103,7 +103,7 @@ impl PlonkVerifier of PVerifier {
         // result
 
         //test
-        true
+        false 
     }
 
     // step 1: check if the points are on the bn254 curve
