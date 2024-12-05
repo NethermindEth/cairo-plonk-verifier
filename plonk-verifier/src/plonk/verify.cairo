@@ -31,6 +31,156 @@ use plonk_verifier::pairing::optimal_ate::{single_ate_pairing, ate_miller_loop};
 
 #[generate_trait]
 impl PlonkVerifier of PVerifier {
+    fn verify_invalid(
+        verification_key: PlonkVerificationKey, proof: PlonkProof, publicSignals: Array<u256>
+    ) -> bool {
+        let mut result = true;
+        result = result
+            && Self::is_on_curve(proof.A)
+            && Self::is_on_curve(proof.B)
+            && Self::is_on_curve(proof.C)
+            && Self::is_on_curve(proof.Z)
+            && Self::is_on_curve(proof.T1)
+            && Self::is_on_curve(proof.T2)
+            && Self::is_on_curve(proof.T3)
+            && Self::is_on_curve(proof.Wxi)
+            && Self::is_on_curve(proof.Wxiw);
+
+        result = result
+            && Self::is_in_field(proof.eval_a)
+            && Self::is_in_field(proof.eval_b)
+            && Self::is_in_field(proof.eval_c)
+            && Self::is_in_field(proof.eval_s1)
+            && Self::is_in_field(proof.eval_s2)
+            && Self::is_in_field(proof.eval_zw);
+
+        // result = result
+        //     && Self::check_public_inputs_length(
+        //         verification_key.nPublic, publicSignals.len().into()
+        //     );
+        let mut challenges: PlonkChallenge = Self::compute_challenges(
+            verification_key, proof, publicSignals.clone()
+        );
+
+        // Test
+        let mut challenges = PlonkChallenge {
+            beta: fq(0),
+            gamma: fq(0),
+            alpha: fq(0),
+            xi: fq(0),
+            xin: fq(0),
+            zh: fq(0),
+            v1: fq(0),
+            v2: fq(0),
+            v3: fq(0),
+            v4: fq(0),
+            v5: fq(0),
+            u: fq(0)
+        };
+
+        let (L, challenges) = Self::compute_lagrange_evaluations(verification_key, challenges);
+
+        // Test Produce Error
+        Self::produce_error();
+
+        // let PI = Self::compute_PI(publicSignals.clone(), L.clone());
+
+        // let R0 = Self::compute_R0(proof, challenges, PI, L[1].clone());
+
+        // test (This Errors when above two lines are commented...)
+        // let R0 = Self::compute_R0(proof, challenges, Fq{c0: 0}, Fq{c0: 0});
+
+        // let D = Self::compute_D(proof, challenges, verification_key, L[1].clone());
+
+        // let F = Self::compute_F(proof, challenges, verification_key, D);
+
+        // let E = Self::compute_E(proof, challenges, R0);
+        
+        // let valid_pairing = Self::valid_pairing(proof, challenges, verification_key, E, F);
+
+        // result = result && valid_pairing;
+
+        // result
+
+        //test
+        false 
+    }
+
+    fn verify_valid(
+        verification_key: PlonkVerificationKey, proof: PlonkProof, publicSignals: Array<u256>
+    ) -> bool {
+        let mut result = true;
+        result = result
+            && Self::is_on_curve(proof.A)
+            && Self::is_on_curve(proof.B)
+            && Self::is_on_curve(proof.C)
+            && Self::is_on_curve(proof.Z)
+            && Self::is_on_curve(proof.T1)
+            && Self::is_on_curve(proof.T2)
+            && Self::is_on_curve(proof.T3)
+            && Self::is_on_curve(proof.Wxi)
+            && Self::is_on_curve(proof.Wxiw);
+
+        result = result
+            && Self::is_in_field(proof.eval_a)
+            && Self::is_in_field(proof.eval_b)
+            && Self::is_in_field(proof.eval_c)
+            && Self::is_in_field(proof.eval_s1)
+            && Self::is_in_field(proof.eval_s2)
+            && Self::is_in_field(proof.eval_zw);
+
+        // result = result
+        //     && Self::check_public_inputs_length(
+        //         verification_key.nPublic, publicSignals.len().into()
+        //     );
+        let mut challenges: PlonkChallenge = Self::compute_challenges(
+            verification_key, proof, publicSignals.clone()
+        );
+
+        // Test
+        let mut challenges = PlonkChallenge {
+            beta: fq(0),
+            gamma: fq(0),
+            alpha: fq(0),
+            xi: fq(0),
+            xin: fq(0),
+            zh: fq(0),
+            v1: fq(0),
+            v2: fq(0),
+            v3: fq(0),
+            v4: fq(0),
+            v5: fq(0),
+            u: fq(0)
+        };
+
+        let (L, challenges) = Self::compute_lagrange_evaluations(verification_key, challenges);
+
+        // Test Produce Error
+        // Self::produce_error();
+
+        // let PI = Self::compute_PI(publicSignals.clone(), L.clone());
+
+        // let R0 = Self::compute_R0(proof, challenges, PI, L[1].clone());
+
+        // test (This Errors when above two lines are commented...)
+        // let R0 = Self::compute_R0(proof, challenges, Fq{c0: 0}, Fq{c0: 0});
+
+        // let D = Self::compute_D(proof, challenges, verification_key, L[1].clone());
+
+        // let F = Self::compute_F(proof, challenges, verification_key, D);
+
+        // let E = Self::compute_E(proof, challenges, R0);
+        
+        // let valid_pairing = Self::valid_pairing(proof, challenges, verification_key, E, F);
+
+        // result = result && valid_pairing;
+
+        // result
+
+        //test
+        false 
+    }
+
     fn verify(
         verification_key: PlonkVerificationKey, proof: PlonkProof, publicSignals: Array<u256>
     ) -> bool {
