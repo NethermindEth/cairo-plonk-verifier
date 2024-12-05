@@ -57,9 +57,8 @@ mod PLONK_Verifier{
             //public_signals
             let public_signals = constants::public_inputs();
 
+            // let verified: bool = plonk_verifier::plonk::verify::PlonkVerifier::verify_valid(verification_key, proof, public_signals);
             let verified: bool = plonk_verifier::plonk::verify::PlonkVerifier::verify_invalid(verification_key, proof, public_signals);
-
-            // let verified: bool = plonk_verifier::plonk::verify::PlonkVerifier::verify_invalid(verification_key, proof, public_signals);
             
             assert(verified, 'plonk verification failed'); 
         }

@@ -54,10 +54,10 @@ impl PlonkVerifier of PVerifier {
             && Self::is_in_field(proof.eval_s2)
             && Self::is_in_field(proof.eval_zw);
 
-        // result = result
-        //     && Self::check_public_inputs_length(
-        //         verification_key.nPublic, publicSignals.len().into()
-        //     );
+        result = result
+            && Self::check_public_inputs_length(
+                verification_key.nPublic, publicSignals.len().into()
+            );
         let mut challenges: PlonkChallenge = Self::compute_challenges(
             verification_key, proof, publicSignals.clone()
         );
@@ -129,10 +129,10 @@ impl PlonkVerifier of PVerifier {
             && Self::is_in_field(proof.eval_s2)
             && Self::is_in_field(proof.eval_zw);
 
-        // result = result
-        //     && Self::check_public_inputs_length(
-        //         verification_key.nPublic, publicSignals.len().into()
-        //     );
+        result = result
+            && Self::check_public_inputs_length(
+                verification_key.nPublic, publicSignals.len().into()
+            );
         let mut challenges: PlonkChallenge = Self::compute_challenges(
             verification_key, proof, publicSignals.clone()
         );
