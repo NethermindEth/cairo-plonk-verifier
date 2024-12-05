@@ -533,14 +533,14 @@ impl PlonkVerifier of PVerifier {
     }
 
     fn produce_error() {
-        let e2_1: u256 = sqr_nz(1, ORDER_NZ);
-        let e2_2: u256 = mul_nz(1, 1, ORDER_NZ);
+        sqr_nz(1, ORDER_NZ);
+        mul_nz(1, 1, ORDER_NZ);
 
-        let mut e3a = add_nz(
+        add_nz(
             0, mul_nz(0, 0, ORDER_NZ), ORDER_NZ
         );
 
-        let field_nz = get_field_nz();
+        get_field_nz();
 
         let t1: Fq12 = Default::default();
         let t2: Fq12 = Default::default();//.frob2();
