@@ -28,10 +28,6 @@ mod pairing {
     mod optimal_ate_utils;
     mod optimal_ate_impls;
     mod optimal_ate;
-    // #[cfg(test)]
-// mod ate_tests;
-// #[cfg(test)]
-// mod tests;
 }
 
 use plonk_verifier::fields as f;
@@ -39,12 +35,13 @@ use plonk_verifier::math::fast_mod as m;
 use m::{u512};
 use m::utils::u128_overflowing_sub;
 use m::{
-    add_u, add_nz, sub, sub_u, mul_u, mul_nz, div_nz, sqr_u, sqr_nz, scl_u, reduce, u512_add,
+    add_u, sub, sub_u, mul_u, mul_nz, div_nz, sqr_u, sqr_nz, scl_u, reduce, u512_add,
     u512_sub
 };
 use m::{u512_add_u256, u512_sub_u256, u512_add_overflow, u512_sub_overflow, u512_scl, u512_reduce};
 use m::{Tuple2Add, Tuple2Sub, Tuple3Add, Tuple3Sub};
 use f::{SixU512};
+use m::{mul_f, mul_o};
 
 #[inline(always)]
 fn scale_9(a: f::Fq) -> f::Fq {
@@ -303,6 +300,21 @@ fn mul_by_v_nz_as_circuit(t: f::Fq6) -> f::Fq6 {
 #[inline(always)]
 fn mul(a: u256, b: u256) -> u256 {
     m::mul_nz(a, b, get_field_nz())
+    // let in1 = CircuitElement::<CircuitInput<0>> {};
+    // let in2 = CircuitElement::<CircuitInput<1>> {};
+    // let mul = circuit_mul(in1, in2);
+
+    // let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+
+    // let a = from_u256(a);
+    // let b = from_u256(b);
+
+    // let outputs = match (mul,).new_inputs().next(a).next(b).done().eval(modulus) {
+    //     Result::Ok(outputs) => { outputs },
+    //     Result::Err(_) => { panic!("Expected success") }
+    // };
+
+    // outputs.get_output(mul).try_into().unwrap()
 }
 
 #[inline(always)]
@@ -323,6 +335,42 @@ fn neg_o(b: u256) -> u256 {
 #[inline(always)]
 fn add(mut a: u256, mut b: u256) -> u256 {
     m::add(a, b, FIELD)
+    // let in1 = CircuitElement::<CircuitInput<0>> {};
+    // let in2 = CircuitElement::<CircuitInput<1>> {};
+    // let add = circuit_add(in1, in2);
+
+    // let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+
+    // let a = from_u256(a);
+    // let b = from_u256(b);
+
+    // let outputs = match (add,).new_inputs().next(a).next(b).done().eval(modulus) {
+    //     Result::Ok(outputs) => { outputs },
+    //     Result::Err(_) => { panic!("Expected success") }
+    // };
+
+    // outputs.get_output(add).try_into().unwrap()
+}
+
+// Add mod order
+#[inline(always)]
+fn add_o(mut a: u256, mut b: u256) -> u256 {
+    m::add(a, b, ORDER)
+    // let in1 = CircuitElement::<CircuitInput<0>> {};
+    // let in2 = CircuitElement::<CircuitInput<1>> {};
+    // let add = circuit_add(in1, in2);
+
+    // let modulus = TryInto::<_, CircuitModulus>::try_into(ORDER_U384).unwrap();
+
+    // let a = from_u256(a);
+    // let b = from_u256(b);
+
+    // let outputs = match (add,).new_inputs().next(a).next(b).done().eval(modulus) {
+    //     Result::Ok(outputs) => { outputs },
+    //     Result::Err(_) => { panic!("Expected success") }
+    // };
+
+    // outputs.get_output(add).try_into().unwrap()
 }
 
 #[inline(always)]
@@ -333,7 +381,44 @@ fn sqr(mut a: u256) -> u256 {
 #[inline(always)]
 fn sub_field(mut a: u256, mut b: u256) -> u256 {
     m::sub(a, b, FIELD)
+    // let in1 = CircuitElement::<CircuitInput<0>> {};
+    // let in2 = CircuitElement::<CircuitInput<1>> {};
+    // let sub = circuit_sub(in1, in2);
+
+    // let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+
+    // let a = from_u256(a);
+    // let b = from_u256(b);
+
+    // let outputs = match (sub,).new_inputs().next(a).next(b).done().eval(modulus) {
+    //     Result::Ok(outputs) => { outputs },
+    //     Result::Err(_) => { panic!("Expected success") }
+    // };
+
+    // outputs.get_output(sub).try_into().unwrap()
 }
+
+#[inline(always)]
+fn sub_o(mut a: u256, mut b: u256) -> u256 {
+    // m::sub(a, b, FIELD)
+    let in1 = CircuitElement::<CircuitInput<0>> {};
+    let in2 = CircuitElement::<CircuitInput<1>> {};
+    let sub = circuit_sub(in1, in2);
+
+    let modulus = TryInto::<_, CircuitModulus>::try_into(ORDER_U384).unwrap();
+
+    let a = from_u256(a);
+    let b = from_u256(b);
+
+    let outputs = match (sub,).new_inputs().next(a).next(b).done().eval(modulus) {
+        Result::Ok(outputs) => { outputs },
+        Result::Err(_) => { panic!("Expected success") }
+    };
+
+    outputs.get_output(sub).try_into().unwrap()
+}
+
+
 
 #[inline(always)]
 fn div(a: u256, b: u256) -> u256 {

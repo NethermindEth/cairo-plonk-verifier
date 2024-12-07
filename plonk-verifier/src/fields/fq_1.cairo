@@ -15,7 +15,7 @@ use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg
 use plonk_verifier::traits::{FieldUtils, FieldOps, FieldShortcuts, FieldMulShortcuts};
 use debug::PrintTrait;
 
-#[derive(Copy, Drop, Serde, Debug)]
+#[derive(Default, Copy, Drop, Serde, Debug)]
 struct Fq {
     c0: u256
 }

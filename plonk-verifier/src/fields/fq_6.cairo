@@ -21,7 +21,7 @@ use core::circuit::{
 
 use debug::PrintTrait;
 
-#[derive(Copy, Drop, Serde, Debug)]
+#[derive(Default, Copy, Drop, Serde, Debug)]
 struct Fq6 {
     c0: Fq2,
     c1: Fq2,

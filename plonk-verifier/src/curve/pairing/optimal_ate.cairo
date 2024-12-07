@@ -229,8 +229,10 @@ fn ate_pairing<
 
 fn single_ate_pairing(p: AffineG1, q: AffineG2) -> Fq12 {
     ate_miller_loop(p, q).final_exponentiation()
+    // let test: Fq12 = Default::default(); 
+    // test
 }
 
 fn test_single_ate_loop(p: AffineG1, q: AffineG2) {
-    let x = ate_miller_loop(p, q);
+    ate_miller_loop(p, q);
 }

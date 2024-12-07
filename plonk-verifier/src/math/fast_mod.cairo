@@ -23,11 +23,12 @@ use add_sub::{neg, add, add_nz, add_u, sub, sub_u};
 mod mul_scale_sqr;
 
 use mul_scale_sqr::{scl, scl_nz, scl_u, mul, mul_nz, mul_u, sqr, sqr_nz, sqr_u, u512_scl};
+use mul_scale_sqr::{mul_o, mul_f};
 // endregion mul operations
 
 // region div/inv operations
 mod div_inv;
-use div_inv::{inv, div, div_nz, div_u};
+use div_inv::{inv, div, div_u, div_nz};
 // endregion div/inv operations
 
 #[inline(always)]
