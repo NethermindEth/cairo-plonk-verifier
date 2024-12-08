@@ -1,7 +1,14 @@
-use plonk_verifier::curve::groups::ECOperations;
+use plonk_verifier::curve::groups::{
+    ECOperations,
+    ECOperationsCircuitFq2,
+    ECOperationsCircuitFq6
+    };
 use plonk_verifier::fields::fq;
 use plonk_verifier::curve::groups::{
-    Affine, AffineOps, AffineG1, AffineG1Impl, g1, AffineG2, AffineG2Impl, g2
+    Affine, AffineOps,
+    AffineG1, AffineG1Impl, g1,
+    AffineG2, AffineG2Impl, g2,
+    AffineG6, AffineG6Impl, g6
 };
 use debug::PrintTrait;
 
@@ -13,7 +20,7 @@ const TPL_Y: u256 = 193215337665523688609465524374805154414168300397779116379134
 
 #[cfg(test)]
 fn g1_dbl() {
-    let doubled = AffineG1Impl::one().double();
+    let doubled  = AffineG1Impl::one().double();
     assert(doubled.x.c0 == DBL_X, 'wrong double x');
     assert(doubled.y.c0 == DBL_Y, 'wrong double y');
 }
@@ -51,6 +58,8 @@ fn g1_mul() {
         'wrong mul 250 bit'
     );
 }
+
+
 const DBL_X_0: u256 = 18029695676650738226693292988307914797657423701064905010927197838374790804409;
 const DBL_X_1: u256 = 14583779054894525174450323658765874724019480979794335525732096752006891875705;
 const DBL_Y_0: u256 = 2140229616977736810657479771656733941598412651537078903776637920509952744750;
@@ -81,4 +90,146 @@ fn g2_add() {
 fn g2_mul() {
     let g_3x = AffineG2Impl::one().multiply(3);
     assert_g2_match(g_3x, TPL_X_0, TPL_X_1, TPL_Y_0, TPL_Y_1, 'wrong multiply');
+}
+
+/////////////////////////////////////////////////////////////
+/// Fq6 with circuit
+////////////////////////////////////////////////////////////
+
+const INIT_X_C0_0: u256 = 20484134632227413105288852818573307096537828350605883914293261499202706558932;
+const INIT_X_C0_1: u256 = 283027205451805829911283416334749444152166604350404893963662054653109752570;
+const INIT_X_C1_0: u256 = 4872883918153764825330855961068725807551808808739107813150077196882906638099;
+const INIT_X_C1_1: u256 = 8274794029246137792464104733459993037041262152389379057883240989711411681544;
+const INIT_X_C2_0: u256 = 11410622344362579270341021334220993326208891893123481318972114230329275021689;
+const INIT_X_C2_1: u256 = 10370876545384681187779998897369692590180150910970520885980650649565193430448;
+
+const INIT_Y_C0_0: u256 = 21888242871839275222246405745257275088696311157297823662689037894645226208582;
+const INIT_Y_C0_1: u256 = 0;
+const INIT_Y_C1_0: u256 = 0;
+const INIT_Y_C1_1: u256 = 0;
+const INIT_Y_C2_0: u256 = 0;
+const INIT_Y_C2_1: u256 = 0;
+
+
+const INIT2_X_C0_0: u256 = 6332630470069007818510410782711727428171086725301393848166167962318143698476;
+const INIT2_X_C0_1: u256 = 21122961909958299544456203858674009958311208418362239338094445142237396147255;
+const INIT2_X_C1_0: u256 = 8692152477966235408165675855509521949699839283589879884614965015832111741961;
+const INIT2_X_C1_1: u256 = 3376125027674839115102766051486897822318641200585443824118985307324136852655;
+const INIT2_X_C2_0: u256 = 13271672509281395900621201224912043504467382985910919724262711257466623229598;
+const INIT2_X_C2_1: u256 = 16423729737344100214055990811066351451964461357546777880451630277184403077966;
+
+const INIT2_Y_C0_0: u256 = 1;
+const INIT2_Y_C0_1: u256 = 0;
+const INIT2_Y_C1_0: u256 = 0;
+const INIT2_Y_C1_1: u256 = 0;
+const INIT2_Y_C2_0: u256 = 0;
+const INIT2_Y_C2_1: u256 = 0;
+
+
+
+/// Helper function to assert `Fq6` components match
+fn assert_g6_match(
+    self: AffineG6, 
+    xc0_0: u256, xc0_1: u256, xc1_0: u256, xc1_1: u256, xc2_0: u256, xc2_1: u256,
+    yc0_0: u256, yc0_1: u256, yc1_0: u256, yc1_1: u256, yc2_0: u256, yc2_1: u256,
+    msg: felt252
+) {
+    assert(
+        (
+            self.x.c0.c0, self.x.c0.c1, 
+            self.x.c1.c0, self.x.c1.c1, 
+            self.x.c2.c0, self.x.c2.c1, 
+            self.y.c0.c0, self.y.c0.c1, 
+            self.y.c1.c0, self.y.c1.c1, 
+            self.y.c2.c0, self.y.c2.c1,
+        ) == (
+            xc0_0, xc0_1, xc1_0, xc1_1, xc2_0, xc2_1, 
+            yc0_0, yc0_1, yc1_0, yc1_1, yc2_0, yc2_1,
+        ),
+        msg
+    );
+}
+
+
+
+/// Test doubling operation for Fq6
+#[cfg(test)]
+fn g6_dbl() {
+    let doubled = AffineG6Impl::one().double();
+    assert_g6_match(
+        doubled,
+        DBL_X_C0_0, DBL_X_C0_1, DBL_X_C1_0, DBL_X_C1_1, DBL_X_C2_0, DBL_X_C2_1,
+        DBL_Y_C0_0, DBL_Y_C0_1, DBL_Y_C1_0, DBL_Y_C1_1, DBL_Y_C2_0, DBL_Y_C2_1,
+        'wrong double operation for Fq6'
+    );
+}
+
+/// Test addition operation for Fq6
+#[cfg(test)]
+fn g6_add() {
+    let g_3x = AffineG6Impl::one().add_as_circuit(g6(
+        DBL_X_C0_0, DBL_X_C0_1, DBL_X_C1_0, DBL_X_C1_1, DBL_X_C2_0, DBL_X_C2_1,
+        DBL_Y_C0_0, DBL_Y_C0_1, DBL_Y_C1_0, DBL_Y_C1_1, DBL_Y_C2_0, DBL_Y_C2_1
+    ));
+    assert_g6_match(
+        g_3x,
+        TPL_X_C0_0, TPL_X_C0_1, TPL_X_C1_0, TPL_X_C1_1, TPL_X_C2_0, TPL_X_C2_1,
+        TPL_Y_C0_0, TPL_Y_C0_1, TPL_Y_C1_0, TPL_Y_C1_1, TPL_Y_C2_0, TPL_Y_C2_1,
+        'wrong add operation for Fq6'
+    );
+}
+
+/// Test multiplication operation for Fq6
+#[cfg(test)]
+fn g6_mul() {
+    // Scalar values for testing
+    const MUL_SCALAR_2: u256 = 2; // Double
+    const MUL_SCALAR_3: u256 = 3; // Triple
+
+    // Initialize the base point
+    let point = AffineG6Impl::one();
+
+    // Test double multiplication
+    let doubled = point.multiply_as_circuit(MUL_SCALAR_2);
+    assert_g6_match(
+        doubled,
+        DBL_X_C0_0, DBL_X_C0_1, DBL_X_C1_0, DBL_X_C1_1, DBL_X_C2_0, DBL_X_C2_1,
+        DBL_Y_C0_0, DBL_Y_C0_1, DBL_Y_C1_0, DBL_Y_C1_1, DBL_Y_C2_0, DBL_Y_C2_1,
+        "wrong double operation for Fq6"
+    );
+
+    // Test triple multiplication
+    let tripled = point.multiply_as_circuit(MUL_SCALAR_3);
+    assert_g6_match(
+        tripled,
+        TPL_X_C0_0, TPL_X_C0_1, TPL_X_C1_0, TPL_X_C1_1, TPL_X_C2_0, TPL_X_C2_1,
+        TPL_Y_C0_0, TPL_Y_C0_1, TPL_Y_C1_0, TPL_Y_C1_1, TPL_Y_C2_0, TPL_Y_C2_1,
+        "wrong triple operation for Fq6"
+    );
+}
+
+/////////////////////////////////////////////////////////////
+/// Fq2 with circuit
+////////////////////////////////////////////////////////////
+
+fn assert_g2_match(self: AffineG2, x0: u256, x1: u256, y0: u256, y1: u256, msg: felt252) {
+    assert((self.x.c0.c0, self.x.c1.c0, self.y.c0.c0, self.y.c1.c0,) == (x0, x1, y0, y1,), msg);
+}
+
+#[cfg(test)]
+fn g2_dbl() {
+    let doubled = AffineG2Impl::one().double_as_circuit();
+    assert_g2_match(doubled, DBL_X_0, DBL_X_1, DBL_Y_0, DBL_Y_1, 'wrong Fq2 circuit double');
+}
+
+#[cfg(test)]
+fn g2_add() {
+    let g_3x = AffineG2Impl::one().add_as_circuit(g2(DBL_X_0, DBL_X_1, DBL_Y_0, DBL_Y_1,));
+    assert_g2_match(g_3x, TPL_X_0, TPL_X_1, TPL_Y_0, TPL_Y_1, 'wrong Fq2 circuit add');
+}
+
+#[cfg(test)]
+fn g2_mul() {
+    let g_3x = AffineG2Impl::one().multiply_as_circuit(3);
+    assert_g2_match(g_3x, TPL_X_0, TPL_X_1, TPL_Y_0, TPL_Y_1, 'wrong Fq2 circuit multiply');
 }
