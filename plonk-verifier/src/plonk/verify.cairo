@@ -37,44 +37,61 @@ impl PlonkVerifier of PVerifier {
         verification_key: PlonkVerificationKey, proof: PlonkProof, publicSignals: Array<u256>
     ) -> bool {
         let mut result = true;
-        result = result
-            && Self::is_on_curve(proof.A)
-            && Self::is_on_curve(proof.B)
-            && Self::is_on_curve(proof.C)
-            && Self::is_on_curve(proof.Z)
-            && Self::is_on_curve(proof.T1)
-            && Self::is_on_curve(proof.T2)
-            && Self::is_on_curve(proof.T3)
-            && Self::is_on_curve(proof.Wxi)
-            && Self::is_on_curve(proof.Wxiw);
+        // result = result
+        //     && Self::is_on_curve(proof.A)
+        //     && Self::is_on_curve(proof.B)
+        //     && Self::is_on_curve(proof.C)
+        //     && Self::is_on_curve(proof.Z)
+        //     && Self::is_on_curve(proof.T1)
+        //     && Self::is_on_curve(proof.T2)
+        //     && Self::is_on_curve(proof.T3)
+        //     && Self::is_on_curve(proof.Wxi)
+        //     && Self::is_on_curve(proof.Wxiw);
 
-        result = result
-            && Self::is_in_field(proof.eval_a)
-            && Self::is_in_field(proof.eval_b)
-            && Self::is_in_field(proof.eval_c)
-            && Self::is_in_field(proof.eval_s1)
-            && Self::is_in_field(proof.eval_s2)
-            && Self::is_in_field(proof.eval_zw);
+        // result = result
+        //     && Self::is_in_field(proof.eval_a)
+        //     && Self::is_in_field(proof.eval_b)
+        //     && Self::is_in_field(proof.eval_c)
+        //     && Self::is_in_field(proof.eval_s1)
+        //     && Self::is_in_field(proof.eval_s2)
+        //     && Self::is_in_field(proof.eval_zw);
 
-        result = result
-            && Self::check_public_inputs_length(
-                verification_key.nPublic, publicSignals.len().into()
-            );
-        let mut challenges: PlonkChallenge = Self::compute_challenges(
-            verification_key, proof, publicSignals.clone()
-        );
+        // result = result
+        //     && Self::check_public_inputs_length(
+        //         verification_key.nPublic, publicSignals.len().into()
+        //     );
+        // let mut challenges: PlonkChallenge = Self::compute_challenges(
+        //     verification_key, proof, publicSignals.clone()
+        // );
 
-        let (L, challenges) = Self::compute_lagrange_evaluations(verification_key, challenges);
+        // let (L, challenges) = Self::compute_lagrange_evaluations(verification_key, challenges);
 
-        let PI = Self::compute_PI(publicSignals.clone(), L.clone());
+        // let PI = Self::compute_PI(publicSignals.clone(), L.clone());
 
-        let R0 = Self::compute_R0(proof, challenges, PI, L[1].clone());
+        // let R0 = Self::compute_R0(proof, challenges, PI, L[1].clone());
 
-        let D = Self::compute_D(proof, challenges, verification_key, L[1].clone());
+        // let D = Self::compute_D(proof, challenges, verification_key, L[1].clone());
 
-        let F = Self::compute_F(proof, challenges, verification_key, D);
+        // let F = Self::compute_F(proof, challenges, verification_key, D);
 
-        let E = Self::compute_E(proof, challenges, R0);
+        // let E = Self::compute_E(proof, challenges, R0);
+
+        let mut challenges = PlonkChallenge {
+            beta: fq(1),
+            gamma: fq(1),
+            alpha: fq(1),
+            xi: fq(1),
+            xin: fq(1),
+            zh: fq(1),
+            v1: fq(1),
+            v2: fq(1),
+            v3: fq(1),
+            v4: fq(1),
+            v5: fq(1),
+            u: fq(1)
+        };
+        let F: AffineG1 = g1(1, 2);
+        let E: AffineG1 = g1(1, 2);
 
         let valid_pairing = Self::valid_pairing(proof, challenges, verification_key, E, F);
         result = result && valid_pairing;

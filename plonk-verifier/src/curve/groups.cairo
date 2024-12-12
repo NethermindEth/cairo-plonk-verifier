@@ -8,6 +8,8 @@ use core::circuit::{
     circuit_mul, circuit_inverse, EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus,
     AddInputResultTrait, CircuitInputs, EvalCircuitResult, CircuitElementTrait, IntoCircuitInputValue, 
 };
+use core::circuit::{AddModGate, SubModGate, MulModGate, InverseGate};
+
 use core::circuit::conversions::from_u256;
 use core::fmt::{Display, Formatter, Error};
 
@@ -16,78 +18,54 @@ use debug::PrintTrait as Print;
 type AffineG1 = Affine<Fq>;
 type AffineG2 = Affine<Fq2>;
 
-// Testing
-#[derive(Copy, Drop)]
-struct CircuitBuilder<T> {
-    circuit: CircuitElement<T>,
-    inputs: Array<u384>, 
-    idx: usize, // current idx of input
-}
-
-trait CircuitEval<T> {
-    fn eval(self: @CircuitBuilder<T>) -> u384;
-}
-
-trait CircuitECOperations<T> {
-    // fn x_on_slope(self: @Affine<Fq>, slope: Fq, x2: Fq) -> Fq;
-    // fn y_on_slope(self: @Affine<Fq>, slope: Fq, x: Fq) -> Fq;
-    fn pt_on_slope(self: CircuitBuilder<T>, lhs: @Affine<Fq>, slope: Fq, x2: Fq) -> (CircuitElement<T>, CircuitElement<T>);
-    // fn chord(self: CircuitBuilder<T>, lhs: @Affine<Fq>, rhs: Affine<Fq>) -> (CircuitElement<T>, CircuitElement<T>);
-    // fn add_as_circuit(self: CircuitBuilder<T>, lhs: @Affine<Fq>, rhs: Affine<Fq>) -> (CircuitElement<T>, CircuitElement<T>);
-    // // fn tangent(self: @Affine<Fq>) -> Fq;
-    // fn double_as_circuit(self: CircuitBuilder<T>, lhs: @Affine<Fq>,) -> (CircuitElement<T>, CircuitElement<T>);
-    // fn multiply_as_circuit(self: CircuitBuilder<T>, lhs: @Affine<Fq>, multiplier: u256) -> (CircuitElement<T>, CircuitElement<T>);
-    // fn neg(self: @Affine<Fq>) -> Affine<Fq>;
-}
-
-impl CircuitAffineOperations<T, +CircuitElementTrait<T>> of CircuitECOperations<T> {
-    fn pt_on_slope(self: CircuitBuilder<T>, lhs: @Affine<Fq>, slope: Fq, x2: Fq) -> (CircuitElement<T>, CircuitElement<T>) {
-        let x_2 = x2;
-        // x = λ^2 - x1 - x2
-        // slope.sqr() - *self.x - x2
-        //let x = self.x_on_slope(slope, x2);
-        // y = λ(x1 - x) - y1
-        // slope * (*self.x - x) - *self.y
-        //let y = self.y_on_slope(slope, x);
+// impl CircuitAffineOperations<T, +CircuitElementTrait<T>> of CircuitECOperations<T> {
+//     fn pt_on_slope(self: CircuitBuilder<T>, lhs: @Affine<Fq>, slope: Fq, x2: Fq) -> (CircuitElement<T>, CircuitElement<T>) {
+//         let x_2 = x2;
+//         // x = λ^2 - x1 - x2
+//         // slope.sqr() - *self.x - x2
+//         //let x = self.x_on_slope(slope, x2);
+//         // y = λ(x1 - x) - y1
+//         // slope * (*self.x - x) - *self.y
+//         //let y = self.y_on_slope(slope, x);
         
-        let lambda = CircuitElement::<CircuitInput<0>> {};
-        let x1 = CircuitElement::<CircuitInput<1>> {};
-        let y1 = CircuitElement::<CircuitInput<2>> {};
-        let x2 = CircuitElement::<CircuitInput<3>> {};        
+//         let lambda = CircuitElement::<CircuitInput<0>> {};
+//         let x1 = CircuitElement::<CircuitInput<1>> {};
+//         let y1 = CircuitElement::<CircuitInput<2>> {};
+//         let x2 = CircuitElement::<CircuitInput<3>> {};        
         
-        let lambda_sqr = circuit_mul(lambda, lambda);  // slope.sqr()
-        let x_slope_sub_sqr_x1 = circuit_sub(lambda_sqr, x1); // slope.sqr() - *self.x
-        let x_slope_sub_x1_x2 = circuit_sub(x_slope_sub_sqr_x1, x2); // slope.sqr() - *self.x - x2
+//         let lambda_sqr = circuit_mul(lambda, lambda);  // slope.sqr()
+//         let x_slope_sub_sqr_x1 = circuit_sub(lambda_sqr, x1); // slope.sqr() - *self.x
+//         let x_slope_sub_x1_x2 = circuit_sub(x_slope_sub_sqr_x1, x2); // slope.sqr() - *self.x - x2
 
-        let y_slope_sub_x1_x = circuit_sub(x1, x_slope_sub_x1_x2); // (*self.x - x)
-        let y_slope_mul_lambda_x1_x = circuit_mul(lambda, y_slope_sub_x1_x); // slope * (*self.x - x)
-        let y_slope_lambda_sub_lambda_x_y = circuit_sub(y_slope_mul_lambda_x1_x, y1); // slope * (*self.x - x) - *self.y
+//         let y_slope_sub_x1_x = circuit_sub(x1, x_slope_sub_x1_x2); // (*self.x - x)
+//         let y_slope_mul_lambda_x1_x = circuit_mul(lambda, y_slope_sub_x1_x); // slope * (*self.x - x)
+//         let y_slope_lambda_sub_lambda_x_y = circuit_sub(y_slope_mul_lambda_x1_x, y1); // slope * (*self.x - x) - *self.y
 
-        // let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-        // let lambda = from_u256(slope.c0);
-        // let x1 = from_u256(*self.x.c0);
-        // let y1 = from_u256(*self.y.c0);
-        // let x2 = from_u256(x_2.c0);
+//         // let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+//         // let lambda = from_u256(slope.c0);
+//         // let x1 = from_u256(*self.x.c0);
+//         // let y1 = from_u256(*self.y.c0);
+//         // let x2 = from_u256(x_2.c0);
 
-        // let outputs =
-        //     match (x_slope_sub_x1_x2, y_slope_lambda_sub_lambda_x_y, )
-        //         .new_inputs()
-        //         .next(lambda)
-        //         .next(x1)
-        //         .next(y1)
-        //         .next(x2)
-        //         .done()
-        //         .eval(modulus) {
-        //     Result::Ok(outputs) => { outputs },
-        //     Result::Err(_) => { panic!("Expected success") }
-        // };
+//         // let outputs =
+//         //     match (x_slope_sub_x1_x2, y_slope_lambda_sub_lambda_x_y, )
+//         //         .new_inputs()
+//         //         .next(lambda)
+//         //         .next(x1)
+//         //         .next(y1)
+//         //         .next(x2)
+//         //         .done()
+//         //         .eval(modulus) {
+//         //     Result::Ok(outputs) => { outputs },
+//         //     Result::Err(_) => { panic!("Expected success") }
+//         // };
         
-        // let x = Fq{c0: outputs.get_output(x_slope_sub_x1_x2).try_into().unwrap()};
-        // let y = Fq{c0: outputs.get_output(y_slope_lambda_sub_lambda_x_y).try_into().unwrap()};
+//         // let x = Fq{c0: outputs.get_output(x_slope_sub_x1_x2).try_into().unwrap()};
+//         // let y = Fq{c0: outputs.get_output(y_slope_lambda_sub_lambda_x_y).try_into().unwrap()};
 
-        // Affine { x, y }
-        (x_slope_sub_x1_x2, y_slope_lambda_sub_lambda_x_y)
-    }
+//         // Affine { x, y }
+//         (x_slope_sub_x1_x2, y_slope_lambda_sub_lambda_x_y)
+//     }
 
     // fn double_as_circuit(self: CircuitBuilder<T>, lhs: @Affine<Fq>,) -> (CircuitElement<T>, CircuitElement<T>) {        // λ = (3x^2 + a) / 2y
     //     // But BN curve has a == 0 so that's one less addition
@@ -243,7 +221,7 @@ impl CircuitAffineOperations<T, +CircuitElementTrait<T>> of CircuitECOperations<
     //     };
     //     Fq{c0: outputs.get_output(mul).try_into().unwrap()}
     // }
-}
+// }
 
 
 
