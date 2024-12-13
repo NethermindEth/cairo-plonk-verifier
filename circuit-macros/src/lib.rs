@@ -2,6 +2,12 @@ use bigdecimal::{num_traits::pow, BigDecimal};
 use cairo_lang_macro::{inline_macro, Diagnostic, ProcMacroResult, TokenStream};
 use cairo_lang_parser::utils::SimpleParserDatabase;
 
+#[inline_macro]
+pub fn some(token_stream: TokenStream) -> ProcMacroResult {
+    // no-op
+    ProcMacroResult::new(token_stream)
+}
+
 /// Compile-time power function.
 ///
 /// Takes two arguments, `x, y`, calculates the value of `x` raised to the power of `y`.
@@ -31,15 +37,17 @@ pub fn pow(token_stream: TokenStream) -> ProcMacroResult {
         );
     }
 
-    let base: BigDecimal = match macro_args[0].parse() {
+    println!("macro args {:?}", macro_args[0]);
+    let base: u32 = match macro_args[0].parse() {
         Ok(val) => val,
-        Err(_) => {
+        Err(err) => {
+            println!("{:?}", err); 
             return ProcMacroResult::new(TokenStream::empty())
                 .with_diagnostics(Diagnostic::error("Invalid base value").into());
         }
     };
 
-    let exp: usize = match macro_args[1].parse() {
+    let exp: u32 = match macro_args[1].parse() {
         Ok(val) => val,
         Err(_) => {
             return ProcMacroResult::new(TokenStream::empty())
@@ -47,7 +55,7 @@ pub fn pow(token_stream: TokenStream) -> ProcMacroResult {
         }
     };
 
-    let result: BigDecimal = pow(base, exp);
+    let result: u32 = base * exp; 
 
     ProcMacroResult::new(TokenStream::new(result.to_string()))
 }

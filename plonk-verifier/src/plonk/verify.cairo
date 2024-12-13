@@ -95,6 +95,7 @@ impl PlonkVerifier of PVerifier {
 
         let valid_pairing = Self::valid_pairing(proof, challenges, verification_key, E, F);
         result = result && valid_pairing;
+        let x: felt252 = pow!(1000,4);
 
         result
     }

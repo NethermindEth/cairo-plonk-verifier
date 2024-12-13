@@ -42,6 +42,7 @@ fn test_is_on_curve() {
         4693417943536520268746058560989260808135478372449023987176805259899316401080,
         8186764010206899711756657704517859444555824539207093839904632766037261603987
     );
+
     assert_eq!(PlonkVerifier::is_on_curve(pt_on_curve), true);
     assert_eq!(PlonkVerifier::is_on_curve(pt_not_on_curve), false);
 }
