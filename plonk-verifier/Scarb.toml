@@ -14,7 +14,9 @@ starknet = ">=2.8.2"
 # cairo_pairing = { git = "https://github.com/shramee/cairo_pairing.git"}
 snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry", tag = "v0.31.0" }
 assert_macros = "2.8.2" 
+circuit_macros = { path = "../circuit-macros" }
 
 [lib]
 sierra = true
 casm = true
+

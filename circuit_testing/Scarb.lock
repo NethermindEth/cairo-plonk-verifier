@@ -2,6 +2,10 @@
 version = 1
 
 [[package]]
+name = "circuit_macros"
+version = "0.1.0"
+
+[[package]]
 name = "circuit_testing"
 version = "0.1.0"
 dependencies = [
@@ -13,6 +17,7 @@ dependencies = [
 name = "plonk_verifier"
 version = "0.1.0"
 dependencies = [
+ "circuit_macros",
  "snforge_std",
 ]
 

@@ -20,6 +20,8 @@ mod PLONK_Verifier{
     use plonk_verifier::plonk::types::{PlonkVerificationKey, PlonkProof};
     use plonk_verifier::plonk::constants;
 
+
+
     #[storage]
     struct Storage {}
 
@@ -49,18 +51,6 @@ mod PLONK_Verifier{
             // let public_signals = constants::public_inputs();
             // let verified: bool = plonk_verifier::plonk::verify::PlonkVerifier::verify(verification_key, proof, public_signals);
             // assert(verified, 'plonk verification failed'); 
-            let mut tmp = CircuitEval::new();
-            tmp.increment(); 
-            tmp.increment(); 
-            tmp.increment(); 
-            tmp.increment(); 
-            tmp.increment(); 
-            tmp.increment(); 
-            tmp.increment(); 
-            tmp.increment(); 
-            tmp.increment(); 
-            tmp.increment(); 
-            let mut tmp = CircuitEval::new();
 
         }
 
@@ -87,44 +77,83 @@ mod PLONK_Verifier{
     type AffineG1 = Affine<Fq>;
     type AffineG2 = Affine<Fq2>;
 
-    // Testing
-    #[derive(Drop)]
-    pub struct CircuitBuilder {
-        circuit: Gates,
-        inputs: Array<u384>, 
-        idx: usize, // current idx of input
-    }
+    // Output Circuit Types
+    type PointOnSlopeCircuit = CircuitElement::<
+        SubModGate::<
+            SubModGate::<
+                MulModGate::<CircuitInput::<0>, CircuitInput::<0>>, 
+                CircuitInput::<1>>, 
+            CircuitInput::<3>>>;
 
-    #[derive(Drop)]
-    pub enum Gates {
-        And,
-    }
-
-    trait CircuitEval {
-        fn new() -> CircuitBuilder;
-        //fn eval(self: @CircuitBuilder<T>) -> u384;
-        fn increment(ref self: CircuitBuilder); 
-    }
-
-    impl CircuitEvalImpl of CircuitEval {
-        fn new() -> CircuitBuilder {
-            CircuitBuilder {circuit: Gates::And, inputs: ArrayTrait::<u384>::new(), idx: 0}
-        }
-        fn increment(ref self: CircuitBuilder) {
-            self.idx = self.idx + 1; 
-        }
-    }
-
-    // trait CircuitECOperations<T> {
-    //     // fn x_on_slope(self: @Affine<Fq>, slope: Fq, x2: Fq) -> Fq;
-    //     // fn y_on_slope(self: @Affine<Fq>, slope: Fq, x: Fq) -> Fq;
-    //     fn pt_on_slope(self: CircuitBuilder<T>, lhs: @Affine<Fq>, slope: Fq, x2: Fq) -> (CircuitElement<T>, CircuitElement<T>);
-    //     // fn chord(self: CircuitBuilder<T>, lhs: @Affine<Fq>, rhs: Affine<Fq>) -> (CircuitElement<T>, CircuitElement<T>);
-    //     // fn add_as_circuit(self: CircuitBuilder<T>, lhs: @Affine<Fq>, rhs: Affine<Fq>) -> (CircuitElement<T>, CircuitElement<T>);
-    //     // // fn tangent(self: @Affine<Fq>) -> Fq;
-    //     // fn double_as_circuit(self: CircuitBuilder<T>, lhs: @Affine<Fq>,) -> (CircuitElement<T>, CircuitElement<T>);
-    //     // fn multiply_as_circuit(self: CircuitBuilder<T>, lhs: @Affine<Fq>, multiplier: u256) -> (CircuitElement<T>, CircuitElement<T>);
-    //     // fn neg(self: @Affine<Fq>) -> Affine<Fq>;
+    // // Testing
+    // #[derive(Drop)]
+    // pub struct CircuitBuilder<T> {
+    //     circuit: Gates<T>,
+    //     inputs: Array<u384>, 
+    //     idx: usize, // current idx of input
     // }
+
+    // // Create pattern matching logic
+    // #[derive(Drop)]
+    // pub enum Gates {
+    //     PointOnSlope {
+    //         out: (Box<)
+    //     }
+    // }
+
+    // trait CircuitEval<T> {
+    //     fn new() -> CircuitBuilder<T>;
+    //     //fn eval(self: @CircuitBuilder<T>) -> u384;
+    //     fn increment(ref self: CircuitBuilder<T>); 
+    // }
+
+    // impl CircuitEvalImpl of CircuitEval<T> {
+    //     fn new() -> CircuitBuilder<T> {
+    //         CircuitBuilder {circuit: Gates::And, inputs: ArrayTrait::<u384>::new(), idx: 0}
+    //     }
+
+    //     fn increment(ref self: CircuitBuilder<T>) {
+    //         self.idx = self.idx + 1; 
+    //     }
+    // }
+
+    // // trait CircuitECOperations<T> {
+    // //     // fn x_on_slope(self: @Affine<Fq>, slope: Fq, x2: Fq) -> Fq;
+    // //     // fn y_on_slope(self: @Affine<Fq>, slope: Fq, x: Fq) -> Fq;
+    // //     fn pt_on_slope(self: CircuitBuilder<T>, lhs: @Affine<Fq>, slope: Fq, x2: Fq) -> (CircuitElement<T>, CircuitElement<T>);
+    // //     // fn chord(self: CircuitBuilder<T>, lhs: @Affine<Fq>, rhs: Affine<Fq>) -> (CircuitElement<T>, CircuitElement<T>);
+    // //     // fn add_as_circuit(self: CircuitBuilder<T>, lhs: @Affine<Fq>, rhs: Affine<Fq>) -> (CircuitElement<T>, CircuitElement<T>);
+    // //     // // fn tangent(self: @Affine<Fq>) -> Fq;
+    // //     // fn double_as_circuit(self: CircuitBuilder<T>, lhs: @Affine<Fq>,) -> (CircuitElement<T>, CircuitElement<T>);
+    // //     // fn multiply_as_circuit(self: CircuitBuilder<T>, lhs: @Affine<Fq>, multiplier: u256) -> (CircuitElement<T>, CircuitElement<T>);
+    // //     // fn neg(self: @Affine<Fq>) -> Affine<Fq>;
+    // // }
+
+    // fn pt_on_slope(self: CircuitBuilder, lhs: @Affine<Fq>, slope: Fq, x2: Fq)  {
+    //     let x_2 = x2;
+    //     // x = λ^2 - x1 - x2
+    //     // slope.sqr() - *self.x - x2
+    //     //let x = self.x_on_slope(slope, x2);
+    //     // y = λ(x1 - x) - y1
+    //     // slope * (*self.x - x) - *self.y
+    //     //let y = self.y_on_slope(slope, x);
+        
+    //     let lambda = CircuitElement::<CircuitInput<0>> {};
+    //     let x1 = CircuitElement::<CircuitInput<1>> {};
+    //     let y1 = CircuitElement::<CircuitInput<2>> {};
+    //     let x2 = CircuitElement::<CircuitInput<3>> {};        
+        
+    //     let lambda_sqr = circuit_mul(lambda, lambda);  // slope.sqr()
+    //     let x_slope_sub_sqr_x1 = circuit_sub(lambda_sqr, x1); // slope.sqr() - *self.x
+    //     let x_slope_sub_x1_x2 = circuit_sub(x_slope_sub_sqr_x1, x2); // slope.sqr() - *self.x - x2
+
+    //     let y_slope_sub_x1_x = circuit_sub(x1, x_slope_sub_x1_x2); // (*self.x - x)
+    //     let y_slope_mul_lambda_x1_x = circuit_mul(lambda, y_slope_sub_x1_x); // slope * (*self.x - x)
+    //     let y_slope_lambda_sub_lambda_x_y = circuit_sub(y_slope_mul_lambda_x1_x, y1); // slope * (*self.x - x) - *self.y
+
+    //     (x_slope_sub_x1_x2, y_slope_lambda_sub_lambda_x_y);
+
+    // }
+        
 }
 

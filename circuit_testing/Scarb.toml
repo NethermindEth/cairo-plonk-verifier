@@ -11,6 +11,7 @@ sierra = true
 [dependencies]
 starknet = "2.8.2"
 plonk_verifier = { path = "../plonk-verifier" }
+# circuit_macros = { path = "../circuit-macros" }
 
 [dev-dependencies]
 snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry", tag = "v0.31.0" }
@@ -18,3 +19,4 @@ assert_macros = "2.8.2"
 
 [cairo]
 sierra-replace-ids = false
+
