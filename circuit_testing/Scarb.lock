@@ -9,6 +9,7 @@ version = "0.1.0"
 name = "circuit_testing"
 version = "0.1.0"
 dependencies = [
+ "circuit_macros",
  "plonk_verifier",
  "snforge_std",
 ]

@@ -1,61 +1,40 @@
-use bigdecimal::{num_traits::pow, BigDecimal};
-use cairo_lang_macro::{inline_macro, Diagnostic, ProcMacroResult, TokenStream};
+use cairo_lang_macro::{inline_macro, ProcMacroResult, TokenStream};
 use cairo_lang_parser::utils::SimpleParserDatabase;
+use eyre::{eyre, Result};
+use regex::Regex;
 
+// EC Group Operations Fq
+// let lambda = CircuitElement::<CircuitInput<i>> {};
+// let x1 = CircuitElement::<CircuitInput<i + 1>> {};
+// let y1 = CircuitElement::<CircuitInput<i + 2>> {};
+// let x2 = CircuitElement::<CircuitInput<i + 3>> {};    
 #[inline_macro]
-pub fn some(token_stream: TokenStream) -> ProcMacroResult {
-    // no-op
-    ProcMacroResult::new(token_stream)
+pub fn point_on_slope_fq(token_stream: TokenStream) -> ProcMacroResult {
+    let values = parse_circuit_inputs(token_stream).unwrap(); 
+    println!("values {:?}", values); 
+    ProcMacroResult::new(TokenStream::new("5".to_string()))
 }
 
-/// Compile-time power function.
-///
-/// Takes two arguments, `x, y`, calculates the value of `x` raised to the power of `y`.
-///
-/// ```
-/// const MEGABYTE: u64 = pow!(2, 20);
-/// assert_eq!(MEGABYTE, 1048576);
-/// ```
-#[inline_macro]
-pub fn pow(token_stream: TokenStream) -> ProcMacroResult {
+
+
+// Parses a macro input and returns args
+fn parse_circuit_inputs(token_stream: TokenStream) -> Result<Vec<i32>> {
+    let re = Regex::new(r"\(([^)]*)\)").unwrap();
+    
     let db = SimpleParserDatabase::default();
     let (parsed, _diag) = db.parse_virtual_with_diagnostics(token_stream);
-
-    let macro_args: Vec<String> = parsed
+    let macro_args = parsed
         .descendants(&db)
         .next()
         .unwrap()
-        .get_text(&db)
-        .trim_matches(|c| c == '(' || c == ')')
-        .split(',')
-        .map(|s| s.trim().to_string())
-        .collect();
+        .get_text(&db);
 
-    if macro_args.len() != 2 {
-        return ProcMacroResult::new(TokenStream::empty()).with_diagnostics(
-            Diagnostic::error(format!("Expected two arguments, got {:?}", macro_args)).into(),
-        );
+    if let Some(captures) = re.captures(&macro_args) {
+        let val = captures.get(0).unwrap().as_str();
+        println!("val: {:?}", val); 
+        let parsed: Vec<i32> = val.trim_matches(|s|s == '(' || s == ')').split(',').map(|s|s.trim().parse::<i32>().unwrap()).collect(); 
+        
+        return Ok(parsed);
     }
-
-    println!("macro args {:?}", macro_args[0]);
-    let base: u32 = match macro_args[0].parse() {
-        Ok(val) => val,
-        Err(err) => {
-            println!("{:?}", err); 
-            return ProcMacroResult::new(TokenStream::empty())
-                .with_diagnostics(Diagnostic::error("Invalid base value").into());
-        }
-    };
-
-    let exp: u32 = match macro_args[1].parse() {
-        Ok(val) => val,
-        Err(_) => {
-            return ProcMacroResult::new(TokenStream::empty())
-                .with_diagnostics(Diagnostic::error("Invalid exponent value").into());
-        }
-    };
-
-    let result: u32 = base * exp; 
-
-    ProcMacroResult::new(TokenStream::new(result.to_string()))
+    Err(eyre!("Parsing Error"))
 }

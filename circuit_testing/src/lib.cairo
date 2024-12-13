@@ -14,7 +14,8 @@ trait IVerifier<T> {
 #[starknet::contract]
 mod PLONK_Verifier{
 
-    use core::array::ArrayTrait;
+    use to_byte_array::FormatAsByteArray;
+use core::array::ArrayTrait;
     
     use plonk_verifier::plonk::verify;
     use plonk_verifier::plonk::types::{PlonkVerificationKey, PlonkProof};
@@ -53,8 +54,14 @@ mod PLONK_Verifier{
             // assert(verified, 'plonk verification failed'); 
 
         }
-
+    }
+    fn test() {
+        let y = 5; 
         
+        let x = point_on_slope_fq!(20, 4);
+        pt_on_slope(); 
+        assert(5 == x, 'ne');
+
     }
     use plonk_verifier::curve::groups::Affine;
     use plonk_verifier::traits::{FieldOps as FOps, FieldShortcuts as FShort};
@@ -129,31 +136,39 @@ mod PLONK_Verifier{
     // //     // fn neg(self: @Affine<Fq>) -> Affine<Fq>;
     // // }
 
-    // fn pt_on_slope(self: CircuitBuilder, lhs: @Affine<Fq>, slope: Fq, x2: Fq)  {
-    //     let x_2 = x2;
-    //     // x = λ^2 - x1 - x2
-    //     // slope.sqr() - *self.x - x2
-    //     //let x = self.x_on_slope(slope, x2);
-    //     // y = λ(x1 - x) - y1
-    //     // slope * (*self.x - x) - *self.y
-    //     //let y = self.y_on_slope(slope, x);
+    fn pt_on_slope() {
+        // let x_2 = x2;
+        // x = λ^2 - x1 - x2
+        // slope.sqr() - *self.x - x2
+        //let x = self.x_on_slope(slope, x2);
+        // y = λ(x1 - x) - y1
+        // slope * (*self.x - x) - *self.y
+        //let y = self.y_on_slope(slope, x);
         
-    //     let lambda = CircuitElement::<CircuitInput<0>> {};
-    //     let x1 = CircuitElement::<CircuitInput<1>> {};
-    //     let y1 = CircuitElement::<CircuitInput<2>> {};
-    //     let x2 = CircuitElement::<CircuitInput<3>> {};        
+        let lambda = CircuitElement::<CircuitInput<0>> {};
+        let x1 = CircuitElement::<CircuitInput<1>> {};
+        let y1 = CircuitElement::<CircuitInput<2>> {};
+        let x2 = CircuitElement::<CircuitInput<3>> {};        
         
-    //     let lambda_sqr = circuit_mul(lambda, lambda);  // slope.sqr()
-    //     let x_slope_sub_sqr_x1 = circuit_sub(lambda_sqr, x1); // slope.sqr() - *self.x
-    //     let x_slope_sub_x1_x2 = circuit_sub(x_slope_sub_sqr_x1, x2); // slope.sqr() - *self.x - x2
+        let lambda_sqr = circuit_mul(lambda, lambda);  // slope.sqr()
+        let x_slope_sub_sqr_x1 = circuit_sub(lambda_sqr, x1); // slope.sqr() - *self.x
+        let x_slope_sub_x1_x2 = circuit_sub(x_slope_sub_sqr_x1, x2); // slope.sqr() - *self.x - x2
 
-    //     let y_slope_sub_x1_x = circuit_sub(x1, x_slope_sub_x1_x2); // (*self.x - x)
-    //     let y_slope_mul_lambda_x1_x = circuit_mul(lambda, y_slope_sub_x1_x); // slope * (*self.x - x)
-    //     let y_slope_lambda_sub_lambda_x_y = circuit_sub(y_slope_mul_lambda_x1_x, y1); // slope * (*self.x - x) - *self.y
+        let y_slope_sub_x1_x = circuit_sub(x1, x_slope_sub_x1_x2); // (*self.x - x)
+        let y_slope_mul_lambda_x1_x = circuit_mul(lambda, y_slope_sub_x1_x); // slope * (*self.x - x)
+        let y_slope_lambda_sub_lambda_x_y = circuit_sub(y_slope_mul_lambda_x1_x, y1); // slope * (*self.x - x) - *self.y
+        let tmp = core::circuit::CircuitElement::<core::circuit::SubModGate::<core::circuit::MulModGate::<core::circuit::CircuitInput::<0>, core::circuit::SubModGate::<core::circuit::CircuitInput::<1>, core::circuit::SubModGate::<core::circuit::SubModGate::<core::circuit::MulModGate::<core::circuit::CircuitInput::<0>, core::circuit::CircuitInput::<0>>, core::circuit::CircuitInput::<1>>, core::circuit::CircuitInput::<3>>>>, core::circuit::CircuitInput::<2>>> {};
+        (x_slope_sub_x1_x2, y_slope_lambda_sub_lambda_x_y);
 
-    //     (x_slope_sub_x1_x2, y_slope_lambda_sub_lambda_x_y);
-
-    // }
-        
+    }        
 }
 
+#[cfg(test)]
+mod test {
+    use super::PLONK_Verifier;
+    #[test]
+    fn test_circuit() {
+        PLONK_Verifier::test(); 
+
+    }
+}
