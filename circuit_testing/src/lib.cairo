@@ -56,11 +56,88 @@ use core::array::ArrayTrait;
         }
     }
     fn test() {
-        let y = 5; 
+        // let y = 5; 
         
-        let x = point_on_slope_fq!(20, 4);
-        pt_on_slope(); 
-        assert(5 == x, 'ne');
+        // let x = point_on_slope_fq!(20, 4);
+        // pt_on_slope(); 
+        // assert(5 == x, 'ne');
+        let test_fq2_a = fq2(2, 4);
+        let test_fq2_b = fq2(5, 10);
+
+
+        let a0 = CircuitElement::<CircuitInput<0>> {};
+        let a1 = CircuitElement::<CircuitInput<1>> {};
+        let b0 = CircuitElement::<CircuitInput<2>> {};
+        let b1 = CircuitElement::<CircuitInput<3>> {};
+
+        let t0 = circuit_mul(a0, b0);
+        let t1 = circuit_mul(a1, b1);
+        let a0_add_a1 = circuit_add(a0, a1);
+        let b0_add_b1 = circuit_add(b0, b1);
+        let t2 = circuit_mul(a0_add_a1, b0_add_b1);
+        let t3 = circuit_add(t0, t1);
+        let t3 = circuit_sub(t2, t3);
+        let t4 = circuit_sub(t0, t1);
+
+        let t0 = circuit_mul(t4, t4);
+        let t1 = circuit_mul(t3, t3);
+        let a0_add_a1 = circuit_add(t4, t3);
+        let b0_add_b1 = circuit_add(t4, t3);
+        let t2 = circuit_mul(a0_add_a1, b0_add_b1);
+        let t3 = circuit_add(t0, t1);
+        let t3 = circuit_sub(t2, t3);
+        let t4 = circuit_sub(t0, t1);
+
+        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+
+        let a0 = from_u256(test_fq2_a.c0.c0);
+        let a1 = from_u256(test_fq2_a.c1.c0);
+        let b0 = from_u256(test_fq2_b.c0.c0);
+        let b1 = from_u256(test_fq2_b.c1.c0);
+
+        let outputs =
+            match (t3, t4,).new_inputs().next(a0).next(a1).next(b0).next(b1).done().eval(modulus) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
+        };
+        
+        let fq_c0 = outputs.get_output(t4);
+        let fq_c1 = outputs.get_output(t3);
+
+        
+        // let a0 = CircuitElement::<CircuitInput<0>> {};
+        // let a1 = CircuitElement::<CircuitInput<1>> {};
+        // // let b0 = CircuitElement::<CircuitInput<2>> {};
+        // // let b1 = CircuitElement::<CircuitInput<3>> {};
+
+        // let t0 = circuit_mul(a0, a0);
+        // let t1 = circuit_mul(a1, a1);
+        // let a0_add_a1 = circuit_add(a0, a1);
+        // let b0_add_b1 = circuit_add(a0, a1);
+        // let t2 = circuit_mul(a0_add_a1, b0_add_b1);
+        // let t3 = circuit_add(t0, t1);
+        // let t3 = circuit_sub(t2, t3);
+        // let t4 = circuit_sub(t0, t1);
+
+        // let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+
+
+        // let outputs =
+        //     match (t3, t4,).new_inputs().next(fq_c0).next(fq_c1).done().eval(modulus) {
+        //     Result::Ok(outputs) => { outputs },
+        //     Result::Err(_) => { panic!("Expected success") }
+        // };
+
+        // let fq_c0 = outputs.get_output(t4);
+        // let fq_c1 = outputs.get_output(t3);
+
+        // let fq_c0 = Fq { c0: outputs.get_output(t4).try_into().unwrap() };
+        // let fq_c1 = Fq { c0: outputs.get_output(t3).try_into().unwrap() };
+
+        // let fq_t = Fq2 { c0: fq_c0, c1: fq_c1 };
+
+        // let fq_t = fq_t * fq_t; 
+        //println!("out: {:?}", fq_t);
 
     }
     use plonk_verifier::curve::groups::Affine;
@@ -157,7 +234,7 @@ use core::array::ArrayTrait;
         let y_slope_sub_x1_x = circuit_sub(x1, x_slope_sub_x1_x2); // (*self.x - x)
         let y_slope_mul_lambda_x1_x = circuit_mul(lambda, y_slope_sub_x1_x); // slope * (*self.x - x)
         let y_slope_lambda_sub_lambda_x_y = circuit_sub(y_slope_mul_lambda_x1_x, y1); // slope * (*self.x - x) - *self.y
-        let tmp = core::circuit::CircuitElement::<core::circuit::SubModGate::<core::circuit::MulModGate::<core::circuit::CircuitInput::<0>, core::circuit::SubModGate::<core::circuit::CircuitInput::<1>, core::circuit::SubModGate::<core::circuit::SubModGate::<core::circuit::MulModGate::<core::circuit::CircuitInput::<0>, core::circuit::CircuitInput::<0>>, core::circuit::CircuitInput::<1>>, core::circuit::CircuitInput::<3>>>>, core::circuit::CircuitInput::<2>>> {};
+        // let tmp = core::circuit::CircuitElement::<core::circuit::SubModGate::<core::circuit::MulModGate::<core::circuit::CircuitInput::<0>, core::circuit::SubModGate::<core::circuit::CircuitInput::<1>, core::circuit::SubModGate::<core::circuit::SubModGate::<core::circuit::MulModGate::<core::circuit::CircuitInput::<0>, core::circuit::CircuitInput::<0>>, core::circuit::CircuitInput::<1>>, core::circuit::CircuitInput::<3>>>>, core::circuit::CircuitInput::<2>>> {};
         (x_slope_sub_x1_x2, y_slope_lambda_sub_lambda_x_y);
 
     }        

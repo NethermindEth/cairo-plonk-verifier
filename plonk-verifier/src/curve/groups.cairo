@@ -479,7 +479,7 @@ impl AffineOps<
     #[inline(always)]
     fn x_on_slope(self: @Affine<T>, slope: T, x2: T) -> T {
         // x = λ^2 - x1 - x2
-        slope.sqr() - *self.x - x2
+        slope.sqr() - *self.x - x2  
     }
 
     #[inline(always)]

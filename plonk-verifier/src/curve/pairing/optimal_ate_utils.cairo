@@ -56,6 +56,13 @@ struct LineFn {
     slope: Fq2,
     c: Fq2,
 }
+use plonk_verifier::curve::constants::FIELD_U384;
+use core::circuit::{
+    RangeCheck96, AddMod, MulMod, u96, CircuitElement, CircuitInput, circuit_add, circuit_sub,
+    circuit_mul, circuit_inverse, EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus,
+    AddInputResultTrait, CircuitInputs, EvalCircuitResult, CircuitElementTrait, IntoCircuitInputValue, 
+};
+use core::circuit::conversions::from_u256;
 
 mod line_fn {
     use plonk_verifier::fields::fq_2::Fq2FrobeniusTrait;
@@ -117,7 +124,9 @@ mod line_fn {
         let s = acc;
         // s + q
         let slope1 = s.chord(q);
+        
         let x1 = s.x_on_slope(slope1, q.x);
+                
         let line1 = line_fn(slope1, s);
 
         // we skip y1 calculation and sub slope1 directly in second slope calculation
@@ -128,7 +137,7 @@ mod line_fn {
         let slope2 = -slope1 - (s.y.u_add(s.y)) / (x1 - s.x);
         acc = s.pt_on_slope(slope2, x1);
         let line2 = line_fn(slope2, s);
-
+ 
         // line functions
         (line1, line2)
     }
