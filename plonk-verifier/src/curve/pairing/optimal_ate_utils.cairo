@@ -12,6 +12,7 @@ use plonk_verifier::fields::{Fq12Sparse034, Fq12Sparse01234, FqSparse};
 use plonk_verifier::fields::print::{Fq2Display, Fq12Display, FqDisplay};
 use plonk_verifier::fields::frobenius::pi;
 
+
 // This implementation follows the paper at https://eprint.iacr.org/2022/1162
 // Pairings in Rank-1 Constraint Systems, Youssef El Housni et al.
 // Section 6.1 Miller loop
@@ -83,6 +84,16 @@ mod line_fn {
     use plonk_verifier::fields::frobenius::pi;
     use super::{LineFn, PPre, NZNum, F034};
 
+    use core::circuit::{
+        RangeCheck96, AddMod, MulMod, u96, CircuitElement, CircuitInput, circuit_add, circuit_sub,
+        circuit_mul, circuit_inverse, EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus,
+        AddInputResultTrait, CircuitInputs, EvalCircuitResult, CircuitElementTrait, IntoCircuitInputValue, 
+    };
+    use core::circuit::{AddModGate, SubModGate, MulModGate, InverseGate};
+    use plonk_verifier::curve::constants::FIELD_U384;
+
+    use core::circuit::conversions::from_u256;
+
     #[inline(always)]
     fn line_fn(slope: Fq2, s: PtG2) -> LineFn {
         LineFn { slope, c: slope * s.x - s.y, }
@@ -123,7 +134,75 @@ mod line_fn {
     fn step_dbl_add(ref acc: PtG2, q: PtG2, field_nz: NZNum) -> (LineFn, LineFn) {
         let s = acc;
         // s + q
-        let slope1 = s.chord(q);
+        // let slope1 = s.chord(q);
+        // Testing
+        let lhs_x_0 = CircuitElement::<CircuitInput<0>> {};
+        let lhs_x_1 = CircuitElement::<CircuitInput<1>> {};
+        let lhs_y_0 = CircuitElement::<CircuitInput<2>> {};
+        let lhs_y_1 = CircuitElement::<CircuitInput<3>> {};
+        let rhs_x_0 = CircuitElement::<CircuitInput<4>> {};
+        let rhs_x_1 = CircuitElement::<CircuitInput<5>> {};
+        let rhs_y_0 = CircuitElement::<CircuitInput<6>> {};
+        let rhs_y_1 = CircuitElement::<CircuitInput<7>> {};
+    
+        // y2 - y1 lhs
+        let y2_y1_0 = circuit_sub(rhs_y_0, lhs_y_0);
+        let y2_y1_1 = circuit_sub(rhs_y_1, lhs_y_1);
+        
+        // x2 - x1 rhs
+        let x2_x1_0 = circuit_sub(rhs_x_0, lhs_x_0);
+        let x2_x1_1 = circuit_sub(rhs_x_1, lhs_x_1);
+    
+        // sqr let t = FqOps::inv(c0.sqr() + c1.sqr(), field_nz);
+        let x2_x1_sqr_0 = circuit_mul(x2_x1_0, x2_x1_0);
+        let x2_x1_sqr_1 = circuit_mul(x2_x1_1, x2_x1_1); 
+        let x2_x1_add = circuit_add(x2_x1_sqr_0, x2_x1_sqr_1);
+        let x2_x1_inv = circuit_inverse(x2_x1_add);
+    
+        //Fq2 { c0: c0.mul(t), c1: c1.mul(-t) }
+        let x2_x1_out_0 = circuit_mul(x2_x1_0, x2_x1_inv);
+        let zero = circuit_sub(lhs_x_0, lhs_x_0);
+        let x2_x1_out_1_neg = circuit_sub(zero, x2_x1_inv);
+        let x2_x1_out_1 = circuit_mul(x2_x1_1, x2_x1_out_1_neg); 
+    
+        // mul 
+        let t0 = circuit_mul(y2_y1_0, x2_x1_out_0);
+        let t1 = circuit_mul(y2_y1_1, x2_x1_out_1);
+        let a0_add_a1 = circuit_add(y2_y1_0, y2_y1_1);
+        let b0_add_b1 = circuit_add(x2_x1_out_0, x2_x1_out_1);
+        let t2 = circuit_mul(a0_add_a1, b0_add_b1);
+        let t3 = circuit_add(t0, t1);
+        let t3 = circuit_sub(t2, t3);
+        let t4 = circuit_sub(t0, t1);
+        
+        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+        let x1_0 = from_u256(s.x.c0.c0);
+        let x1_1 = from_u256(s.x.c1.c0);
+        let y1_0 = from_u256(s.y.c0.c0);
+        let y1_1 = from_u256(s.y.c1.c0);
+        let x2_0 = from_u256(q.x.c0.c0);
+        let x2_1 = from_u256(q.x.c1.c0);
+        let y2_0 = from_u256(q.y.c0.c0);
+        let y2_1 = from_u256(q.y.c1.c0);
+        
+        let outputs =
+            match (t4,t3,)
+                .new_inputs()
+                .next(x1_0)
+                .next(x1_1)
+                .next(y1_0)
+                .next(y1_1)
+                .next(x2_0)
+                .next(x2_1)
+                .next(y2_0)
+                .next(y2_1)
+                .done()
+                .eval(modulus) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
+        };
+        let slope1 = Fq2{c0: fq(outputs.get_output(t4).try_into().unwrap()), c1: fq(outputs.get_output(t3).try_into().unwrap())};
+
         
         let x1 = s.x_on_slope(slope1, q.x);
                 

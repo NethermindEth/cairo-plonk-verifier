@@ -588,3 +588,85 @@ impl AffineG2Impl of ECGroup<Fq2> {
         )
     }
 }
+
+//
+// #[inline(always)]
+// fn chord(self: @Affine<T>, rhs: Affine<T>) -> T {
+//     let Affine { x: x1, y: y1 } = *self;
+//     let Affine { x: x2, y: y2 } = rhs;
+//     // λ = (y2-y1) / (x2-x1)
+//     (y2 - y1) / (x2 - x1)
+// }
+
+// div
+// rhs inv
+//     // #[inline(always)]
+//     fn inv(self: Fq2, field_nz: NonZero<u256>) -> Fq2 {
+//         let Fq2 { c0, c1 } = self;
+//         let t = FqOps::inv(c0.sqr() + c1.sqr(), field_nz);
+//         Fq2 { c0: c0.mul(t), c1: c1.mul(-t) }
+//     }
+fn chord_fq2(lhs: Affine<Fq>, rhs: Affine<Fq>) {
+    let lhs_x_0 = CircuitElement::<CircuitInput<0>> {};
+    let lhs_x_1 = CircuitElement::<CircuitInput<1>> {};
+    let lhs_y_0 = CircuitElement::<CircuitInput<2>> {};
+    let lhs_y_1 = CircuitElement::<CircuitInput<3>> {};
+    let rhs_x_0 = CircuitElement::<CircuitInput<4>> {};
+    let rhs_x_1 = CircuitElement::<CircuitInput<5>> {};
+    let rhs_y_0 = CircuitElement::<CircuitInput<6>> {};
+    let rhs_y_1 = CircuitElement::<CircuitInput<7>> {};
+
+    // y2 - y1 lhs
+    let y2_y1_0 = circuit_sub(rhs_y_0, lhs_y_0);
+    let y2_y1_1 = circuit_sub(rhs_y_1, lhs_y_1);
+    
+    // x2 - x1 rhs
+    let x2_x1_0 = circuit_sub(rhs_x_0, lhs_x_0);
+    let x2_x1_1 = circuit_sub(rhs_x_1, lhs_x_1);
+
+    // sqr let t = FqOps::inv(c0.sqr() + c1.sqr(), field_nz);
+    let x2_x1_sqr_0 = circuit_mul(x2_x1_0, x2_x1_0);
+    let x2_x1_sqr_1 = circuit_mul(x2_x1_1, x2_x1_1); 
+    let x2_x1_add = circuit_add(x2_x1_sqr_0, x2_x1_sqr_1);
+    let x2_x1_inv = circuit_inverse(x2_x1_add);
+
+    //Fq2 { c0: c0.mul(t), c1: c1.mul(-t) }
+    let x2_x1_out_0 = circuit_mul(x2_x1_0, x2_x1_inv);
+    let zero = circuit_sub(lhs_x_0, lhs_x_0);
+    let x2_x1_out_1_neg = circuit_sub(zero, x2_x1_inv);
+    let x2_x1_out_1 = circuit_mul(x2_x1_1, x2_x1_out_1_neg); 
+
+    // mul 
+    let t0 = circuit_mul(y2_y1_0, x2_x1_out_0);
+    let t1 = circuit_mul(y2_y1_1, x2_x1_out_1);
+    let a0_add_a1 = circuit_add(y2_y1_0, y2_y1_1);
+    let b0_add_b1 = circuit_add(x2_x1_out_0, x2_x1_out_1);
+    let t2 = circuit_mul(a0_add_a1, b0_add_b1);
+    let t3 = circuit_add(t0, t1);
+    let t3 = circuit_sub(t2, t3);
+    let t4 = circuit_sub(t0, t1);
+
+
+    // let x2_x1_inv = circuit_inverse(x2_x1); 
+    // let mul = circuit_mul(y2_y1, x2_x1_inv); 
+    
+    // let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+    // let x1 = from_u256(*self.x.c0);
+    // let y1 = from_u256(*self.y.c0);
+    // let x2 = from_u256(rhs.x.c0);
+    // let y2 = from_u256(rhs.y.c0);
+    
+    // let outputs =
+    //     match (mul, )
+    //         .new_inputs()
+    //         .next(x1)
+    //         .next(x2)
+    //         .next(y1)
+    //         .next(y2)
+    //         .done()
+    //         .eval(modulus) {
+    //     Result::Ok(outputs) => { outputs },
+    //     Result::Err(_) => { panic!("Expected success") }
+    // };
+    // Fq{c0: outputs.get_output(mul).try_into().unwrap()};
+}

@@ -2,27 +2,58 @@ pub struct CairoCodeBuilder {
     code: String,
 }
 
+pub struct Fq2 {
+    c0: String,
+    c1: String,
+    inp: [usize; 2], 
+}
+
+pub struct AffineFq2 {
+    x_c0: Fq2,
+    x_c1: Fq2,
+    
+}
+
 pub enum CircuitBuilder {
-    PtOnSlopeFq {
+    // PtOnSlopeFq {
+    //     fq_x: String,
+    //     fq_y: String,
+    //     inp: [usize; 4],
+    // },
+    ChordFq2 {
         fq_x: String,
         fq_y: String,
-        inp: [usize; 4],
-    },
+        inp: [usize; 8],
+    }
 }
 
 impl CircuitBuilder {
-    pub fn pt_on_slope_fq(inp: [usize; 4]) -> CircuitBuilder {
-        let fq_x = format!(r#"core::circuit::CircuitElement::<core::circuit::SubModGate::<core::circuit::SubModGate::<core::circuit::MulModGate::<core::circuit::CircuitInput::<{}>, core::circuit::CircuitInput::<{}>>, core::circuit::CircuitInput::<{}>>, core::circuit::CircuitInput::<{}>>> {{}};"#, inp[0], inp[0], inp[1], inp[3]);
-        let fq_y = format!(r#"core::circuit::CircuitElement::<core::circuit::SubModGate::<core::circuit::MulModGate::<core::circuit::CircuitInput::<{}>, core::circuit::SubModGate::<core::circuit::CircuitInput::<{}>, core::circuit::SubModGate::<core::circuit::SubModGate::<core::circuit::MulModGate::<core::circuit::CircuitInput::<{}>, core::circuit::CircuitInput::<{}>>, core::circuit::CircuitInput::<{}>>, core::circuit::CircuitInput::<{}>>>>, core::circuit::CircuitInput::<{}>>> {{}};"#, inp[0], inp[1], inp[0], inp[0], inp[1], inp[3], inp[2]); 
+    // pub fn pt_on_slope_fq(inp: [usize; 4]) -> CircuitBuilder {
+    //     let fq_x = format!(r#"core::circuit::CircuitElement::<core::circuit::SubModGate::<core::circuit::SubModGate::<core::circuit::MulModGate::<core::circuit::CircuitInput::<{}>, core::circuit::CircuitInput::<{}>>, core::circuit::CircuitInput::<{}>>, core::circuit::CircuitInput::<{}>>> {{}};"#, inp[0], inp[0], inp[1], inp[3]);
+    //     let fq_y = format!(r#"core::circuit::CircuitElement::<core::circuit::SubModGate::<core::circuit::MulModGate::<core::circuit::CircuitInput::<{}>, core::circuit::SubModGate::<core::circuit::CircuitInput::<{}>, core::circuit::SubModGate::<core::circuit::SubModGate::<core::circuit::MulModGate::<core::circuit::CircuitInput::<{}>, core::circuit::CircuitInput::<{}>>, core::circuit::CircuitInput::<{}>>, core::circuit::CircuitInput::<{}>>>>, core::circuit::CircuitInput::<{}>>> {{}};"#, inp[0], inp[1], inp[0], inp[0], inp[1], inp[3], inp[2]); 
         
-        CircuitBuilder::PtOnSlopeFq {
-            fq_x,
-            fq_y,
-            inp,
-        }
+    //     CircuitBuilder::PtOnSlopeFq {
+    //         fq_x,
+    //         fq_y,
+    //         inp,
+    //     }
+    // }
+    
+    // lhs: Fq2 - rhs: Fq2
+    // lhs_x_0 = inp[0]
+    // lhs_x_1
+    // lhs_y_0
+    // lhs_y_1 ...
+    // rhs_x_0 
+    // rhs_x_1
+    // rhs_y_0
+    // rhs_y_1 = inp[7]
+    pub fn ChordFq2(lhs: Option<AffineFq2>, rhs: Option<AffineFq2>, inp: [usize; 8]) -> CircuitBuilder {
 
-        
+
+        CircuitBuilder::ChordFq2 { fq_x: "".to_string(), fq_y: "".to_string(), inp }
     }
+
 }
 
 impl CairoCodeBuilder {
@@ -35,9 +66,9 @@ impl CairoCodeBuilder {
     
     pub fn add_circuit(&mut self, circuit: CircuitBuilder) -> &mut Self {
         match circuit {
-            CircuitBuilder::PtOnSlopeFq { fq_x, fq_y, inp } => {
-                self.code.push_str(&("let fq_x = ".to_string() + &fq_x));
-            },
+            // CircuitBuilder::PtOnSlopeFq { fq_x, fq_y, inp } => {
+            //     self.code.push_str(&("let fq_x = ".to_string() + &fq_x));
+            // },
         }
 
         self
@@ -87,8 +118,8 @@ impl CairoCodeBuilder {
 pub fn generate_cairo_code() -> String {
     let mut builder = CairoCodeBuilder::new();
 
-    let sopfq = CircuitBuilder::pt_on_slope_fq([0,1,2,3]);
-    builder.add_circuit(sopfq);
+    // let sopfq = CircuitBuilder::pt_on_slope_fq([0,1,2,3]);
+    // builder.add_circuit(sopfq);
 
     // // Add a simple function
     // builder
