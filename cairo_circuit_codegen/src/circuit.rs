@@ -33,7 +33,7 @@ impl Circuit {
         Circuit::new(format!(r#"M::<{}, {}>"#, lhs.inner, rhs.inner))
     }
 
-    pub fn circuit_inverse(lhs: &Circuit) -> Circuit {
+    pub fn circuit_inv(lhs: &Circuit) -> Circuit {
         Circuit::new(format!(r#"I::<{}>"#, lhs.inner))
     }
 
