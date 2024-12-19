@@ -16,18 +16,20 @@ use u512_ops::{u512_high_add, u512_high_sub, u512_reduce, u512_add_u256, u512_su
 // region add/sub operation
 mod add_sub;
 
-use add_sub::{neg, add, add_nz, add_u, sub, sub_u};
+use add_sub::{neg, add, add_nz, add_u, sub, sub_u, add_circuit, sub_circuit, sub_nz};
 // endregion add/sub operation
 
 // region mul operations
 mod mul_scale_sqr;
 
-use mul_scale_sqr::{scl, scl_nz, scl_u, mul, mul_nz, mul_u, sqr, sqr_nz, sqr_u, u512_scl};
+use mul_scale_sqr::{
+    scl, scl_nz, scl_u, sqr_circuit, mul, mul_nz, mul_u, mul_circuit, sqr, sqr_nz, sqr_u, u512_scl
+};
 // endregion mul operations
 
 // region div/inv operations
 mod div_inv;
-use div_inv::{inv, div, div_nz, div_u};
+use div_inv::{inv, inv_circuit, div, div_nz, div_u, div_circuit};
 // endregion div/inv operations
 
 #[inline(always)]

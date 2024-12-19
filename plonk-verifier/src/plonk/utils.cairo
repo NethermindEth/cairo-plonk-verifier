@@ -108,15 +108,14 @@ fn reverse_endianness(value: u256) -> u256 {
 
 // This helper function assumes that combining both low and high < u8
 // It should always be true, therefore no error assert check needed
-fn combine_low_and_high_u8_as_hex(low: u8, high: u8) -> u8 { 
+fn combine_low_and_high_u8_as_hex(low: u8, high: u8) -> u8 {
     low + high * 16
 }
 
-fn append_formatted_to_byte_array_as_hex
-(
+fn append_formatted_to_byte_array_as_hex(
     mut value: @u256, ref byte_array: ByteArray, base_nz: NonZero<u256>,
 ) {
-    let base: u256 = base_nz.into(); 
+    let base: u256 = base_nz.into();
     assert(base == 16, 'base must be == 16');
 
     let mut reversed_digits = array![];
@@ -138,7 +137,7 @@ fn append_formatted_to_byte_array_as_hex
 
     // Pad to 32 bytes
     for _ in 0..32 - reversed_digits.len() {
-        reversed_digits.append(0); 
+        reversed_digits.append(0);
     };
 
     // Reverse to change back to original endianness

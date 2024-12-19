@@ -8,9 +8,9 @@ use core::debug::{PrintTrait, print_byte_array_as_string};
 use core::array::ArrayTrait;
 use core::cmp::max;
 use core::circuit::{
-    RangeCheck96, AddMod, u96, CircuitElement, CircuitInput, circuit_add, circuit_sub,
-    circuit_mul, circuit_inverse, EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus,
-    AddInputResultTrait, CircuitInputs,EvalCircuitResult,
+    RangeCheck96, AddMod, u96, CircuitElement, CircuitInput, circuit_add, circuit_sub, circuit_mul,
+    circuit_inverse, EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus,
+    AddInputResultTrait, CircuitInputs, EvalCircuitResult,
 };
 use core::circuit::conversions::from_u256;
 
@@ -87,25 +87,19 @@ impl PlonkVerifier of PVerifier {
         let x = CircuitElement::<CircuitInput<0>> {};
         let y = CircuitElement::<CircuitInput<1>> {};
         let x_sqr = circuit_mul(x, x);
-        let x_cube = circuit_mul(x_sqr, x); 
-        let y_sqr = circuit_mul(y, y); 
+        let x_cube = circuit_mul(x_sqr, x);
+        let y_sqr = circuit_mul(y, y);
         let out = circuit_sub(y_sqr, x_cube);
 
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let in1 = from_u256(pt.x.c0);
         let in2 = from_u256(pt.y.c0);
 
-        let outputs =
-            match (out, )
-                .new_inputs()
-                .next(in1)
-                .next(in2)
-                .done()
-                .eval(modulus) {
+        let outputs = match (out,).new_inputs().next(in1).next(in2).done().eval(modulus) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
-        let out: u256 = outputs.get_output(out).try_into().unwrap(); 
+        let out: u256 = outputs.get_output(out).try_into().unwrap();
 
         out == 3
     }
@@ -152,9 +146,10 @@ impl PlonkVerifier of PVerifier {
         beta_transcript.add_poly_commitment(verification_key.S2);
         beta_transcript.add_poly_commitment(verification_key.S3);
 
-        for i in 0..publicSignals.len() {
-            beta_transcript.add_scalar(fq(publicSignals.at(i).clone()));
-        };
+        for i in 0
+            ..publicSignals.len() {
+                beta_transcript.add_scalar(fq(publicSignals.at(i).clone()));
+            };
 
         beta_transcript.add_poly_commitment(proof.A);
         beta_transcript.add_poly_commitment(proof.B);
@@ -295,7 +290,9 @@ impl PlonkVerifier of PVerifier {
     fn compute_D(
         proof: PlonkProof, challenges: PlonkChallenge, vk: PlonkVerificationKey, l1: Fq
     ) -> AffineG1 {
-        let mut d1 = vk.Qm.multiply_as_circuit((mul_nz(proof.eval_a.c0, proof.eval_b.c0, ORDER_NZ)));
+        let mut d1 = vk
+            .Qm
+            .multiply_as_circuit((mul_nz(proof.eval_a.c0, proof.eval_b.c0, ORDER_NZ)));
         d1 = d1.add(vk.Ql.multiply_as_circuit(proof.eval_a.c0));
         d1 = d1.add(vk.Qr.multiply_as_circuit(proof.eval_b.c0));
         d1 = d1.add(vk.Qo.multiply_as_circuit(proof.eval_c.c0));
@@ -319,7 +316,9 @@ impl PlonkVerifier of PVerifier {
 
         let d2b = mul_nz(l1.c0, sqr_nz(challenges.alpha.c0, ORDER_NZ), ORDER_NZ);
 
-        let d2 = proof.Z.multiply_as_circuit(add_nz(add_nz(d2a, d2b, ORDER_NZ), challenges.u.c0, ORDER_NZ));
+        let d2 = proof
+            .Z
+            .multiply_as_circuit(add_nz(add_nz(d2a, d2b, ORDER_NZ), challenges.u.c0, ORDER_NZ));
 
         let d3a = add_nz(
             add_nz(
@@ -383,7 +382,7 @@ impl PlonkVerifier of PVerifier {
     fn compute_E(proof: PlonkProof, challenges: PlonkChallenge, r0: Fq) -> AffineG1 {
         let mut res: AffineG1 = g1(1, 2);
         let neg_r0 = neg_o(r0.c0);
-        
+
         let n_r0 = CircuitElement::<CircuitInput<0>> {};
         let v1 = CircuitElement::<CircuitInput<1>> {};
         let v2 = CircuitElement::<CircuitInput<2>> {};
@@ -399,22 +398,22 @@ impl PlonkVerifier of PVerifier {
         let zw = CircuitElement::<CircuitInput<12>> {};
 
         let e0_inner = circuit_mul(v1, a);
-        let e0 = circuit_add(n_r0, e0_inner); 
+        let e0 = circuit_add(n_r0, e0_inner);
         let e1_inner = circuit_mul(v2, b);
-        let e1 = circuit_add(e0, e1_inner); 
+        let e1 = circuit_add(e0, e1_inner);
         let e2_inner = circuit_mul(v3, c);
-        let e2 = circuit_add(e1, e2_inner); 
+        let e2 = circuit_add(e1, e2_inner);
         let e3_inner = circuit_mul(v4, s1);
-        let e3 = circuit_add(e2, e3_inner); 
+        let e3 = circuit_add(e2, e3_inner);
         let e4_inner = circuit_mul(v5, s2);
-        let e4 = circuit_add(e3, e4_inner); 
+        let e4 = circuit_add(e3, e4_inner);
         let e5_inner = circuit_mul(u, zw);
-        let e5 = circuit_add(e4, e5_inner); 
+        let e5 = circuit_add(e4, e5_inner);
 
         let modulus = TryInto::<_, CircuitModulus>::try_into(ORDER_U384).unwrap();
 
         let outputs =
-            match (e5, )
+            match (e5,)
                 .new_inputs()
                 .next(from_u256(neg_r0))
                 .next(from_u256(challenges.v1.c0))
@@ -434,7 +433,7 @@ impl PlonkVerifier of PVerifier {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
-        let e: u256 = outputs.get_output(e5).try_into().unwrap(); 
+        let e: u256 = outputs.get_output(e5).try_into().unwrap();
 
         res = res.multiply_as_circuit(e);
 

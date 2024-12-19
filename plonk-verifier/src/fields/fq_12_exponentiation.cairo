@@ -8,15 +8,16 @@ use plonk_verifier::curve::{t_naf, get_field_nz, FIELD_X2};
 use plonk_verifier::curve::{u512, mul_by_v, U512BnAdd, U512BnSub, Tuple2Add, Tuple2Sub,};
 use plonk_verifier::curve::{u512_add, u512_sub, u512_high_add, u512_high_sub, U512Fq2Ops};
 use plonk_verifier::fields::{
-    FieldUtils, FieldOps, fq, Fq, Fq2, Fq6, Fq12, fq12, Fq12Frobenius, Fq12Squaring, Fq12SquaringCircuit
+    FieldUtils, FieldOps, fq, Fq, Fq2, Fq6, Fq12, fq12, Fq12Frobenius, Fq12Squaring,
+    Fq12SquaringCircuit
 };
 use plonk_verifier::fields::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 use plonk_verifier::fields::print::{Fq2Display, FqDisplay, u512Display};
 use plonk_verifier::curve::constants::FIELD_U384;
 use core::circuit::{
-    CircuitElement, CircuitInput, circuit_add, circuit_sub,
-    circuit_mul, circuit_inverse, EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus,
-    AddInputResultTrait, CircuitInputs, EvalCircuitResult,
+    CircuitElement, CircuitInput, circuit_add, circuit_sub, circuit_mul, circuit_inverse,
+    EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus, AddInputResultTrait, CircuitInputs,
+    EvalCircuitResult,
 };
 
 
@@ -201,27 +202,20 @@ impl Fq12ExponentiationCircuit of PairingExponentiationTraitCircuit {
         let T0 = circuit_mul(a0, b0);
         let T1 = circuit_mul(a1, b1);
         let T2_0 = circuit_add(a0, a1);
-        let T2_1 = circuit_add(b0, b1); 
-        let T2 = circuit_mul(T2_0, T2_1); 
-        let T3_0 = circuit_add(T0, T1); 
+        let T2_1 = circuit_add(b0, b1);
+        let T2 = circuit_mul(T2_0, T2_1);
+        let T3_0 = circuit_add(T0, T1);
         let T3 = circuit_sub(T2, T3_0);
-        let T4 = circuit_sub(T0, T1); 
-        
+        let T4 = circuit_sub(T0, T1);
+
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let a0 = from_u256(self.c0.c0);
         let a1 = from_u256(self.c1.c0);
         let b0 = from_u256(rhs.c0.c0);
         let b1 = from_u256(rhs.c1.c0);
-        
+
         let outputs =
-            match (T3, T4, )
-                .new_inputs()
-                .next(a0)
-                .next(a1)
-                .next(b0)
-                .next(b1)
-                .done()
-                .eval(modulus) {
+            match (T3, T4,).new_inputs().next(a0).next(a1).next(b0).next(b1).done().eval(modulus) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
@@ -238,30 +232,24 @@ impl Fq12ExponentiationCircuit of PairingExponentiationTraitCircuit {
 
         let a0_scale_9_2 = circuit_add(a0, a0);
         let a0_scale_9_4 = circuit_add(a0_scale_9_2, a0_scale_9_2);
-        let a0_scale_9 = circuit_add(a0_scale_9_4, a0); 
+        let a0_scale_9 = circuit_add(a0_scale_9_4, a0);
         let a1_scale_9_2 = circuit_add(a1, a1);
         let a1_scale_9_4 = circuit_add(a1_scale_9_2, a1_scale_9_2);
-        let a1_scale_9 = circuit_add(a1_scale_9_4, a0); 
+        let a1_scale_9 = circuit_add(a1_scale_9_4, a0);
         let fq_c0 = circuit_sub(a0_scale_9, a1);
-        let fq_c1 = circuit_add(a1_scale_9, a0); 
+        let fq_c1 = circuit_add(a1_scale_9, a0);
 
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let a0 = from_u256(self.c0.c0);
         let a1 = from_u256(self.c1.c0);
-        
-        let outputs =
-            match (fq_c0, fq_c1, )
-                .new_inputs()
-                .next(a0)
-                .next(a1)
-                .done()
-                .eval(modulus) {
+
+        let outputs = match (fq_c0, fq_c1,).new_inputs().next(a0).next(a1).done().eval(modulus) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
         let fq_c0: u256 = outputs.get_output(fq_c0).try_into().unwrap();
         let fq_c1: u256 = outputs.get_output(fq_c1).try_into().unwrap();
 
-        Fq2 {c0: Fq{c0: fq_c0}, c1: Fq {c0: fq_c1}}
+        Fq2 { c0: Fq { c0: fq_c0 }, c1: Fq { c0: fq_c1 } }
     }
 }

@@ -34,8 +34,8 @@ fn ate_miller_loop<
 // The implementation below is the algorithm described below in a single loop.
 //
 //
-// Algorithm 2: Calculate and store line functions for BLS12 curve Input: Q ∈ G2, P ∈ G1, curve parameter u
-// Output: An array g of ⌊log2(u)⌋ line functions ∈ Fp12
+// Algorithm 2: Calculate and store line functions for BLS12 curve Input: Q ∈ G2, P ∈ G1, curve
+// parameter u Output: An array g of ⌊log2(u)⌋ line functions ∈ Fp12
 // 1: T←Q
 // 2: for i ← ⌊log2(u)⌋−1 to 0 do
 // 3:     g[i] ← lT,T(P), T ← 2T
@@ -57,7 +57,7 @@ fn ate_miller_loop<
 // 3:     f ← f^2
 // 4:     Compute g[i] and mul with f based on the bit value
 // 5: return f
-// 
+//
 fn ate_miller_loop_steps<TG2, TPreC, +MillerSteps<TPreC, TG2, Fq12>, +Drop<TG2>, +Drop<TPreC>,>(
     precompute: TPreC, ref q_acc: TG2
 ) -> Fq12 {

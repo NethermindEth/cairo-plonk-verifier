@@ -15,7 +15,7 @@
 // 10|     end if
 // 11|  end for
 // 12|  return f ← f^((q^k-1)/r)
-// 
+//
 // This can probably use a lot of optimisation from NAF/short miller loop implementations
 
 use core::debug::PrintTrait;
@@ -49,7 +49,7 @@ fn tate_miller_loop(p: AffineG1, q: AffineG2) -> Fq12 {
                     // R ← R + P
                     r = r.add(p);
                 }
-            //
+                //
             },
             Option::None => { break; }
         }

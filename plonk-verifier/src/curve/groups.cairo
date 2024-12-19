@@ -6,7 +6,7 @@ use plonk_verifier::curve::constants::FIELD_U384;
 use core::circuit::{
     RangeCheck96, AddMod, MulMod, u96, CircuitElement, CircuitInput, circuit_add, circuit_sub,
     circuit_mul, circuit_inverse, EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus,
-    AddInputResultTrait, CircuitInputs,EvalCircuitResult,
+    AddInputResultTrait, CircuitInputs, EvalCircuitResult,
 };
 use core::circuit::conversions::from_u256;
 use core::fmt::{Display, Formatter, Error};
@@ -70,29 +70,33 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
         let x1 = CircuitElement::<CircuitInput<0>> {};
         let y1 = CircuitElement::<CircuitInput<1>> {};
 
-        let x1_sqr = circuit_mul(x1, x1); 
+        let x1_sqr = circuit_mul(x1, x1);
         let x1_add_x1_x1 = circuit_add(x1_sqr, x1_sqr);
-        let x1_add_x1_x1_x1 = circuit_add(x1_add_x1_x1, x1_sqr); 
+        let x1_add_x1_x1_x1 = circuit_add(x1_add_x1_x1, x1_sqr);
 
-        let y1_double = circuit_add(y1, y1); 
+        let y1_double = circuit_add(y1, y1);
         let y1_inv = circuit_inverse(y1_double);
 
-        let tangent = circuit_mul(x1_add_x1_x1_x1, y1_inv); 
+        let tangent = circuit_mul(x1_add_x1_x1_x1, y1_inv);
 
-        let lambda_sqr = circuit_mul(tangent, tangent);  // slope.sqr()
+        let lambda_sqr = circuit_mul(tangent, tangent); // slope.sqr()
         let x_slope_sub_sqr_x1 = circuit_sub(lambda_sqr, x1); // slope.sqr() - *self.x
         let x_slope_sub_x1_x2 = circuit_sub(x_slope_sub_sqr_x1, x1); // slope.sqr() - *self.x - x2
 
         let y_slope_sub_x1_x = circuit_sub(x1, x_slope_sub_x1_x2); // (*self.x - x)
-        let y_slope_mul_lambda_x1_x = circuit_mul(tangent, y_slope_sub_x1_x); // slope * (*self.x - x)
-        let y_slope_lambda_sub_lambda_x_y = circuit_sub(y_slope_mul_lambda_x1_x, y1); // slope * (*self.x - x) - *self.y
+        let y_slope_mul_lambda_x1_x = circuit_mul(
+            tangent, y_slope_sub_x1_x
+        ); // slope * (*self.x - x)
+        let y_slope_lambda_sub_lambda_x_y = circuit_sub(
+            y_slope_mul_lambda_x1_x, y1
+        ); // slope * (*self.x - x) - *self.y
 
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let x1 = from_u256(*self.x.c0);
         let y1 = from_u256(*self.y.c0);
-        
+
         let outputs =
-            match (x_slope_sub_x1_x2, y_slope_lambda_sub_lambda_x_y, )
+            match (x_slope_sub_x1_x2, y_slope_lambda_sub_lambda_x_y,)
                 .new_inputs()
                 .next(x1)
                 .next(y1)
@@ -101,12 +105,11 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
-        
-        let x = Fq{c0: outputs.get_output(x_slope_sub_x1_x2).try_into().unwrap()};
-        let y = Fq{c0: outputs.get_output(y_slope_lambda_sub_lambda_x_y).try_into().unwrap()};
+
+        let x = Fq { c0: outputs.get_output(x_slope_sub_x1_x2).try_into().unwrap() };
+        let y = Fq { c0: outputs.get_output(y_slope_lambda_sub_lambda_x_y).try_into().unwrap() };
 
         Affine { x, y }
-
     }
 
     fn add_as_circuit(self: @Affine<Fq>, rhs: Affine<Fq>) -> Affine<Fq> {
@@ -117,25 +120,29 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
 
         let y2_y1 = circuit_sub(y2, y1);
         let x2_x1 = circuit_sub(x2, x1);
-        let x2_x1_inv = circuit_inverse(x2_x1); 
-        let lambda = circuit_mul(y2_y1, x2_x1_inv); 
+        let x2_x1_inv = circuit_inverse(x2_x1);
+        let lambda = circuit_mul(y2_y1, x2_x1_inv);
 
-        let lambda_sqr = circuit_mul(lambda, lambda);  // slope.sqr()
+        let lambda_sqr = circuit_mul(lambda, lambda); // slope.sqr()
         let x_slope_sub_sqr_x1 = circuit_sub(lambda_sqr, x1); // slope.sqr() - *self.x
         let x_slope_sub_x1_x2 = circuit_sub(x_slope_sub_sqr_x1, x2); // slope.sqr() - *self.x - x2
 
         let y_slope_sub_x1_x = circuit_sub(x1, x_slope_sub_x1_x2); // (*self.x - x)
-        let y_slope_mul_lambda_x1_x = circuit_mul(lambda, y_slope_sub_x1_x); // slope * (*self.x - x)
-        let y_slope_lambda_sub_lambda_x_y = circuit_sub(y_slope_mul_lambda_x1_x, y1); // slope * (*self.x - x) - *self.y
-        
+        let y_slope_mul_lambda_x1_x = circuit_mul(
+            lambda, y_slope_sub_x1_x
+        ); // slope * (*self.x - x)
+        let y_slope_lambda_sub_lambda_x_y = circuit_sub(
+            y_slope_mul_lambda_x1_x, y1
+        ); // slope * (*self.x - x) - *self.y
+
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let x1 = from_u256(*self.x.c0);
         let y1 = from_u256(*self.y.c0);
         let x2 = from_u256(rhs.x.c0);
         let y2 = from_u256(rhs.y.c0);
-        
+
         let outputs =
-            match (x_slope_sub_x1_x2, y_slope_lambda_sub_lambda_x_y, )
+            match (x_slope_sub_x1_x2, y_slope_lambda_sub_lambda_x_y,)
                 .new_inputs()
                 .next(x1)
                 .next(y1)
@@ -146,9 +153,9 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
-        
-        let x = Fq{c0: outputs.get_output(x_slope_sub_x1_x2).try_into().unwrap()};
-        let y = Fq{c0: outputs.get_output(y_slope_lambda_sub_lambda_x_y).try_into().unwrap()};
+
+        let x = Fq { c0: outputs.get_output(x_slope_sub_x1_x2).try_into().unwrap() };
+        let y = Fq { c0: outputs.get_output(y_slope_lambda_sub_lambda_x_y).try_into().unwrap() };
 
         Affine { x, y }
     }
@@ -190,19 +197,23 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
         // y = λ(x1 - x) - y1
         // slope * (*self.x - x) - *self.y
         //let y = self.y_on_slope(slope, x);
-        
+
         let lambda = CircuitElement::<CircuitInput<0>> {};
         let x1 = CircuitElement::<CircuitInput<1>> {};
         let y1 = CircuitElement::<CircuitInput<2>> {};
-        let x2 = CircuitElement::<CircuitInput<3>> {};        
-        
-        let lambda_sqr = circuit_mul(lambda, lambda);  // slope.sqr()
+        let x2 = CircuitElement::<CircuitInput<3>> {};
+
+        let lambda_sqr = circuit_mul(lambda, lambda); // slope.sqr()
         let x_slope_sub_sqr_x1 = circuit_sub(lambda_sqr, x1); // slope.sqr() - *self.x
         let x_slope_sub_x1_x2 = circuit_sub(x_slope_sub_sqr_x1, x2); // slope.sqr() - *self.x - x2
 
         let y_slope_sub_x1_x = circuit_sub(x1, x_slope_sub_x1_x2); // (*self.x - x)
-        let y_slope_mul_lambda_x1_x = circuit_mul(lambda, y_slope_sub_x1_x); // slope * (*self.x - x)
-        let y_slope_lambda_sub_lambda_x_y = circuit_sub(y_slope_mul_lambda_x1_x, y1); // slope * (*self.x - x) - *self.y
+        let y_slope_mul_lambda_x1_x = circuit_mul(
+            lambda, y_slope_sub_x1_x
+        ); // slope * (*self.x - x)
+        let y_slope_lambda_sub_lambda_x_y = circuit_sub(
+            y_slope_mul_lambda_x1_x, y1
+        ); // slope * (*self.x - x) - *self.y
 
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let lambda = from_u256(slope.c0);
@@ -211,7 +222,7 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
         let x2 = from_u256(x_2.c0);
 
         let outputs =
-            match (x_slope_sub_x1_x2, y_slope_lambda_sub_lambda_x_y, )
+            match (x_slope_sub_x1_x2, y_slope_lambda_sub_lambda_x_y,)
                 .new_inputs()
                 .next(lambda)
                 .next(x1)
@@ -222,9 +233,9 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
-        
-        let x = Fq{c0: outputs.get_output(x_slope_sub_x1_x2).try_into().unwrap()};
-        let y = Fq{c0: outputs.get_output(y_slope_lambda_sub_lambda_x_y).try_into().unwrap()};
+
+        let x = Fq { c0: outputs.get_output(x_slope_sub_x1_x2).try_into().unwrap() };
+        let y = Fq { c0: outputs.get_output(y_slope_lambda_sub_lambda_x_y).try_into().unwrap() };
 
         Affine { x, y }
     }
@@ -238,28 +249,21 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
 
         let y2_y1 = circuit_sub(y2, y1);
         let x2_x1 = circuit_sub(x2, x1);
-        let x2_x1_inv = circuit_inverse(x2_x1); 
-        let mul = circuit_mul(y2_y1, x2_x1_inv); 
-        
+        let x2_x1_inv = circuit_inverse(x2_x1);
+        let mul = circuit_mul(y2_y1, x2_x1_inv);
+
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let x1 = from_u256(*self.x.c0);
         let y1 = from_u256(*self.y.c0);
         let x2 = from_u256(rhs.x.c0);
         let y2 = from_u256(rhs.y.c0);
-        
+
         let outputs =
-            match (mul, )
-                .new_inputs()
-                .next(x1)
-                .next(x2)
-                .next(y1)
-                .next(y2)
-                .done()
-                .eval(modulus) {
+            match (mul,).new_inputs().next(x1).next(x2).next(y1).next(y2).done().eval(modulus) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
-        Fq{c0: outputs.get_output(mul).try_into().unwrap()}
+        Fq { c0: outputs.get_output(mul).try_into().unwrap() }
     }
 }
 

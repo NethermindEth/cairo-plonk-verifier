@@ -40,7 +40,7 @@ use m::{u512};
 use m::utils::u128_overflowing_sub;
 use m::{
     add_u, add_nz, sub, sub_u, mul_u, mul_nz, div_nz, sqr_u, sqr_nz, scl_u, reduce, u512_add,
-    u512_sub
+    u512_sub, add_circuit,
 };
 use m::{u512_add_u256, u512_sub_u256, u512_add_overflow, u512_sub_overflow, u512_scl, u512_reduce};
 use m::{Tuple2Add, Tuple2Sub, Tuple3Add, Tuple3Sub};

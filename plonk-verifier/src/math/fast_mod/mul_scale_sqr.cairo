@@ -6,6 +6,14 @@ use core::num::traits::{OverflowingAdd, OverflowingSub, WrappingAdd};
 use u::{u128_circuit_wrapping_add};
 
 use super::{utils as u, reduce, u512_reduce};
+use core::circuit::{
+    CircuitElement, CircuitInput, AddMod, circuit_add, circuit_sub, circuit_mul, circuit_inverse,
+    EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus, AddInputResultTrait, CircuitInputs,
+    EvalCircuitResult
+};
+use core::circuit::conversions::{from_u128, from_u256};
+use plonk_verifier::curve::constants::FIELD_U384;
+
 // scale u512 by u128 (for smaller numbers)
 // unreduced, returns u512 plus u128 (fifth limb) which needs handling
 #[inline(always)]
@@ -83,7 +91,7 @@ fn mul_u(a: u256, b: u256) -> u512 {
 // mul two u256
 // takes non zero modulo
 // returns modded u256
-#[inline(always)]
+// #[inline(always)]
 fn mul_nz(a: u256, b: u256, modulo: NonZero<u256>) -> u256 {
     u512_reduce(mul_u(a, b), modulo)
 }
@@ -93,6 +101,26 @@ fn mul_nz(a: u256, b: u256, modulo: NonZero<u256>) -> u256 {
 #[inline(always)]
 fn mul(a: u256, b: u256, modulo: u256) -> u256 {
     mul_nz(a, b, modulo.try_into().unwrap())
+}
+
+// #[inline(always)]
+fn mul_circuit(a: u256, b: u256) -> u256 {
+    let l = CircuitElement::<CircuitInput<0>> {};
+    let r = CircuitElement::<CircuitInput<1>> {};
+    let mul = circuit_mul(l, r);
+
+    let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+
+    let l = from_u256(a);
+    let r = from_u256(b);
+
+    let outputs = match (mul,).new_inputs().next(l).next(r).done().eval(modulus) {
+        Result::Ok(outputs) => { outputs },
+        Result::Err(_) => { panic!("Expected success") }
+    };
+
+    let o = outputs.get_output(mul).try_into().unwrap();
+    o
 }
 
 // squares a u256
@@ -132,4 +160,22 @@ fn sqr_nz(a: u256, modulo: NonZero<u256>) -> u256 {
 #[inline(always)]
 fn sqr(a: u256, modulo: u256) -> u256 {
     u512_reduce(sqr_u(a), modulo.try_into().unwrap())
+}
+
+#[inline(always)]
+fn sqr_circuit(a: u256) -> u256 {
+    let l = CircuitElement::<CircuitInput<0>> {};
+    let mul = circuit_mul(l, l);
+
+    let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+
+    let l = from_u256(a);
+
+    let outputs = match (mul,).new_inputs().next(l).done().eval(modulus) {
+        Result::Ok(outputs) => { outputs },
+        Result::Err(_) => { panic!("Expected success") }
+    };
+
+    let o = outputs.get_output(mul).try_into().unwrap();
+    o
 }

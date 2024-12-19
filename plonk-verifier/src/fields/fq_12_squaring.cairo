@@ -12,9 +12,9 @@ use plonk_verifier::fields::{
 use plonk_verifier::fields::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 use plonk_verifier::fields::print::{Fq2Display, FqDisplay, u512Display};
 use core::circuit::{
-    CircuitElement, CircuitInput, circuit_add, circuit_sub,
-    circuit_mul, circuit_inverse, EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus,
-    AddInputResultTrait, CircuitInputs, EvalCircuitResult,
+    CircuitElement, CircuitInput, circuit_add, circuit_sub, circuit_mul, circuit_inverse,
+    EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus, AddInputResultTrait, CircuitInputs,
+    EvalCircuitResult,
 };
 use core::circuit::conversions::from_u256;
 use plonk_verifier::curve::constants::FIELD_U384;
@@ -306,10 +306,10 @@ impl Fq12Squaring of Fq12SquaringTrait {
 
 #[generate_trait]
 impl Fq12SquaringCircuit of Fq12SquaringCircuitTrait {
-    // Cyclotomic squaring 
+    // Cyclotomic squaring
     fn cyclotomic_sqr_circuit(self: Fq12, field_nz: NonZero<u256>) -> Fq12 {
         core::internal::revoke_ap_tracking();
-        
+
         let z0_0 = CircuitElement::<CircuitInput<0>> {};
         let z0_1 = CircuitElement::<CircuitInput<1>> {};
         let z1_0 = CircuitElement::<CircuitInput<2>> {};
@@ -318,50 +318,52 @@ impl Fq12SquaringCircuit of Fq12SquaringCircuitTrait {
         let tmp_T0 = circuit_mul(z0_0, z1_0); // z0 * z1;
         let tmp_T1 = circuit_mul(z0_1, z1_1);
         let tmp_T2_0 = circuit_add(z0_0, z0_1);
-        let tmp_T2_1 = circuit_add(z1_0, z1_1); 
-        let tmp_T2 = circuit_mul(tmp_T2_0, tmp_T2_1); 
-        let tmp_T3_0 = circuit_add(tmp_T0, tmp_T1); 
+        let tmp_T2_1 = circuit_add(z1_0, z1_1);
+        let tmp_T2 = circuit_mul(tmp_T2_0, tmp_T2_1);
+        let tmp_T3_0 = circuit_add(tmp_T0, tmp_T1);
         let tmp_c1 = circuit_sub(tmp_T2, tmp_T3_0);
-        let tmp_c0 = circuit_sub(tmp_T0, tmp_T1); 
-        
+        let tmp_c0 = circuit_sub(tmp_T0, tmp_T1);
+
         let T0_0_c0 = circuit_add(z0_0, z1_0); // (z0 + z1)
-        let T0_0_c1 = circuit_add(z0_1, z1_1); 
+        let T0_0_c1 = circuit_add(z0_1, z1_1);
 
         let a0_scale_9_2 = circuit_add(z1_0, z1_0); // z1.mul_by_nonresidue()
         let a0_scale_9_4 = circuit_add(a0_scale_9_2, a0_scale_9_2);
         let a0_scale_9_8 = circuit_add(a0_scale_9_4, a0_scale_9_4);
-        let a0_scale_9 = circuit_add(a0_scale_9_8, z1_0); 
+        let a0_scale_9 = circuit_add(a0_scale_9_8, z1_0);
         let a1_scale_9_2 = circuit_add(z1_1, z1_1);
         let a1_scale_9_4 = circuit_add(a1_scale_9_2, a1_scale_9_2);
         let a1_scale_9_8 = circuit_add(a1_scale_9_4, a1_scale_9_4);
-        let a1_scale_9 = circuit_add(a1_scale_9_8, z1_1); 
+        let a1_scale_9 = circuit_add(a1_scale_9_8, z1_1);
         let T0_1_c0 = circuit_sub(a0_scale_9, z1_1);
-        let T0_1_c1 = circuit_add(a1_scale_9, z1_0); 
+        let T0_1_c1 = circuit_add(a1_scale_9, z1_0);
 
         let T0_2_c0 = circuit_add(T0_1_c0, z0_0); // (z1.mul_by_nonresidue() + z0)
-        let T0_2_c1 = circuit_add(T0_1_c1, z0_1); 
-    
+        let T0_2_c1 = circuit_add(T0_1_c1, z0_1);
+
         let tmp_T0 = circuit_mul(T0_0_c0, T0_2_c0); // (z0 + z1) * (z1.mul_by_nonresidue() + z0)
         let tmp_T1 = circuit_mul(T0_0_c1, T0_2_c1);
         let tmp_T2_0 = circuit_add(T0_0_c0, T0_0_c1);
-        let tmp_T2_1 = circuit_add(T0_2_c0, T0_2_c1); 
-        let tmp_T2 = circuit_mul(tmp_T2_0, tmp_T2_1); 
-        let tmp_T3_0 = circuit_add(tmp_T0, tmp_T1); 
+        let tmp_T2_1 = circuit_add(T0_2_c0, T0_2_c1);
+        let tmp_T2 = circuit_mul(tmp_T2_0, tmp_T2_1);
+        let tmp_T3_0 = circuit_add(tmp_T0, tmp_T1);
         let T0_3_c1 = circuit_sub(tmp_T2, tmp_T3_0);
-        let T0_3_c0 = circuit_sub(tmp_T0, tmp_T1); 
+        let T0_3_c0 = circuit_sub(tmp_T0, tmp_T1);
 
         let a0_scale_9_2 = circuit_add(tmp_c0, tmp_c0); // tmp.mul_by_nonresidue()
         let a0_scale_9_4 = circuit_add(a0_scale_9_2, a0_scale_9_2);
         let a0_scale_9_8 = circuit_add(a0_scale_9_4, a0_scale_9_4);
-        let a0_scale_9 = circuit_add(a0_scale_9_8, tmp_c0); 
+        let a0_scale_9 = circuit_add(a0_scale_9_8, tmp_c0);
         let a1_scale_9_2 = circuit_add(tmp_c1, tmp_c1);
         let a1_scale_9_4 = circuit_add(a1_scale_9_2, a1_scale_9_2);
         let a1_scale_9_8 = circuit_add(a1_scale_9_4, a1_scale_9_4);
-        let a1_scale_9 = circuit_add(a1_scale_9_8, tmp_c1); 
+        let a1_scale_9 = circuit_add(a1_scale_9_8, tmp_c1);
         let T0_4_c0 = circuit_sub(a0_scale_9, tmp_c1);
-        let T0_4_c1 = circuit_add(a1_scale_9, tmp_c0); 
+        let T0_4_c1 = circuit_add(a1_scale_9, tmp_c0);
 
-        let T0_5_c0 = circuit_sub(T0_3_c0, tmp_c0); // (z0 + z1) * (z1.mul_by_nonresidue() + z0) - tmp
+        let T0_5_c0 = circuit_sub(
+            T0_3_c0, tmp_c0
+        ); // (z0 + z1) * (z1.mul_by_nonresidue() + z0) - tmp
         let T0_5_c1 = circuit_sub(T0_3_c1, tmp_c1);
 
         let T0_c0_template = circuit_sub(T0_5_c0, T0_4_c0);
@@ -369,7 +371,7 @@ impl Fq12SquaringCircuit of Fq12SquaringCircuitTrait {
 
         let T1_c0_template = circuit_add(tmp_c0, tmp_c0);
         let T1_c1_template = circuit_add(tmp_c1, tmp_c1);
-        
+
         // Initialization
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let z0_0 = from_u256(self.c0.c0.c0.c0);
@@ -436,7 +438,7 @@ impl Fq12SquaringCircuit of Fq12SquaringCircuitTrait {
         let T4_c1 = outputs.get_output(T0_c1_template);
         let T5_c0 = outputs.get_output(T1_c0_template);
         let T5_c1 = outputs.get_output(T1_c1_template);
-        
+
         // Z0
         let z0_0_in = CircuitElement::<CircuitInput<0>> {};
         let z0_1_in = CircuitElement::<CircuitInput<1>> {};
@@ -445,13 +447,13 @@ impl Fq12SquaringCircuit of Fq12SquaringCircuitTrait {
 
         let Z0_0_c0 = circuit_sub(t0_0_in, z0_0_in);
         let Z0_1_c0 = circuit_sub(t0_1_in, z0_1_in);
-        let Z0_0_dbl = circuit_add(Z0_0_c0, Z0_0_c0); 
+        let Z0_0_dbl = circuit_add(Z0_0_c0, Z0_0_c0);
         let Z0_1_dbl = circuit_add(Z0_1_c0, Z0_1_c0);
         let Z0_0 = circuit_add(Z0_0_dbl, t0_0_in);
         let Z0_1 = circuit_add(Z0_1_dbl, t0_1_in);
 
         let outputs =
-            match (Z0_0, Z0_1, )
+            match (Z0_0, Z0_1,)
                 .new_inputs()
                 .next(z0_0)
                 .next(z0_1)
@@ -473,13 +475,13 @@ impl Fq12SquaringCircuit of Fq12SquaringCircuitTrait {
 
         let Z1_0_c0 = circuit_add(t1_0_in, z1_0_in);
         let Z1_1_c0 = circuit_add(t1_1_in, z1_1_in);
-        let Z1_0_dbl = circuit_add(Z1_0_c0, Z1_0_c0); 
+        let Z1_0_dbl = circuit_add(Z1_0_c0, Z1_0_c0);
         let Z1_1_dbl = circuit_add(Z1_1_c0, Z1_1_c0);
         let Z1_0 = circuit_add(Z1_0_dbl, t1_0_in);
-        let Z1_1 = circuit_add(Z1_1_dbl, t1_1_in);  
+        let Z1_1 = circuit_add(Z1_1_dbl, t1_1_in);
 
         let outputs =
-            match (Z1_0, Z1_1, )
+            match (Z1_0, Z1_1,)
                 .new_inputs()
                 .next(z1_0)
                 .next(z1_1)
@@ -499,24 +501,19 @@ impl Fq12SquaringCircuit of Fq12SquaringCircuitTrait {
 
         let a0_scale_9_2 = circuit_add(t5_0_in, t5_0_in); // 2 * z5_0
         let a0_scale_9_4 = circuit_add(a0_scale_9_2, a0_scale_9_2); // 4 * z5_0
-        let a0_scale_9_8 = circuit_add(a0_scale_9_4, a0_scale_9_4); 
+        let a0_scale_9_8 = circuit_add(a0_scale_9_4, a0_scale_9_4);
         let a0_scale_9 = circuit_add(a0_scale_9_8, t5_0_in); // 5 * z5_0
         let a1_scale_9_2 = circuit_add(t5_1_in, t5_1_in); // 2 * z5_1
         let a1_scale_9_4 = circuit_add(a1_scale_9_2, a1_scale_9_2); // 4 * z5_1
-        let a1_scale_9_8 = circuit_add(a1_scale_9_4, a1_scale_9_4); 
+        let a1_scale_9_8 = circuit_add(a1_scale_9_4, a1_scale_9_4);
         let a1_scale_9 = circuit_add(a1_scale_9_8, t5_1_in); // 5 * z5_1
 
         let tmp_0 = circuit_sub(a0_scale_9, t5_1_in); // T4_1_c0 = a0_scale_9 - z5_1
         let tmp_1 = circuit_add(a1_scale_9, t5_0_in); // T4_1_c1 = a1_scale_9 + z5_0
-        
+
         // Temp is split into smaller circuit due to error with recursive circuit building
         let outputs =
-            match (tmp_0, tmp_1, )
-                .new_inputs()
-                .next(T5_c0)
-                .next(T5_c1)
-                .done()
-                .eval(modulus) {
+            match (tmp_0, tmp_1,).new_inputs().next(T5_c0).next(T5_c1).done().eval(modulus) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
@@ -530,13 +527,13 @@ impl Fq12SquaringCircuit of Fq12SquaringCircuitTrait {
 
         let Z2_0_c0 = circuit_add(tmp_0_in, z2_0_in);
         let Z2_1_c0 = circuit_add(tmp_1_in, z2_1_in);
-        let Z2_0_dbl = circuit_add(Z2_0_c0, Z2_0_c0); 
+        let Z2_0_dbl = circuit_add(Z2_0_c0, Z2_0_c0);
         let Z2_1_dbl = circuit_add(Z2_1_c0, Z2_1_c0);
         let Z2_0 = circuit_add(Z2_0_dbl, tmp_0_in);
         let Z2_1 = circuit_add(Z2_1_dbl, tmp_1_in);
 
         let outputs =
-            match (Z2_0, Z2_1, )
+            match (Z2_0, Z2_1,)
                 .new_inputs()
                 .next(z2_0)
                 .next(z2_1)
@@ -558,13 +555,13 @@ impl Fq12SquaringCircuit of Fq12SquaringCircuitTrait {
 
         let Z3_0_c0 = circuit_sub(t4_0_in, z3_0_in);
         let Z3_1_c0 = circuit_sub(t4_1_in, z3_1_in);
-        let Z3_0_dbl = circuit_add(Z3_0_c0, Z3_0_c0); 
+        let Z3_0_dbl = circuit_add(Z3_0_c0, Z3_0_c0);
         let Z3_1_dbl = circuit_add(Z3_1_c0, Z3_1_c0);
         let Z3_0 = circuit_add(Z3_0_dbl, t4_0_in);
         let Z3_1 = circuit_add(Z3_1_dbl, t4_1_in);
 
         let outputs =
-            match (Z3_0, Z3_1, )
+            match (Z3_0, Z3_1,)
                 .new_inputs()
                 .next(z3_0)
                 .next(z3_1)
@@ -586,13 +583,13 @@ impl Fq12SquaringCircuit of Fq12SquaringCircuitTrait {
 
         let Z4_0_c0 = circuit_sub(t2_0_in, z4_0_in);
         let Z4_1_c0 = circuit_sub(t2_1_in, z4_1_in);
-        let Z4_0_dbl = circuit_add(Z4_0_c0, Z4_0_c0); 
+        let Z4_0_dbl = circuit_add(Z4_0_c0, Z4_0_c0);
         let Z4_1_dbl = circuit_add(Z4_1_c0, Z4_1_c0);
         let Z4_0 = circuit_add(Z4_0_dbl, t2_0_in);
         let Z4_1 = circuit_add(Z4_1_dbl, t2_1_in);
 
         let outputs =
-            match (Z4_0, Z4_1, )
+            match (Z4_0, Z4_1,)
                 .new_inputs()
                 .next(z4_0)
                 .next(z4_1)
@@ -614,13 +611,13 @@ impl Fq12SquaringCircuit of Fq12SquaringCircuitTrait {
 
         let Z5_0_c0 = circuit_add(t3_0_in, z5_0_in);
         let Z5_1_c0 = circuit_add(t3_1_in, z5_1_in);
-        let Z5_0_dbl = circuit_add(Z5_0_c0, Z5_0_c0); 
+        let Z5_0_dbl = circuit_add(Z5_0_c0, Z5_0_c0);
         let Z5_1_dbl = circuit_add(Z5_1_c0, Z5_1_c0);
         let Z5_0 = circuit_add(Z5_0_dbl, t3_0_in);
         let Z5_1 = circuit_add(Z5_1_dbl, t3_1_in);
 
         let outputs =
-            match (Z5_0, Z5_1, )
+            match (Z5_0, Z5_1,)
                 .new_inputs()
                 .next(z5_0)
                 .next(z5_1)
@@ -635,14 +632,16 @@ impl Fq12SquaringCircuit of Fq12SquaringCircuitTrait {
         let z5_1: u256 = outputs.get_output(Z5_1).try_into().unwrap();
 
         Fq12 {
-            c0: Fq6 { 
-                c0: Fq2 {c0: Fq {c0: z0_0}, c1: Fq {c0: z0_1}}, 
-                c1: Fq2 {c0: Fq {c0: z4_0}, c1: Fq {c0: z4_1}}, 
-                c2: Fq2 {c0: Fq {c0: z3_0}, c1: Fq {c0: z3_1}} },
-            c1: Fq6 { 
-                c0: Fq2 {c0: Fq {c0: z2_0}, c1: Fq {c0: z2_1}}, 
-                c1: Fq2 {c0: Fq {c0: z1_0}, c1: Fq {c0: z1_1}}, 
-                c2: Fq2 {c0: Fq {c0: z5_0}, c1: Fq {c0: z5_1}} },
+            c0: Fq6 {
+                c0: Fq2 { c0: Fq { c0: z0_0 }, c1: Fq { c0: z0_1 } },
+                c1: Fq2 { c0: Fq { c0: z4_0 }, c1: Fq { c0: z4_1 } },
+                c2: Fq2 { c0: Fq { c0: z3_0 }, c1: Fq { c0: z3_1 } }
+            },
+            c1: Fq6 {
+                c0: Fq2 { c0: Fq { c0: z2_0 }, c1: Fq { c0: z2_1 } },
+                c1: Fq2 { c0: Fq { c0: z1_0 }, c1: Fq { c0: z1_1 } },
+                c2: Fq2 { c0: Fq { c0: z5_0 }, c1: Fq { c0: z5_1 } }
+            },
         }
     }
 }
