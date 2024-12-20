@@ -16,7 +16,14 @@ use plonk_verifier::fields::{Fq, fq, FqOps};
 use plonk_verifier::fields::print::u512Display;
 use plonk_verifier::curve::constants::FIELD_U384;
 use plonk_verifier::fields::utils::conversions::into_u512;
-
+use core::circuit::{
+	AddModGate as A,
+	SubModGate as S,
+	MulModGate as M,
+	InverseGate as I,
+	CircuitInput as CI,
+	CircuitElement as CE,
+};
 #[derive(Default, Copy, Drop, Serde, Debug)]
 struct Fq2 {
     c0: Fq,
@@ -235,8 +242,8 @@ impl Fq2Ops of FieldOps<Fq2> {
         let b0_add_b1 = circuit_add(b0, b1);
         let t2 = circuit_mul(a0_add_a1, b0_add_b1);
         let t3 = circuit_add(t0, t1);
-        let t3 = circuit_sub(t2, t3);
-        let t4 = circuit_sub(t0, t1);
+        let t3: CE::<S::<M::<A::<CI::<0>, CI::<1>>, A::<CI::<2>, CI::<3>>>, A::<M::<CI::<0>, CI::<2>>, M::<CI::<1>, CI::<3>>>>> = circuit_sub(t2, t3);
+        let t4: CE::<S::<M::<CI::<0>, CI::<2>>, M::<CI::<1>, CI::<3>>>> = circuit_sub(t0, t1);
 
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
 

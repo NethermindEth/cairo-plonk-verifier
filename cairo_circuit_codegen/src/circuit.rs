@@ -1,4 +1,4 @@
-use crate::fields::affine::AffineFq2;
+use crate::fields::affine::Affine;
 
 #[derive(Clone, Default, Debug)]
 pub struct Circuit {
@@ -81,7 +81,7 @@ impl CircuitBuilder {
     // rhs_x_1
     // rhs_y_0
     // rhs_y_1 = inp[7]
-    pub fn ChordFq2(lhs: Option<AffineFq2>, rhs: Option<AffineFq2>, inp: [usize; 8]) -> CircuitBuilder {
+    pub fn ChordFq2(lhs: Option<usize>, rhs: Option<usize>, inp: [usize; 8]) -> CircuitBuilder {
         
 
         CircuitBuilder::ChordFq2 { fq_x: "".to_string(), fq_y: "".to_string(), inp }

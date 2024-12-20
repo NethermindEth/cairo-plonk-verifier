@@ -1,6 +1,6 @@
 use std::ops::{Add, Sub, Mul, Div, Neg};
 use crate::circuit::*;
-use crate::FieldOps;
+use crate::fields::FieldOps;
 
 #[derive(Debug, Clone)]
 pub struct Fq {
@@ -23,32 +23,32 @@ impl Fq {
 
 impl FieldOps for Fq {
     fn add(&self, rhs: &Self) -> Self {
-        Self {c0: Circuit::circuit_add(&self.c0, &rhs.c0), inp: None}
+        Self { c0: Circuit::circuit_add(&self.c0, &rhs.c0), inp: None }
     }
 
     fn sub(&self, rhs: &Self) -> Self {
-        Self {c0: Circuit::circuit_sub(&self.c0, &rhs.c0), inp: None}
+        Self { c0: Circuit::circuit_sub(&self.c0, &rhs.c0), inp: None }
     }
 
     fn mul(&self, rhs: &Self) -> Self {
-        Self {c0: Circuit::circuit_mul(&self.c0, &rhs.c0), inp: None}
+        Self { c0: Circuit::circuit_mul(&self.c0, &rhs.c0), inp: None }
     }
 
     fn div(&self, rhs: &Self) -> Self {
-        Self {c0: Circuit::circuit_mul(&self.c0, &Circuit::circuit_inv(&rhs.c0)), inp: None}
+        Self { c0: Circuit::circuit_mul(&self.c0, &Circuit::circuit_inv(&rhs.c0)), inp: None }
     }
 
     fn sqr(&self) -> Self {
-        Self {c0: Circuit::circuit_mul(&self.c0, &self.c0), inp: None}
+        Self { c0: Circuit::circuit_mul(&self.c0, &self.c0), inp: None }
     }
 
     fn neg(&self) -> Self {
         let tmp = Self::new_input(0); // Guaranteed because valid circuits have atleast 1 input
-        Self {c0: Circuit::circuit_sub(&Circuit::circuit_sub(&tmp.c0, &tmp.c0), &self.c0), inp: None}
+        Self { c0: Circuit::circuit_sub(&Circuit::circuit_sub(&tmp.c0, &tmp.c0), &self.c0), inp: None }
     }
 
     fn inv(&self) -> Self {
-        Self {c0: Circuit::circuit_inv(&self.c0), inp: None}
+        Self { c0: Circuit::circuit_inv(&self.c0), inp: None }
     }
 }
 

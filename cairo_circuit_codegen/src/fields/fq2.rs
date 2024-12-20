@@ -1,6 +1,6 @@
 use std::ops::{Add, Sub, Mul, Div, Neg};
-use crate::circuit::*;
-use crate::FieldOps;
+use crate::circuit::Circuit;
+use crate::fields::FieldOps;
 use crate::fields::fq::Fq;
 
 #[derive(Debug, Clone)]
@@ -19,22 +19,22 @@ impl Fq2 {
         }
     }
 
-    pub fn c0(&mut self) -> &mut Circuit {
-        self.c0.c0()
+    pub fn c0(&mut self) -> &mut Fq {
+        &mut self.c0
     }
 
-    pub fn c1(&mut self) -> &mut Circuit {
-        self.c1.c0()
+    pub fn c1(&mut self) -> &mut Fq {
+        &mut self.c1
     }
 }
 
 impl FieldOps for Fq2 {
     fn add(&self, rhs: &Self) -> Self {
-        Self {c0: &self.c0 + &rhs.c0, c1: &self.c1 + &rhs.c1, inp: None}
+        Self { c0: &self.c0 + &rhs.c0, c1: &self.c1 + &rhs.c1, inp: None }
     }
 
     fn sub(&self, rhs: &Self) -> Self {
-        Self {c0: &self.c0 - &rhs.c0, c1: &self.c1 - &rhs.c1, inp: None}
+        Self { c0: &self.c0 - &rhs.c0, c1: &self.c1 - &rhs.c1, inp: None }
     }
 
     fn mul(&self, rhs: &Self) -> Self {
@@ -47,7 +47,7 @@ impl FieldOps for Fq2 {
         let t3 = t2 -&(t0 + t1);
         let t4 = t0 - t1;
 
-        Self {c0: t4, c1: t3, inp: None}
+        Self { c0: t4, c1: t3, inp: None }
     }
 
     fn div(&self, rhs: &Self) -> Self {
@@ -62,17 +62,17 @@ impl FieldOps for Fq2 {
         let t0 = (a0 + a1) * (a0 - a1);
         let t1 = &(a0 + a0) * a1;
 
-        Self {c0: t0, c1: t1, inp: None}
+        Self { c0: t0, c1: t1, inp: None }
 
     }
     
     fn neg(&self,) -> Self {
-        Self {c0: -&self.c0, c1: -&self.c1, inp: None}
+        Self { c0: -&self.c0, c1: -&self.c1, inp: None }
     }
 
     fn inv(&self) -> Self {
-        let t = &Fq::inv(&(&self.c0.sqr() + &self.c1.sqr()));
-        Self {c0: &self.c0 * t, c1: &self.c0 * &(-t), inp: None}
+        let t = &(&self.c0.sqr() + &self.c1.sqr()).inv();
+        Self { c0: &self.c0 * t, c1: &self.c1 * &(-t), inp: None }
     }
     
 }
@@ -160,7 +160,8 @@ impl<'a> Neg for &'a Fq2 {
 
 #[cfg(test)]
 mod test {
-    use super::{CairoCodeBuilder, Fq2};
+    use super::Fq2;
+    use crate::circuit::CairoCodeBuilder;
     use crate::utils::utils::write_stdout; 
     #[test]
     pub fn test_fq2() {
@@ -168,8 +169,8 @@ mod test {
         let in1 = &Fq2::new_input([2, 3]); 
         
         let mut out = in0 * in1;
-        let out_0 = out.c0().format_circuit();
-        let out_1 = out.c1().format_circuit();
+        let out_0 = out.c0().c0().format_circuit();
+        let out_1 = out.c1().c0().format_circuit();
         let mut builder: CairoCodeBuilder = CairoCodeBuilder::new();
         builder.add_circuit("out_0", out_0);
         builder.add_circuit("out_1", out_1);

@@ -454,7 +454,7 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
         let y2_y1 = circuit_sub(y2, y1);
         let x2_x1 = circuit_sub(x2, x1);
         let x2_x1_inv = circuit_inverse(x2_x1); 
-        let mul = circuit_mul(y2_y1, x2_x1_inv); 
+        let mul: CE::<M::<S::<CI::<3>, CI::<1>>, I::<S::<CI::<2>, CI::<0>>>>> = circuit_mul(y2_y1, x2_x1_inv); 
         
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let x1 = from_u256(*self.x.c0);
@@ -650,7 +650,7 @@ fn chord_fq2(s: Affine<Fq2>, q: Affine<Fq2>) {
     let b0_add_b1: core::circuit::CircuitElement::<core::circuit::AddModGate::<core::circuit::MulModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<4>, core::circuit::CircuitInput::<0>>, core::circuit::InverseGate::<core::circuit::AddModGate::<core::circuit::MulModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<4>, core::circuit::CircuitInput::<0>>, core::circuit::SubModGate::<core::circuit::CircuitInput::<4>, core::circuit::CircuitInput::<0>>>, core::circuit::MulModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<5>, core::circuit::CircuitInput::<1>>, core::circuit::SubModGate::<core::circuit::CircuitInput::<5>, core::circuit::CircuitInput::<1>>>>>>,core::circuit::MulModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<5>, core::circuit::CircuitInput::<1>>, core::circuit::SubModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<0>, core::circuit::CircuitInput::<0>>, core::circuit::InverseGate::<core::circuit::AddModGate::<core::circuit::MulModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<4>, core::circuit::CircuitInput::<0>>, core::circuit::SubModGate::<core::circuit::CircuitInput::<4>, core::circuit::CircuitInput::<0>>>, core::circuit::MulModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<5>, core::circuit::CircuitInput::<1>>, core::circuit::SubModGate::<core::circuit::CircuitInput::<5>, core::circuit::CircuitInput::<1>>>>>>>>> = circuit_add(x2_x1_out_0, x2_x1_out_1);
     let t2 = circuit_mul(a0_add_a1, b0_add_b1);
     let t3 = circuit_add(t0, t1);
-    let t3: core::circuit::CircuitElement::<core::circuit::SubModGate::<core::circuit::MulModGate::<core::circuit::AddModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<6>, core::circuit::CircuitInput::<2>>, core::circuit::SubModGate::<core::circuit::CircuitInput::<7>, core::circuit::CircuitInput::<3>>>, core::circuit::AddModGate::<core::circuit::MulModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<4>, core::circuit::CircuitInput::<0>>, core::circuit::InverseGate::<core::circuit::AddModGate::<core::circuit::MulModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<4>, core::circuit::CircuitInput::<0>>, core::circuit::SubModGate::<core::circuit::CircuitInput::<4>, core::circuit::CircuitInput::<0>>>, core::circuit::MulModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<5>, core::circuit::CircuitInput::<1>>, core::circuit::SubModGate::<core::circuit::CircuitInput::<5>, core::circuit::CircuitInput::<1>>>>>>,core::circuit::MulModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<5>, core::circuit::CircuitInput::<1>>, core::circuit::SubModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<0>, core::circuit::CircuitInput::<0>>, core::circuit::InverseGate::<core::circuit::AddModGate::<core::circuit::MulModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<4>, core::circuit::CircuitInput::<0>>, core::circuit::SubModGate::<core::circuit::CircuitInput::<4>, core::circuit::CircuitInput::<0>>>, core::circuit::MulModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<5>, core::circuit::CircuitInput::<1>>, core::circuit::SubModGate::<core::circuit::CircuitInput::<5>, core::circuit::CircuitInput::<1>>>>>>>>>, core::circuit::AddModGate::<core::circuit::MulModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<6>, core::circuit::CircuitInput::<2>>, core::circuit::MulModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<4>, core::circuit::CircuitInput::<0>>, core::circuit::InverseGate::<core::circuit::AddModGate::<core::circuit::MulModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<4>, core::circuit::CircuitInput::<0>>, core::circuit::SubModGate::<core::circuit::CircuitInput::<4>, core::circuit::CircuitInput::<0>>>, core::circuit::MulModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<5>, core::circuit::CircuitInput::<1>>, core::circuit::SubModGate::<core::circuit::CircuitInput::<5>, core::circuit::CircuitInput::<1>>>>>>>, core::circuit::MulModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<7>, core::circuit::CircuitInput::<3>>, core::circuit::MulModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<5>, core::circuit::CircuitInput::<1>>, core::circuit::SubModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<0>, core::circuit::CircuitInput::<0>>, core::circuit::InverseGate::<core::circuit::AddModGate::<core::circuit::MulModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<4>, core::circuit::CircuitInput::<0>>, core::circuit::SubModGate::<core::circuit::CircuitInput::<4>, core::circuit::CircuitInput::<0>>>, core::circuit::MulModGate::<core::circuit::SubModGate::<core::circuit::CircuitInput::<5>, core::circuit::CircuitInput::<1>>, core::circuit::SubModGate::<core::circuit::CircuitInput::<5>, core::circuit::CircuitInput::<1>>>>>>>>>>> = circuit_sub(t2, t3);
+    let t3: CE::<S::<M::<A::<S::<CI::<6>, CI::<2>>, S::<CI::<7>, CI::<3>>>, A::<M::<S::<CI::<4>, CI::<0>>, I::<A::<M::<S::<CI::<4>, CI::<0>>, S::<CI::<4>, CI::<0>>>, M::<S::<CI::<5>, CI::<1>>, S::<CI::<5>, CI::<1>>>>>>, M::<S::<CI::<5>, CI::<1>>, S::<S::<CI::<0>, CI::<0>>, I::<A::<M::<S::<CI::<4>, CI::<0>>, S::<CI::<4>, CI::<0>>>, M::<S::<CI::<5>, CI::<1>>, S::<CI::<5>, CI::<1>>>>>>>>>, A::<M::<S::<CI::<6>, CI::<2>>, M::<S::<CI::<4>, CI::<0>>, I::<A::<M::<S::<CI::<4>, CI::<0>>, S::<CI::<4>, CI::<0>>>, M::<S::<CI::<5>, CI::<1>>, S::<CI::<5>, CI::<1>>>>>>>, M::<S::<CI::<7>, CI::<3>>, M::<S::<CI::<5>, CI::<1>>, S::<S::<CI::<0>, CI::<0>>, I::<A::<M::<S::<CI::<4>, CI::<0>>, S::<CI::<4>, CI::<0>>>, M::<S::<CI::<5>, CI::<1>>, S::<CI::<5>, CI::<1>>>>>>>>>>> = circuit_sub(t2, t3);
     let t4: CE::<S::<M::<S::<CI::<6>, CI::<2>>, M::<S::<CI::<4>, CI::<0>>, I::<A::<M::<S::<CI::<4>, CI::<0>>, S::<CI::<4>, CI::<0>>>, M::<S::<CI::<5>, CI::<1>>, S::<CI::<5>, CI::<1>>>>>>>, M::<S::<CI::<7>, CI::<3>>, M::<S::<CI::<5>, CI::<1>>, S::<S::<CI::<0>, CI::<0>>, I::<A::<M::<S::<CI::<4>, CI::<0>>, S::<CI::<4>, CI::<0>>>, M::<S::<CI::<5>, CI::<1>>, S::<CI::<5>, CI::<1>>>>>>>>>> = circuit_sub(t0, t1);
 
     let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
@@ -682,20 +682,20 @@ fn chord_fq2(s: Affine<Fq2>, q: Affine<Fq2>) {
     let slope1 = Fq2{c0: fq(outputs.get_output(t4).try_into().unwrap()), c1: fq(outputs.get_output(t3).try_into().unwrap())};
 }
 
-use core::circuit::CircuitDefinition;
-fn new_inputs<impl CD: CircuitDefinition<CES>, +Drop<CES>, CES>() ->  CD::CircuitType{
-    let lambda = CE::<CI<0>> {};
-    let x1 = CE::<CI<1>> {};
-    let y1 = CE::<CI<2>> {};
-    let x2 = CE::<CI<3>> {};        
+// use core::circuit::CircuitDefinition;
+// fn new_inputs<impl CD: CircuitDefinition<CES>, +Drop<CES>, CES>() ->  CD::CircuitType{
+//     let lambda = CE::<CI<0>> {};
+//     let x1 = CE::<CI<1>> {};
+//     let y1 = CE::<CI<2>> {};
+//     let x2 = CE::<CI<3>> {};        
     
-    let lambda_sqr = circuit_mul(lambda, lambda);  // slope.sqr()
-    let x_slope_sub_sqr_x1 = circuit_sub(lambda_sqr, x1); // slope.sqr() - *self.x
-    let x_slope_sub_x1_x2 = circuit_sub(x_slope_sub_sqr_x1, x2); // slope.sqr() - *self.x - x2
+//     let lambda_sqr = circuit_mul(lambda, lambda);  // slope.sqr()
+//     let x_slope_sub_sqr_x1 = circuit_sub(lambda_sqr, x1); // slope.sqr() - *self.x
+//     let x_slope_sub_x1_x2 = circuit_sub(x_slope_sub_sqr_x1, x2); // slope.sqr() - *self.x - x2
 
-    let y_slope_sub_x1_x = circuit_sub(x1, x_slope_sub_x1_x2); // (*self.x - x)
-    let y_slope_mul_lambda_x1_x = circuit_mul(lambda, y_slope_sub_x1_x); // slope * (*self.x - x)
-    let y_slope_lambda_sub_lambda_x_y = circuit_sub(y_slope_mul_lambda_x1_x, y1); // slope * (*self.x - x) - *self.y
+//     let y_slope_sub_x1_x = circuit_sub(x1, x_slope_sub_x1_x2); // (*self.x - x)
+//     let y_slope_mul_lambda_x1_x = circuit_mul(lambda, y_slope_sub_x1_x); // slope * (*self.x - x)
+//     let y_slope_lambda_sub_lambda_x_y = circuit_sub(y_slope_mul_lambda_x1_x, y1); // slope * (*self.x - x) - *self.y
 
-    (y_slope_lambda_sub_lambda_x_y)
-}
+//     (y_slope_lambda_sub_lambda_x_y)
+// }
