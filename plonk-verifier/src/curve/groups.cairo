@@ -681,3 +681,21 @@ fn chord_fq2(s: Affine<Fq2>, q: Affine<Fq2>) {
     };
     let slope1 = Fq2{c0: fq(outputs.get_output(t4).try_into().unwrap()), c1: fq(outputs.get_output(t3).try_into().unwrap())};
 }
+
+use core::circuit::CircuitDefinition;
+fn new_inputs<impl CD: CircuitDefinition<CES>, +Drop<CES>, CES>() ->  CD::CircuitType{
+    let lambda = CE::<CI<0>> {};
+    let x1 = CE::<CI<1>> {};
+    let y1 = CE::<CI<2>> {};
+    let x2 = CE::<CI<3>> {};        
+    
+    let lambda_sqr = circuit_mul(lambda, lambda);  // slope.sqr()
+    let x_slope_sub_sqr_x1 = circuit_sub(lambda_sqr, x1); // slope.sqr() - *self.x
+    let x_slope_sub_x1_x2 = circuit_sub(x_slope_sub_sqr_x1, x2); // slope.sqr() - *self.x - x2
+
+    let y_slope_sub_x1_x = circuit_sub(x1, x_slope_sub_x1_x2); // (*self.x - x)
+    let y_slope_mul_lambda_x1_x = circuit_mul(lambda, y_slope_sub_x1_x); // slope * (*self.x - x)
+    let y_slope_lambda_sub_lambda_x_y = circuit_sub(y_slope_mul_lambda_x1_x, y1); // slope * (*self.x - x) - *self.y
+
+    (y_slope_lambda_sub_lambda_x_y)
+}

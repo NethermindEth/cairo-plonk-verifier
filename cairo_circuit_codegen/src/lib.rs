@@ -1,15 +1,15 @@
-mod circuit;
-mod fq;
-mod fq2;
+pub mod circuit;
+mod utils;
+mod fields; 
 
 trait FieldOps {
-    fn add(lhs: &Self, rhs: &Self) -> Self;
-    fn sub(lhs: &Self, rhs: &Self) -> Self;
-    fn mul(lhs: &Self, rhs: &Self) -> Self;
-    fn div(lhs: &Self, rhs: &Self) -> Self;
-    fn sqr(lhs: &Self) -> Self;
-    fn neg(lhs: &Self) -> Self;
-    fn inv(lhs: &Self) -> Self;
+    fn add(&self, rhs: &Self) -> Self;
+    fn sub(&self, rhs: &Self) -> Self;
+    fn mul(&self, rhs: &Self) -> Self;
+    fn div(&self, rhs: &Self) -> Self;
+    fn sqr(&self,) -> Self;
+    fn neg(&self,) -> Self;
+    fn inv(&self,) -> Self;
 }
 
 #[cfg(test)]

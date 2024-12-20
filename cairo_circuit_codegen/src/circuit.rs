@@ -1,5 +1,4 @@
-
-use crate::fq2::*; 
+use crate::fields::affine::AffineFq2;
 
 #[derive(Clone, Default, Debug)]
 pub struct Circuit {
