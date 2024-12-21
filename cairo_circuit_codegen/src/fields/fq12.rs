@@ -16,11 +16,11 @@ impl Fq12 {
         }
     }
 
-    pub fn c0(&mut self) -> &mut Fq6 {
-        &mut self.c0
+    pub fn c0(&self) -> &Fq6 {
+        &self.c0
     }
 
-    pub fn c1(&mut self) -> &mut Fq6 {
-        &mut self.c1
+    pub fn c1(&self) -> &Fq6 {
+        &self.c1
     }
 }

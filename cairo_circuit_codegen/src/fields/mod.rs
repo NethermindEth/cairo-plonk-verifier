@@ -3,6 +3,7 @@ pub(crate) mod fq2;
 pub(crate) mod fq6;
 pub(crate) mod fq12;
 pub(crate) mod affine;
+pub(crate) mod sparse;
 
 pub trait FieldOps {
     fn add(&self, rhs: &Self) -> Self;

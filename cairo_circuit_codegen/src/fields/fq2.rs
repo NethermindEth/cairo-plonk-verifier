@@ -1,8 +1,6 @@
 use std::ops::{Add, Sub, Mul, Div, Neg};
 use crate::circuit::Circuit;
-use crate::fields::FieldOps;
-use crate::fields::fq::Fq;
-
+use super::{FieldOps, fq::Fq};
 #[derive(Debug, Clone)]
 pub struct Fq2 {
     c0: Fq,
@@ -19,14 +17,20 @@ impl Fq2 {
         }
     }
 
-    pub fn c0(&mut self) -> &mut Fq {
-        &mut self.c0
+    pub fn c0(&self) -> &Fq {
+        &self.c0
     }
 
-    pub fn c1(&mut self) -> &mut Fq {
-        &mut self.c1
+    pub fn c1(&self) -> &Fq {
+        &self.c1
+    }
+    
+    // Todo: Optimize by passing in 9 as circuit input and remove scaling 9 function
+    pub fn mul_by_xi(&self) -> Self {
+        Self {c0: &self.c0().scl_9() - &self.c1(), c1: &self.c1().scl_9() + &self.c0(), inp: None }
     }
 }
+
 
 impl FieldOps for Fq2 {
     fn add(&self, rhs: &Self) -> Self {

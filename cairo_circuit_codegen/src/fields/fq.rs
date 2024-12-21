@@ -1,6 +1,6 @@
 use std::ops::{Add, Sub, Mul, Div, Neg};
 use crate::circuit::*;
-use crate::fields::FieldOps;
+use super::FieldOps;
 
 #[derive(Debug, Clone)]
 pub struct Fq {
@@ -16,8 +16,15 @@ impl Fq {
         } 
     }
 
-    pub fn c0(&mut self) -> &mut Circuit {
-        &mut self.c0
+    pub fn c0(&self) -> &Circuit {
+        &self.c0
+    }
+
+    pub fn scl_9(&self) -> Self {
+        let two = &(self + self);
+        let four = &(two + two);
+        let eight = &(four + four);
+        eight + self
     }
 }
 

@@ -11,7 +11,7 @@ impl Circuit {
     }
 
     // Formats a circuit with the circuit element wrapper and terminating brackets
-    pub fn format_circuit(&mut self) -> Circuit {
+    pub fn format_circuit(&self) -> Circuit {
         Circuit::new(format!(r#"CE::<{}> {{}};"#, self.inner))
     }
 

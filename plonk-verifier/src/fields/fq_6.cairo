@@ -265,7 +265,7 @@ impl Fq6Ops of FieldOps<Fq6> {
 
     #[inline(always)]
     fn mul(self: Fq6, rhs: Fq6) -> Fq6 {
-        //
+        
         // let Fq6 { c0: a0, c1: a1, c2: a2 } = self;
         // let Fq6 { c0: b0, c1: b1, c2: b2 } = rhs;
         // let field_nz = get_field_nz();
@@ -280,7 +280,7 @@ impl Fq6Ops of FieldOps<Fq6> {
         // // c2 = (a0 + a2)(b0 + b2) - v0 + v1 - v2,
         // let C2 = a0.u_add(a2).u_mul(b0.u_add(b2)) - V0 + V1 - V2;
 
-        // (C0, C1, C2)
+        // (C0, C1, C2);
 
         let v0 = Fq2Ops::mul(self.c0, rhs.c0);
         let v1 = Fq2Ops::mul(self.c1, rhs.c1);
