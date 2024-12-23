@@ -9,6 +9,10 @@ pub struct Fq {
 }
 
 impl Fq {
+    pub fn new(c0: Circuit, inp: Option<usize>) -> Self {
+        Fq {c0, inp }
+    }
+
     pub fn new_input(idx: usize) -> Self {
         Self {
             c0: Circuit::circuit_input(idx), 

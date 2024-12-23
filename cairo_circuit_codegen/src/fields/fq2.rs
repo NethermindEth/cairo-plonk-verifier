@@ -9,6 +9,10 @@ pub struct Fq2 {
 }
 
 impl Fq2 {
+    pub fn new(c0: Fq, c1: Fq, inp: Option<[usize; 2]>) -> Self {
+        Fq2 {c0, c1, inp }
+    }
+
     pub fn new_input(idx: [usize; 2]) -> Self {
         Self {
             c0: Fq::new_input(idx[0]), 

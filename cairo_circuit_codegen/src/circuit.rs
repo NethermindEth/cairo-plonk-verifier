@@ -1,4 +1,4 @@
-use crate::fields::affine::Affine;
+use crate::fields::{affine::Affine, fq12::Fq12};
 
 #[derive(Clone, Default, Debug)]
 pub struct Circuit {
@@ -129,6 +129,36 @@ impl CairoCodeBuilder {
             CircuitElement as CE,\n\
             };\n".to_string();
         self.code = imports + self.as_str();
+        self
+    }
+
+    pub fn add_fq12(&mut self, out: Fq12) -> &mut Self {
+        let c0 = out.c0().c0().c0().c0().format_circuit();
+        let c1 = out.c0().c0().c1().c0().format_circuit();
+        let c2 = out.c0().c1().c0().c0().format_circuit();
+        let c3 = out.c0().c1().c1().c0().format_circuit();
+        let c4 = out.c0().c2().c0().c0().format_circuit();
+        let c5 = out.c0().c2().c1().c0().format_circuit();
+        let c6 = out.c1().c0().c0().c0().format_circuit();
+        let c7 = out.c1().c0().c1().c0().format_circuit();
+        let c8 = out.c1().c1().c0().c0().format_circuit();
+        let c9 = out.c1().c1().c1().c0().format_circuit();
+        let c10 = out.c1().c2().c0().c0().format_circuit();
+        let c11 = out.c1().c2().c1().c0().format_circuit();
+
+        self.add_circuit("c0", c0);
+        self.add_circuit("c1", c1);
+        self.add_circuit("c2", c2);
+        self.add_circuit("c3", c3);
+        self.add_circuit("c4", c4);
+        self.add_circuit("c5", c5);
+        self.add_circuit("c6", c6);
+        self.add_circuit("c7", c7);
+        self.add_circuit("c8", c8);
+        self.add_circuit("c9", c9);
+        self.add_circuit("c10", c10);
+        self.add_circuit("c11", c11);
+
         self
     }
 
