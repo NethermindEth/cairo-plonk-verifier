@@ -26,7 +26,7 @@ impl SingleMillerPrecompute of MillerPrecompute<PtG1, PtG2, PreCompute> {
     fn precompute(self: (PtG1, PtG2), field_nz: NonZero<u256>) -> (PreCompute, PtG2) {
         let (p, q) = self;
         let ppc = p_precompute(p, field_nz);
-        let precomp = PreCompute { ppc, neg_q: q.ec_neg(), field_nz, p, q, };
+        let precomp = PreCompute { ppc, neg_q: q.neg(), field_nz, p, q, };
         (precomp, q.clone(),)
     }
 }

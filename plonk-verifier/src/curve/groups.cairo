@@ -31,11 +31,11 @@ trait ECOperations<TCoord> {
     fn y_on_slope(self: @Affine<TCoord>, slope: TCoord, x: TCoord) -> TCoord;
     fn pt_on_slope(self: @Affine<TCoord>, slope: TCoord, x2: TCoord) -> Affine<TCoord>;
     fn chord(self: @Affine<TCoord>, rhs: Affine<TCoord>) -> TCoord;
-    fn ec_add(self: @Affine<TCoord>, rhs: Affine<TCoord>) -> Affine<TCoord>;
+    fn add(self: @Affine<TCoord>, rhs: Affine<TCoord>) -> Affine<TCoord>;
     fn tangent(self: @Affine<TCoord>) -> TCoord;
-    fn ec_double(self: @Affine<TCoord>) -> Affine<TCoord>;
+    fn double(self: @Affine<TCoord>) -> Affine<TCoord>;
     fn multiply(self: @Affine<TCoord>, multiplier: u384) -> Affine<TCoord>;
-    fn ec_neg(self: @Affine<TCoord>) -> Affine<TCoord>;
+    fn neg(self: @Affine<TCoord>) -> Affine<TCoord>;
 }
 
 trait ECOperationsCircuitFq {
@@ -327,7 +327,7 @@ impl AffineOps<
     }
 
     // #[inline(always)]
-    fn ec_add(self: @Affine<T>, rhs: Affine<T>) -> Affine<T> {
+    fn add(self: @Affine<T>, rhs: Affine<T>) -> Affine<T> {
         self.pt_on_slope(self.chord(rhs), rhs.x)
     }
 
@@ -343,7 +343,7 @@ impl AffineOps<
     }
 
     // #[inline(always)]
-    fn ec_double(self: @Affine<T>) -> Affine<T> {
+    fn double(self: @Affine<T>) -> Affine<T> {
         self.pt_on_slope(self.tangent(), *self.x)
     }
 
@@ -366,13 +366,13 @@ impl AffineOps<
                         // self is zero, return rhs
                         dbl_step
                     } else {
-                        result.ec_add(dbl_step)
+                        result.add(dbl_step)
                     }
             }
             if q == 0 {
                 break;
             }
-            dbl_step = dbl_step.ec_double();
+            dbl_step = dbl_step.double();
             multiplier_256 = q;
         };
         result
@@ -395,20 +395,20 @@ impl AffineOps<
     //                     // self is zero, return rhs
     //                     dbl_step
     //                 } else {
-    //                     result.ec_add(dbl_step)
+    //                     result.add(dbl_step)
     //                 }
     //         }
     //         if q == 0 {
     //             break;
     //         }
-    //         dbl_step = dbl_step.ec_double();
+    //         dbl_step = dbl_step.double();
     //         multiplier = q;
     //     };
     //     result
     // }
 
     #[inline(always)]
-    fn ec_neg(self: @Affine<T>) -> Affine<T> {
+    fn neg(self: @Affine<T>) -> Affine<T> {
         Affine { x: *self.x, y: (*self.y).neg() }
     }
 }
