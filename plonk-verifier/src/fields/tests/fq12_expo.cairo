@@ -12,7 +12,7 @@ use plonk_verifier::curve::{
 };
 use plonk_verifier::fields::fq_12_squaring::{x2, x4, X2, Krbn2345, Fq12Squaring};
 use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
-use plonk_verifier::fields::print::{Fq12Display, Fq2Display};
+// use plonk_verifier::fields::print::{Fq12Display, Fq2Display};
 use debug::PrintTrait;
 
 fn a_cyc() -> Fq12 {

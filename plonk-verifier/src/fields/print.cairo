@@ -83,7 +83,6 @@ impl Fq12Display of Display<Fq12> {
         )
     }
 }
-
 impl FqPrintImpl of PrintTrait<Fq> {
     fn print(self: Fq) {
         self.c0.print();
@@ -111,3 +110,4 @@ impl Fq12PrintImpl of PrintTrait<Fq12> {
         self.c1.print();
     }
 }
+

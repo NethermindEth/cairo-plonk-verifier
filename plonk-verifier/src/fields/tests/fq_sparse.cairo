@@ -5,7 +5,7 @@ use plonk_verifier::fields::{fq, fq2, Fq2, fq12, Fq12, Fq6, fq6, Fq12Ops, Fq12Ex
 use plonk_verifier::curve::{FIELD, u512, get_field_nz};
 use plonk_verifier::fields::{FqSparse, Fq6Sparse01, Fq12Sparse034, Fq12Sparse01234, sparse_fq6};
 use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
-use plonk_verifier::fields::print::{Fq12Display, Fq2Display};
+// use plonk_verifier::fields::print::{Fq12Display, Fq2Display};
 use debug::PrintTrait;
 
 

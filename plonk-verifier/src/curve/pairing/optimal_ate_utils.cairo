@@ -9,7 +9,7 @@ use plonk_verifier::fields::{
     Fq, fq, Fq2, fq2, Fq6, Fq12, Fq12Utils, Fq12Ops, FqOps, Fq2Utils, Fq2Ops, Fq12Exponentiation,
 };
 use plonk_verifier::fields::{Fq12Sparse034, Fq12Sparse01234, FqSparse};
-use plonk_verifier::fields::print::{Fq2Display, Fq12Display, FqDisplay};
+// use plonk_verifier::fields::print::{Fq2Display, Fq12Display, FqDisplay};
 use plonk_verifier::fields::frobenius::pi;
 
 // This implementation follows the paper at https://eprint.iacr.org/2022/1162
@@ -36,7 +36,7 @@ use plonk_verifier::fields::frobenius::pi;
 // (1, 0, 0, -λ·xₚ/yₚ, (λxₛ − yₛ)/yₚ, 0)
 //
 
-#[derive(Copy, Drop, Serde)]
+#[derive(Copy, Drop)]
 struct PPrecompute {
     neg_x_over_y: Fq,
     y_inv: Fq,
@@ -51,13 +51,15 @@ type PPre = PPrecompute;
 type NZNum = NonZero<u256>;
 type F034 = Fq12Sparse034;
 
-#[derive(Copy, Drop, Serde)]
+#[derive(Copy, Drop)]
 struct LineFn {
     slope: Fq2,
     c: Fq2,
 }
 
 mod line_fn {
+    use core::circuit::conversions::from_u256;
+
     use plonk_verifier::fields::fq_2::Fq2FrobeniusTrait;
     use plonk_verifier::fields::fq_sparse::FqSparseTrait;
     use plonk_verifier::traits::{FieldShortcuts, FieldUtils};
@@ -72,7 +74,7 @@ mod line_fn {
         Fq12Exponentiation,
     };
     use plonk_verifier::fields::{Fq12Sparse034, Fq12Sparse01234, FqSparse};
-    use plonk_verifier::fields::print::{Fq2Display, Fq12Display, FqDisplay};
+    // use plonk_verifier::fields::print::{Fq2Display, Fq12Display, FqDisplay};
     use plonk_verifier::fields::frobenius::pi;
     use super::{LineFn, PPre, NZNum, F034};
 
@@ -85,28 +87,29 @@ mod line_fn {
     // Multiply by Fp2::NONRESIDUE^(2((q^1) - 1)/6)
     #[inline(always)]
     fn fq2_mul_nr_1p_2(a: Fq2) -> Fq2 {
-        a * fq2(pi::Q1X2_C0, pi::Q1X2_C1)
+        a * fq2(from_u256(pi::Q1X2_C0), from_u256(pi::Q1X2_C1))
     }
+
 
     // For πₚ frobeneus map
     // Multiply by Fp2::NONRESIDUE^(3((q^1) - 1)/6)
     #[inline(always)]
     fn fq2_mul_nr_1p_3(a: Fq2) -> Fq2 {
-        a * fq2(pi::Q1X3_C0, pi::Q1X3_C1)
+        a * fq2(from_u256(pi::Q1X3_C0), from_u256(pi::Q1X3_C1))
     }
 
     // For πₚ² frobeneus map
     // Multiply by Fp2::NONRESIDUE^(2(p^2-1)/6)
     #[inline(always)]
     fn fq2_mul_nr_2p_2(a: Fq2) -> Fq2 {
-        a.scale(fq(pi::Q2X2_C0))
+        a.scale(pi::Q2X2_C0)
     }
 
     // For πₚ² frobeneus map
     // Multiply by Fp2::NONRESIDUE^(3(p^2-1)/6)
     #[inline(always)]
     fn fq2_mul_nr_2p_3(a: Fq2) -> Fq2 {
-        a.scale(fq(pi::Q2X3_C0))
+        a.scale(pi::Q2X3_C0)
     }
 
     // https://eprint.iacr.org/2022/1162 (Section 6.1)
@@ -197,11 +200,17 @@ mod line_fn {
 
 #[inline(always)]
 fn line_fn_at_p(line: LineFn, p_pre: @PPre) -> F034 {
-    F034 { c3: line.slope.scale(*p_pre.neg_x_over_y), c4: line.c.scale(*p_pre.y_inv), }
+    F034 {
+        c3: line.slope.scale((*p_pre.neg_x_over_y.c0).try_into().unwrap()),
+        c4: line.c.scale((*p_pre.y_inv.c0).try_into().unwrap()),
+    }
 }
 
 fn line_evaluation_at_p(slope: Fq2, p_pre: @PPre, s: PtG2) -> F034 {
-    F034 { c3: slope.scale(*p_pre.neg_x_over_y), c4: (slope * s.x - s.y).scale(*p_pre.y_inv), }
+    F034 {
+        c3: slope.scale((*p_pre.neg_x_over_y.c0).try_into().unwrap()),
+        c4: (slope * s.x - s.y).scale((*p_pre.y_inv.c0).try_into().unwrap()),
+    }
 }
 
 #[inline(always)]

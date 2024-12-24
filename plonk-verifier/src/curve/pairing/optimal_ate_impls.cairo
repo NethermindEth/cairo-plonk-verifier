@@ -1,18 +1,16 @@
 use plonk_verifier::fields::fq_sparse::FqSparseTrait;
-use plonk_verifier::traits::{FieldShortcuts, FieldUtils};
-use plonk_verifier::curve::groups::ECOperations;
-use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
+use plonk_verifier::traits::{FieldShortcuts, FieldUtils, MillerPrecompute, MillerSteps};
 use plonk_verifier::fields::{
-    Fq, Fq2, fq2, Fq6, Fq12, Fq12Utils, Fq12Ops, FqOps, Fq2Utils, Fq2Ops, Fq12Exponentiation,
+    Fq, Fq2, fq2, Fq6, Fq12, FqOps, Fq2Utils, Fq2Ops, Fq12Utils, Fq12Ops, Fq12Exponentiation,
+    Fq12Sparse034, Fq12Sparse01234, FqSparse,
 };
-use plonk_verifier::fields::{Fq12Sparse034, Fq12Sparse01234, FqSparse};
-use plonk_verifier::fields::print::{Fq2Display, Fq12Display, FqDisplay};
-use plonk_verifier::curve::groups::{g1, g2, ECGroup};
-use plonk_verifier::curve::groups::{Affine, AffineG1 as PtG1, AffineG2 as PtG2, AffineOps};
-use plonk_verifier::traits::{MillerPrecompute, MillerSteps};
+use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
+use plonk_verifier::curve::groups::{
+    g1, g2, ECGroup, ECOperations, Affine, AffineG1 as PtG1, AffineG2 as PtG2, AffineOps,
+};
 use plonk_verifier::curve::pairing::optimal_ate_utils::{
     PPrecompute, p_precompute, step_dbl_add_to_f, step_dbl_add, step_double_to_f, step_double,
-    correction_step_to_f
+    correction_step_to_f,
 };
 
 #[derive(Copy, Drop)]
@@ -28,7 +26,7 @@ impl SingleMillerPrecompute of MillerPrecompute<PtG1, PtG2, PreCompute> {
     fn precompute(self: (PtG1, PtG2), field_nz: NonZero<u256>) -> (PreCompute, PtG2) {
         let (p, q) = self;
         let ppc = p_precompute(p, field_nz);
-        let precomp = PreCompute { ppc, neg_q: q.neg(), field_nz, p, q, };
+        let precomp = PreCompute { ppc, neg_q: q.ec_neg(), field_nz, p, q, };
         (precomp, q.clone(),)
     }
 }

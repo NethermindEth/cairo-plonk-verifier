@@ -16,7 +16,7 @@ use constants::{
     FIELDSQHIGH, U256_MOD_FIELD, U256_MOD_FIELD_INV, B, t_naf
 };
 use constants::{ATE_LOOP_COUNT, LOG_ATE_LOOP_COUNT, six_t_plus_2_naf_rev_trimmed};
-use plonk_verifier::fields::print::u512Display;
+// use plonk_verifier::fields::print::u512Display;
 use groups::{AffineG1, AffineG2};
 
 // #[cfg(test)]
@@ -62,7 +62,7 @@ fn circuit_scale_9(a: f::Fq) -> f::Fq {
     let a4 = circuit_add(a2, a2);
     let a8 = circuit_add(a4, a4);
     let a9 = circuit_add(a8, a_in);
-    let a_in = from_u256(a.c0);
+    let a_in = a.c0;
     let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
     let outputs = match (a9,).new_inputs().next(a_in).done().eval(modulus) {
         Result::Ok(outputs) => { outputs },
@@ -249,8 +249,8 @@ fn mul_by_xi_nz_as_circuit(t: f::Fq2) -> f::Fq2 {
     let t0_mul_9_sub_t1 = circuit_sub(t0_mul_9, t1);
     let t0_add_t1_mul_9 = circuit_add(t0, t1_mul_9);
 
-    let t0 = from_u256(t.c0.c0);
-    let t1 = from_u256(t.c1.c0);
+    let t0 = t.c0.c0;
+    let t1 = t.c1.c0;
     let scl = [9, 0, 0, 0];
 
     let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
