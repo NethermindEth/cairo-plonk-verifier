@@ -62,9 +62,11 @@ mod test {
     use crate::utils::utils::write_stdout; 
     #[test]
     pub fn test_fq12() {
-        // let tmp: [usize; 12] = [0; 12].into_iter().map(|i|i + 1).collect();
-        let in0 = &Fq12::new_input([0,1,2,3,4,5,6,7,8,9,10,11]);
-        let in1 = &Fq12::new_input([12,13,14,15,16,17,18,19,20,21,22,23]); 
+        let idx_0: [usize; 12] = (1..=12).collect::<Vec<usize>>().try_into().unwrap();
+        let idx_1: [usize; 12] = (12..=24).collect::<Vec<usize>>().try_into().unwrap();
+        
+        let in0 = &Fq12::new_input(idx_0);
+        let in1 = &Fq12::new_input(idx_1); 
         
         let out = Fq12::mul(in0, in1);
 

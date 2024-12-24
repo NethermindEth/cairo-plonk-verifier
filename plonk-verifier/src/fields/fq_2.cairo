@@ -24,6 +24,7 @@ use core::circuit::{
 	CircuitInput as CI,
 	CircuitElement as CE,
 };
+
 #[derive(Default, Copy, Drop, Serde, Debug)]
 struct Fq2 {
     c0: Fq,

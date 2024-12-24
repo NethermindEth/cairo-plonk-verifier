@@ -27,6 +27,10 @@ impl Fq6Sparse01 {
 }
 
 impl Fq12Sparse034 {
+    pub fn new(c3: Fq2, c4: Fq2) -> Self {
+        Self { c3, c4 }
+    }
+
     pub fn c3(&self) -> &Fq2 {
         &self.c3
     }

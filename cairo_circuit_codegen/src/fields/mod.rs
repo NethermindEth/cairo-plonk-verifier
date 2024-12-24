@@ -5,6 +5,11 @@ pub(crate) mod fq12;
 pub(crate) mod affine;
 pub(crate) mod sparse;
 
+pub trait FieldUtils {
+    type FieldChild; 
+    fn scale(&self, by: &Self::FieldChild) -> Self; 
+}
+
 pub trait FieldOps {
     fn add(&self, rhs: &Self) -> Self;
     fn sub(&self, rhs: &Self) -> Self;

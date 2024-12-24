@@ -1,6 +1,6 @@
 use std::ops::{Add, Sub, Mul, Div, Neg};
 use crate::circuit::Circuit;
-use super::{FieldOps, fq::Fq};
+use super::{fq::Fq, FieldOps, FieldUtils};
 #[derive(Debug, Clone)]
 pub struct Fq2 {
     c0: Fq,
@@ -35,6 +35,13 @@ impl Fq2 {
     }
 }
 
+impl FieldUtils for Fq2 {
+    type FieldChild = Fq; 
+
+    fn scale(&self, by: &Self::FieldChild) -> Self {
+        Self {c0: self.c0() * by, c1: self.c1() * by, inp: None }
+    }
+}
 
 impl FieldOps for Fq2 {
     fn add(&self, rhs: &Self) -> Self {
