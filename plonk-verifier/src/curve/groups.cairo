@@ -297,7 +297,7 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
 
 // Cairo does not support generic and specific implementations concurrently
 impl AffineOps<
-    T, +FOps<T>, +FShort<T>, +Copy<T>, +Print<T>, +Drop<T>, impl ECGImpl: ECGroup<T>
+    T, +FOps<T>, +FShort<T>, +Copy<T>, +Drop<T>, impl ECGImpl: ECGroup<T>
 > of ECOperations<T> {
     #[inline(always)]
     fn x_on_slope(self: @Affine<T>, slope: T, x2: T) -> T {
@@ -407,11 +407,11 @@ impl AffineOps<
     //     result
     // }
 
-    #[inline(always)]
     fn neg(self: @Affine<T>) -> Affine<T> {
         Affine { x: *self.x, y: (*self.y).neg() }
     }
 }
+
 
 #[inline(always)]
 fn g1(x: u256, y: u256) -> Affine<Fq> {

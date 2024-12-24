@@ -12,6 +12,7 @@ use plonk_verifier::{
         byte_array_to_decimal_without_ascii_without_rev, convert_le_to_be, decimal_to_byte_array,
         hex_to_decimal, reverse_endianness,
     },
+    math::circuit_mod::{add_co, zero_384}
 };
 
 #[derive(Drop)]
@@ -59,8 +60,8 @@ impl Transcript of Keccak256Transcript<PlonkTranscript> {
                 .len() {
                     match self.data.at(i) {
                         TranscriptElement::Polynomial(pt) => {
-                            let x = (pt.x.c0.clone()).try_into().unwrap();
-                            let y = (pt.y.c0.clone()).try_into().unwrap();
+                            let x: u256 = (pt.x.c0.clone()).try_into().unwrap();
+                            let y: u256 = (pt.y.c0.clone()).try_into().unwrap();
                             let mut x_bytes: ByteArray = decimal_to_byte_array(x);
                             let mut y_bytes: ByteArray = decimal_to_byte_array(y);
                             buffer.append(@x_bytes);
@@ -76,7 +77,8 @@ impl Transcript of Keccak256Transcript<PlonkTranscript> {
 
         let le_value = keccak::compute_keccak_byte_array(@buffer);
         let be_u256 = reverse_endianness(le_value);
-        let challenge: Fq = fq(from_u256(be_u256));
+        let be_mod = add_co(from_u256(be_u256), zero_384);
+        let challenge: Fq = fq(be_mod);
 
         challenge
     }
