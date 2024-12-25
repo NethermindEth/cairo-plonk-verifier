@@ -53,6 +53,15 @@ impl Fq12 {
 
         Self { c0, c1, inp: None }
     }
+
+    pub fn sqr(&self) -> Self {
+        let (a0, a1) = (self.c0(), self.c1()); 
+        let v = a0 * a1;
+        let c0 = &(&((a0 + a1) * (a0 + &a1.mul_by_v())) - &v) - &v.mul_by_v();
+        let c1 = &v + &v;
+
+        Fq12 { c0, c1, inp: None }
+    }
 }
 
 #[cfg(test)]
@@ -69,6 +78,20 @@ mod test {
         let in1 = &Fq12::new_input(idx_1); 
         
         let out = Fq12::mul(in0, in1);
+
+        let mut builder: CairoCodeBuilder = CairoCodeBuilder::new();
+        builder.add_fq12(out);
+
+        let code = builder.build();
+        write_stdout("out.cairo", code);
+    }
+
+    #[test]
+    pub fn test_fq12_sqr() {
+        let idx_0: [usize; 12] = (0..=11).collect::<Vec<usize>>().try_into().unwrap();
+        
+        let in0 = &Fq12::new_input(idx_0);
+        let out = Fq12::sqr(in0);
 
         let mut builder: CairoCodeBuilder = CairoCodeBuilder::new();
         builder.add_fq12(out);

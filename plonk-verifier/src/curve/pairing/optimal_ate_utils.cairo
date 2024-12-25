@@ -57,6 +57,7 @@ struct LineFn {
     slope: Fq2,
     c: Fq2,
 }
+
 use plonk_verifier::curve::constants::FIELD_U384;
 use core::circuit::{
     RangeCheck96, AddMod, MulMod, u96, CircuitElement, CircuitInput, circuit_add, circuit_sub,
