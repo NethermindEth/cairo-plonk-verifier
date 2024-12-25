@@ -20,6 +20,6 @@ circuit_macros = { path = "../circuit-macros" }
 assert_macros = "2.8.2" 
 
 [lib]
-sierra = true
-casm = true
+# sierra = true
+# casm = true
 
