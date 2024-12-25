@@ -9,415 +9,414 @@ use core::traits::Into;
 use plonk_verifier::curve::groups::{g1, g2, AffineG1, AffineG2, Fq, Fq2};
 use plonk_verifier::curve::constants::{ORDER};
 use plonk_verifier::fields::{fq};
-// #[test]
-// fn test_plonk_verify() {
-//     // verification PlonkVerificationKey
-//     let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
-//         constants::verification_key();
-//     let verification_key = PlonkVerificationKey {
-//         n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
-//     };
+#[test]
+fn test_plonk_verify() {
+    // verification PlonkVerificationKey
+    let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
+        constants::verification_key();
+    let verification_key = PlonkVerificationKey {
+        n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
+    };
 
-//     // proof
-//     let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw) =
-//         constants::proof();
-//     let proof = PlonkProof {
-//         A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
-//     };
+    // proof
+    let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw) =
+        constants::proof();
+    let proof = PlonkProof {
+        A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
+    };
 
-//     //public_signals
-//     let public_signals = constants::public_inputs();
+    //public_signals
+    let public_signals = constants::public_inputs();
 
-//     let verified = PlonkVerifier::verify(verification_key, proof, public_signals);
-//     assert(verified, 'verification failed');
-// }
-// #[test]
-// fn test_is_on_curve() {
-//     let pt_on_curve = g1(
-//         4693417943536520268746058560989260808135478372449023987176805259899316401080,
-//         8186764010206899711756657704517859444555824539207093839904632766037261603989
-//     );
-//     let pt_not_on_curve = g1(
-//         4693417943536520268746058560989260808135478372449023987176805259899316401080,
-//         8186764010206899711756657704517859444555824539207093839904632766037261603987
-//     );
-//     assert_eq!(PlonkVerifier::is_on_curve(pt_on_curve), true);
-//     assert_eq!(PlonkVerifier::is_on_curve(pt_not_on_curve), false);
-// }
+    let verified = PlonkVerifier::verify(verification_key, proof, public_signals);
+    assert(verified, 'verification failed');
+}
+#[test]
+fn test_is_on_curve() {
+    let pt_on_curve = g1(
+        4693417943536520268746058560989260808135478372449023987176805259899316401080,
+        8186764010206899711756657704517859444555824539207093839904632766037261603989
+    );
+    let pt_not_on_curve = g1(
+        4693417943536520268746058560989260808135478372449023987176805259899316401080,
+        8186764010206899711756657704517859444555824539207093839904632766037261603987
+    );
+    assert_eq!(PlonkVerifier::is_on_curve(pt_on_curve), true);
+    assert_eq!(PlonkVerifier::is_on_curve(pt_not_on_curve), false);
+}
 
-// #[test]
-// fn test_is_in_field() {
-//     let num_in_field = fq(
-//         from_u256(12414878641105079363695639132995965092423960984837736008191365473346709965275)
-//     );
-//     let num_not_in_field = fq(
-//         from_u256(31888242871839275222246405745257275088548364400416034343698204186575808495617)
-//     );
-//     assert_eq!(PlonkVerifier::is_in_field(num_in_field), true);
-//     assert_eq!(PlonkVerifier::is_in_field(num_not_in_field), false);
-// }
+#[test]
+fn test_is_in_field() {
+    let num_in_field = fq(
+        from_u256(12414878641105079363695639132995965092423960984837736008191365473346709965275)
+    );
+    let num_not_in_field = fq(
+        from_u256(31888242871839275222246405745257275088548364400416034343698204186575808495617)
+    );
+    assert_eq!(PlonkVerifier::is_in_field(num_in_field), true);
+    assert_eq!(PlonkVerifier::is_in_field(num_not_in_field), false);
+}
 
-// #[test]
-// fn test_check_public_inputs_length() {
-//     let len_a = 5;
-//     let len_b = 5;
-//     let len_c = 6;
+#[test]
+fn test_check_public_inputs_length() {
+    let len_a = 5;
+    let len_b = 5;
+    let len_c = 6;
 
-//     assert_eq!(PlonkVerifier::check_public_inputs_length(len_a, len_b), true);
-//     assert_eq!(PlonkVerifier::check_public_inputs_length(len_a, len_c), false);
-// }
+    assert_eq!(PlonkVerifier::check_public_inputs_length(len_a, len_b), true);
+    assert_eq!(PlonkVerifier::check_public_inputs_length(len_a, len_c), false);
+}
 
-// #[test]
-// fn test_compute_challenges() {
-//     let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
-//         constants::verification_key();
-//     let verification_key = PlonkVerificationKey {
-//         n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
-//     };
+#[test]
+fn test_compute_challenges() {
+    let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
+        constants::verification_key();
+    let verification_key = PlonkVerificationKey {
+        n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
+    };
 
-//     // proof
-//     let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw) =
-//         constants::proof();
-//     let proof = PlonkProof {
-//         A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
-//     };
+    // proof
+    let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw) =
+        constants::proof();
+    let proof = PlonkProof {
+        A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
+    };
 
-//     //public_signals
-//     let public_signals = constants::public_inputs();
+    //public_signals
+    let public_signals = constants::public_inputs();
 
-//     let challenges: PlonkChallenge = PlonkVerifier::compute_challenges(
-//         verification_key.clone(), proof.clone(), public_signals.clone()
-//     );
-//     let correct_challenges: PlonkChallenge = PlonkChallenge {
-//         beta: fq(
-//             from_u256(14498736666711970908375456476345180774162405747758964362513385423508335735322)
-//         ),
-//         gamma: fq(
-//             from_u256(12473575158495020584075331747768007427040808349100262643951655593347205212105)
-//         ),
-//         alpha: fq(
-//             from_u256(1638659385023515386554508818708523991148437210157968065970684882752976352387)
-//         ),
-//         xi: fq(
-//             from_u256(11882213808513143293994894265765176245869305285611379364593291279901519522928)
-//         ),
-//         xin: fq(from_u256(0)),
-//         zh: fq(from_u256(0)),
-//         v1: fq(
-//             from_u256(15525246157134916236476400018821255884822413269025828374216029504649227137669)
-//         ),
-//         v2: fq(
-//             from_u256(21132627888087099743804979172433285392556642515445679407925856696706183143931)
-//         ),
-//         v3: fq(
-//             from_u256(14811188092632618134958606395686769465009218042016000324383312979839817536369)
-//         ),
-//         v4: fq(
-//             from_u256(4108746516280855064593980008751272222578296515181456478736767522256005393754)
-//         ),
-//         v5: fq(
-//             from_u256(21273923665773393693442929292304958706950228002872333898227188355663509830744)
-//         ),
-//         u: fq(
-//             from_u256(6089190548497707896050173528768502095987431640910795526240399704164855396906)
-//         )
-//     };
+    let challenges: PlonkChallenge = PlonkVerifier::compute_challenges(
+        verification_key.clone(), proof.clone(), public_signals.clone()
+    );
+    let correct_challenges: PlonkChallenge = PlonkChallenge {
+        beta: fq(
+            from_u256(14498736666711970908375456476345180774162405747758964362513385423508335735322)
+        ),
+        gamma: fq(
+            from_u256(12473575158495020584075331747768007427040808349100262643951655593347205212105)
+        ),
+        alpha: fq(
+            from_u256(1638659385023515386554508818708523991148437210157968065970684882752976352387)
+        ),
+        xi: fq(
+            from_u256(11882213808513143293994894265765176245869305285611379364593291279901519522928)
+        ),
+        xin: fq(from_u256(0)),
+        zh: fq(from_u256(0)),
+        v1: fq(
+            from_u256(15525246157134916236476400018821255884822413269025828374216029504649227137669)
+        ),
+        v2: fq(
+            from_u256(21132627888087099743804979172433285392556642515445679407925856696706183143931)
+        ),
+        v3: fq(
+            from_u256(14811188092632618134958606395686769465009218042016000324383312979839817536369)
+        ),
+        v4: fq(
+            from_u256(4108746516280855064593980008751272222578296515181456478736767522256005393754)
+        ),
+        v5: fq(
+            from_u256(21273923665773393693442929292304958706950228002872333898227188355663509830744)
+        ),
+        u: fq(
+            from_u256(6089190548497707896050173528768502095987431640910795526240399704164855396906)
+        )
+    };
 
-//     let is_equal: bool = PlonkChallengePartialEq::eq(@challenges, @correct_challenges);
+    let is_equal: bool = PlonkChallengePartialEq::eq(@challenges, @correct_challenges);
 
-//     assert_eq!(is_equal, true);
-// }
-// #[test]
-// fn test_compute_lagrange_evaluations() {
-//     let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
-//         constants::verification_key();
-//     let verification_key = PlonkVerificationKey {
-//         n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
-//     };
-//     let mut challenges: PlonkChallenge = PlonkChallenge {
-//         beta: fq(
-//             from_u256(14498736666711970908375456476345180774162405747758964362513385423508335735322)
-//         ),
-//         gamma: fq(
-//             from_u256(12473575158495020584075331747768007427040808349100262643951655593347205212105)
-//         ),
-//         alpha: fq(
-//             from_u256(1638659385023515386554508818708523991148437210157968065970684882752976352387)
-//         ),
-//         xi: fq(
-//             from_u256(11882213808513143293994894265765176245869305285611379364593291279901519522928)
-//         ),
-//         xin: fq(from_u256(0)),
-//         zh: fq(from_u256(0)),
-//         v1: fq(
-//             from_u256(15525246157134916236476400018821255884822413269025828374216029504649227137669)
-//         ),
-//         v2: fq(
-//             from_u256(21132627888087099743804979172433285392556642515445679407925856696706183143931)
-//         ),
-//         v3: fq(
-//             from_u256(14811188092632618134958606395686769465009218042016000324383312979839817536369)
-//         ),
-//         v4: fq(
-//             from_u256(4108746516280855064593980008751272222578296515181456478736767522256005393754)
-//         ),
-//         v5: fq(
-//             from_u256(21273923665773393693442929292304958706950228002872333898227188355663509830744)
-//         ),
-//         u: fq(
-//             from_u256(6089190548497707896050173528768502095987431640910795526240399704164855396906)
-//         )
-//     };
-//     let (L, challenges) = PlonkVerifier::compute_lagrange_evaluations(verification_key,
-//     challenges);
-//     let correct_L = array![
-//         fq(from_u256(0)),
-//         fq(from_u256(2620616904154172175670395853552055689556084771717235903725482226645091308782)),
-//         fq(from_u256(9735872642513449311527546906861943889880061684478058520701947259343550999827)),
-//         fq(from_u256(8327986554861251626971745666386010873552460747759282479133954378286727378410)),
-//         fq(from_u256(4022337429609156333024873048706819958201086574374594171651602119736297244553)),
-//         fq(from_u256(6617265984905210439143759470664564048122583210514619596354035502195742709385)),
-//     ];
-//     let challenges_xin_256: u256 = (challenges.xin.c0).try_into().unwrap();
-//     assert_eq!(
-//         challenges_xin_256,
-//         2547969369229319030019457190033843677010987911599058423863006450250883277211
-//     );
-//     assert_eq!(
-//         challenges.zh,
-//         fq(from_u256(2547969369229319030019457190033843677010987911599058423863006450250883277210))
-//     );
-//     assert_eq!(L, correct_L);
-// }
-// #[test]
-// fn test_compute_PI() {
-//     let public_signals = constants::public_inputs();
-//     let L = array![
-//         fq(from_u256(0)),
-//         fq(from_u256(2620616904154172175670395853552055689556084771717235903725482226645091308782)),
-//         fq(from_u256(9735872642513449311527546906861943889880061684478058520701947259343550999827)),
-//         fq(from_u256(8327986554861251626971745666386010873552460747759282479133954378286727378410)),
-//         fq(from_u256(4022337429609156333024873048706819958201086574374594171651602119736297244553)),
-//         fq(from_u256(6617265984905210439143759470664564048122583210514619596354035502195742709385)),
-//     ];
-//     let PI = PlonkVerifier::compute_PI(public_signals, L);
-//     let PI_u256 = (PI.c0).try_into().unwrap();
-//     let correct_PI_256: u256 =
-//         18271457399299900228442257502287788641966159684441642978038700334889779304449;
+    assert_eq!(is_equal, true);
+}
+#[test]
+fn test_compute_lagrange_evaluations() {
+    let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
+        constants::verification_key();
+    let verification_key = PlonkVerificationKey {
+        n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
+    };
+    let mut challenges: PlonkChallenge = PlonkChallenge {
+        beta: fq(
+            from_u256(14498736666711970908375456476345180774162405747758964362513385423508335735322)
+        ),
+        gamma: fq(
+            from_u256(12473575158495020584075331747768007427040808349100262643951655593347205212105)
+        ),
+        alpha: fq(
+            from_u256(1638659385023515386554508818708523991148437210157968065970684882752976352387)
+        ),
+        xi: fq(
+            from_u256(11882213808513143293994894265765176245869305285611379364593291279901519522928)
+        ),
+        xin: fq(from_u256(0)),
+        zh: fq(from_u256(0)),
+        v1: fq(
+            from_u256(15525246157134916236476400018821255884822413269025828374216029504649227137669)
+        ),
+        v2: fq(
+            from_u256(21132627888087099743804979172433285392556642515445679407925856696706183143931)
+        ),
+        v3: fq(
+            from_u256(14811188092632618134958606395686769465009218042016000324383312979839817536369)
+        ),
+        v4: fq(
+            from_u256(4108746516280855064593980008751272222578296515181456478736767522256005393754)
+        ),
+        v5: fq(
+            from_u256(21273923665773393693442929292304958706950228002872333898227188355663509830744)
+        ),
+        u: fq(
+            from_u256(6089190548497707896050173528768502095987431640910795526240399704164855396906)
+        )
+    };
+    let (L, challenges) = PlonkVerifier::compute_lagrange_evaluations(verification_key, challenges);
+    let correct_L = array![
+        fq(from_u256(0)),
+        fq(from_u256(2620616904154172175670395853552055689556084771717235903725482226645091308782)),
+        fq(from_u256(9735872642513449311527546906861943889880061684478058520701947259343550999827)),
+        fq(from_u256(8327986554861251626971745666386010873552460747759282479133954378286727378410)),
+        fq(from_u256(4022337429609156333024873048706819958201086574374594171651602119736297244553)),
+        fq(from_u256(6617265984905210439143759470664564048122583210514619596354035502195742709385)),
+    ];
+    let challenges_xin_256: u256 = (challenges.xin.c0).try_into().unwrap();
+    assert_eq!(
+        challenges_xin_256,
+        2547969369229319030019457190033843677010987911599058423863006450250883277211
+    );
+    assert_eq!(
+        challenges.zh,
+        fq(from_u256(2547969369229319030019457190033843677010987911599058423863006450250883277210))
+    );
+    assert_eq!(L, correct_L);
+}
+#[test]
+fn test_compute_PI() {
+    let public_signals = constants::public_inputs();
+    let L = array![
+        fq(from_u256(0)),
+        fq(from_u256(2620616904154172175670395853552055689556084771717235903725482226645091308782)),
+        fq(from_u256(9735872642513449311527546906861943889880061684478058520701947259343550999827)),
+        fq(from_u256(8327986554861251626971745666386010873552460747759282479133954378286727378410)),
+        fq(from_u256(4022337429609156333024873048706819958201086574374594171651602119736297244553)),
+        fq(from_u256(6617265984905210439143759470664564048122583210514619596354035502195742709385)),
+    ];
+    let PI = PlonkVerifier::compute_PI(public_signals, L);
+    let PI_u256 = (PI.c0).try_into().unwrap();
+    let correct_PI_256: u256 =
+        18271457399299900228442257502287788641966159684441642978038700334889779304449;
 
-//     assert_eq!(correct_PI_256, PI_u256);
-// }
-// #[test]
-// fn test_compute_R0() {
-//     let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw) =
-//         constants::proof();
-//     let proof = PlonkProof {
-//         A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
-//     };
+    assert_eq!(correct_PI_256, PI_u256);
+}
+#[test]
+fn test_compute_R0() {
+    let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw) =
+        constants::proof();
+    let proof = PlonkProof {
+        A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
+    };
 
-//     let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
-//         constants::verification_key();
-//     let verification_key = PlonkVerificationKey {
-//         n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
-//     };
+    let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
+        constants::verification_key();
+    let verification_key = PlonkVerificationKey {
+        n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
+    };
 
-//     let public_signals = constants::public_inputs();
-//     let challenges = PlonkVerifier::compute_challenges(
-//         verification_key.clone(), proof.clone(), public_signals.clone()
-//     );
-//     let L = array![
-//         fq(from_u256(0)),
-//         fq(from_u256(2620616904154172175670395853552055689556084771717235903725482226645091308782)),
-//         fq(from_u256(9735872642513449311527546906861943889880061684478058520701947259343550999827)),
-//         fq(from_u256(8327986554861251626971745666386010873552460747759282479133954378286727378410)),
-//         fq(from_u256(4022337429609156333024873048706819958201086574374594171651602119736297244553)),
-//         fq(from_u256(6617265984905210439143759470664564048122583210514619596354035502195742709385)),
-//     ];
-//     let PI = PlonkVerifier::compute_PI(public_signals.clone(), L.clone());
-//     let R0 = PlonkVerifier::compute_R0(proof, challenges, PI, L[1].clone());
+    let public_signals = constants::public_inputs();
+    let challenges = PlonkVerifier::compute_challenges(
+        verification_key.clone(), proof.clone(), public_signals.clone()
+    );
+    let L = array![
+        fq(from_u256(0)),
+        fq(from_u256(2620616904154172175670395853552055689556084771717235903725482226645091308782)),
+        fq(from_u256(9735872642513449311527546906861943889880061684478058520701947259343550999827)),
+        fq(from_u256(8327986554861251626971745666386010873552460747759282479133954378286727378410)),
+        fq(from_u256(4022337429609156333024873048706819958201086574374594171651602119736297244553)),
+        fq(from_u256(6617265984905210439143759470664564048122583210514619596354035502195742709385)),
+    ];
+    let PI = PlonkVerifier::compute_PI(public_signals.clone(), L.clone());
+    let R0 = PlonkVerifier::compute_R0(proof, challenges, PI, L[1].clone());
 
-//     let correct_R0: u256 =
-//         8252012205077960742641393316361079931166529015625841574934366119104137152715;
-//     assert_eq!(fq(from_u256(correct_R0)), R0);
-// }
-// #[test]
-// fn test_compute_D() {
-//     let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw) =
-//         constants::proof();
-//     let proof = PlonkProof {
-//         A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
-//     };
-//     let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
-//         constants::verification_key();
-//     let verification_key = PlonkVerificationKey {
-//         n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
-//     };
-//     let challenges: PlonkChallenge = PlonkChallenge {
-//         beta: fq(
-//             from_u256(14498736666711970908375456476345180774162405747758964362513385423508335735322)
-//         ),
-//         gamma: fq(
-//             from_u256(12473575158495020584075331747768007427040808349100262643951655593347205212105)
-//         ),
-//         alpha: fq(
-//             from_u256(1638659385023515386554508818708523991148437210157968065970684882752976352387)
-//         ),
-//         xi: fq(
-//             from_u256(11882213808513143293994894265765176245869305285611379364593291279901519522928)
-//         ),
-//         xin: fq(
-//             from_u256(2547969369229319030019457190033843677010987911599058423863006450250883277211)
-//         ),
-//         zh: fq(
-//             from_u256(2547969369229319030019457190033843677010987911599058423863006450250883277210)
-//         ),
-//         v1: fq(
-//             from_u256(15525246157134916236476400018821255884822413269025828374216029504649227137669)
-//         ),
-//         v2: fq(
-//             from_u256(21132627888087099743804979172433285392556642515445679407925856696706183143931)
-//         ),
-//         v3: fq(
-//             from_u256(14811188092632618134958606395686769465009218042016000324383312979839817536369)
-//         ),
-//         v4: fq(
-//             from_u256(4108746516280855064593980008751272222578296515181456478736767522256005393754)
-//         ),
-//         v5: fq(
-//             from_u256(21273923665773393693442929292304958706950228002872333898227188355663509830744)
-//         ),
-//         u: fq(
-//             from_u256(6089190548497707896050173528768502095987431640910795526240399704164855396906)
-//         )
-//     };
-//     let L1 = fq(
-//         from_u256(2620616904154172175670395853552055689556084771717235903725482226645091308782)
-//     );
-//     let D = PlonkVerifier::compute_D(proof, challenges, verification_key, L1);
-//     let corret_D = g1(
-//         4333398450220542935061332802082369181528242679087535767638817155055555907729,
-//         3001452470579370622125939372942669046487921723785465821088780020440992474494
-//     );
-//     assert_eq!(D.x, corret_D.x);
-//     assert_eq!(D.y, corret_D.y);
-// }
-// #[test]
-// fn test_compute_F() {
-//     let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw) =
-//         constants::proof();
-//     let proof = PlonkProof {
-//         A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
-//     };
-//     let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
-//         constants::verification_key();
-//     let verification_key = PlonkVerificationKey {
-//         n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
-//     };
-//     let challenges: PlonkChallenge = PlonkChallenge {
-//         beta: fq(
-//             from_u256(14498736666711970908375456476345180774162405747758964362513385423508335735322)
-//         ),
-//         gamma: fq(
-//             from_u256(12473575158495020584075331747768007427040808349100262643951655593347205212105)
-//         ),
-//         alpha: fq(
-//             from_u256(1638659385023515386554508818708523991148437210157968065970684882752976352387)
-//         ),
-//         xi: fq(
-//             from_u256(11882213808513143293994894265765176245869305285611379364593291279901519522928)
-//         ),
-//         xin: fq(
-//             from_u256(2547969369229319030019457190033843677010987911599058423863006450250883277211)
-//         ),
-//         zh: fq(
-//             from_u256(2547969369229319030019457190033843677010987911599058423863006450250883277210)
-//         ),
-//         v1: fq(
-//             from_u256(15525246157134916236476400018821255884822413269025828374216029504649227137669)
-//         ),
-//         v2: fq(
-//             from_u256(21132627888087099743804979172433285392556642515445679407925856696706183143931)
-//         ),
-//         v3: fq(
-//             from_u256(14811188092632618134958606395686769465009218042016000324383312979839817536369)
-//         ),
-//         v4: fq(
-//             from_u256(4108746516280855064593980008751272222578296515181456478736767522256005393754)
-//         ),
-//         v5: fq(
-//             from_u256(21273923665773393693442929292304958706950228002872333898227188355663509830744)
-//         ),
-//         u: fq(
-//             from_u256(6089190548497707896050173528768502095987431640910795526240399704164855396906)
-//         )
-//     };
-//     let D = g1(
-//         4333398450220542935061332802082369181528242679087535767638817155055555907729,
-//         3001452470579370622125939372942669046487921723785465821088780020440992474494
-//     );
-//     let F = PlonkVerifier::compute_F(proof, challenges, verification_key, D);
-//     let correct_F = g1(
-//         2447957664398607938229566909991195557288608349864545209476580844025113917745,
-//         16981442144394521581137981015380711983763128730701172250766417640481995742343
-//     );
-//     assert_eq!(F.x, correct_F.x);
-//     assert_eq!(F.y, correct_F.y);
-// }
-// #[test]
-// fn test_compute_E() {
-//     let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw) =
-//         constants::proof();
-//     let proof = PlonkProof {
-//         A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
-//     };
-//     let challenges: PlonkChallenge = PlonkChallenge {
-//         beta: fq(
-//             from_u256(14498736666711970908375456476345180774162405747758964362513385423508335735322)
-//         ),
-//         gamma: fq(
-//             from_u256(12473575158495020584075331747768007427040808349100262643951655593347205212105)
-//         ),
-//         alpha: fq(
-//             from_u256(1638659385023515386554508818708523991148437210157968065970684882752976352387)
-//         ),
-//         xi: fq(
-//             from_u256(11882213808513143293994894265765176245869305285611379364593291279901519522928)
-//         ),
-//         xin: fq(
-//             from_u256(2547969369229319030019457190033843677010987911599058423863006450250883277211)
-//         ),
-//         zh: fq(
-//             from_u256(2547969369229319030019457190033843677010987911599058423863006450250883277210)
-//         ),
-//         v1: fq(
-//             from_u256(15525246157134916236476400018821255884822413269025828374216029504649227137669)
-//         ),
-//         v2: fq(
-//             from_u256(21132627888087099743804979172433285392556642515445679407925856696706183143931)
-//         ),
-//         v3: fq(
-//             from_u256(14811188092632618134958606395686769465009218042016000324383312979839817536369)
-//         ),
-//         v4: fq(
-//             from_u256(4108746516280855064593980008751272222578296515181456478736767522256005393754)
-//         ),
-//         v5: fq(
-//             from_u256(21273923665773393693442929292304958706950228002872333898227188355663509830744)
-//         ),
-//         u: fq(
-//             from_u256(6089190548497707896050173528768502095987431640910795526240399704164855396906)
-//         )
-//     };
+    let correct_R0: u256 =
+        8252012205077960742641393316361079931166529015625841574934366119104137152715;
+    assert_eq!(fq(from_u256(correct_R0)), R0);
+}
+#[test]
+fn test_compute_D() {
+    let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw) =
+        constants::proof();
+    let proof = PlonkProof {
+        A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
+    };
+    let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
+        constants::verification_key();
+    let verification_key = PlonkVerificationKey {
+        n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
+    };
+    let challenges: PlonkChallenge = PlonkChallenge {
+        beta: fq(
+            from_u256(14498736666711970908375456476345180774162405747758964362513385423508335735322)
+        ),
+        gamma: fq(
+            from_u256(12473575158495020584075331747768007427040808349100262643951655593347205212105)
+        ),
+        alpha: fq(
+            from_u256(1638659385023515386554508818708523991148437210157968065970684882752976352387)
+        ),
+        xi: fq(
+            from_u256(11882213808513143293994894265765176245869305285611379364593291279901519522928)
+        ),
+        xin: fq(
+            from_u256(2547969369229319030019457190033843677010987911599058423863006450250883277211)
+        ),
+        zh: fq(
+            from_u256(2547969369229319030019457190033843677010987911599058423863006450250883277210)
+        ),
+        v1: fq(
+            from_u256(15525246157134916236476400018821255884822413269025828374216029504649227137669)
+        ),
+        v2: fq(
+            from_u256(21132627888087099743804979172433285392556642515445679407925856696706183143931)
+        ),
+        v3: fq(
+            from_u256(14811188092632618134958606395686769465009218042016000324383312979839817536369)
+        ),
+        v4: fq(
+            from_u256(4108746516280855064593980008751272222578296515181456478736767522256005393754)
+        ),
+        v5: fq(
+            from_u256(21273923665773393693442929292304958706950228002872333898227188355663509830744)
+        ),
+        u: fq(
+            from_u256(6089190548497707896050173528768502095987431640910795526240399704164855396906)
+        )
+    };
+    let L1 = fq(
+        from_u256(2620616904154172175670395853552055689556084771717235903725482226645091308782)
+    );
+    let D = PlonkVerifier::compute_D(proof, challenges, verification_key, L1);
+    let corret_D = g1(
+        4333398450220542935061332802082369181528242679087535767638817155055555907729,
+        3001452470579370622125939372942669046487921723785465821088780020440992474494
+    );
+    assert_eq!(D.x, corret_D.x);
+    assert_eq!(D.y, corret_D.y);
+}
+#[test]
+fn test_compute_F() {
+    let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw) =
+        constants::proof();
+    let proof = PlonkProof {
+        A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
+    };
+    let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
+        constants::verification_key();
+    let verification_key = PlonkVerificationKey {
+        n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
+    };
+    let challenges: PlonkChallenge = PlonkChallenge {
+        beta: fq(
+            from_u256(14498736666711970908375456476345180774162405747758964362513385423508335735322)
+        ),
+        gamma: fq(
+            from_u256(12473575158495020584075331747768007427040808349100262643951655593347205212105)
+        ),
+        alpha: fq(
+            from_u256(1638659385023515386554508818708523991148437210157968065970684882752976352387)
+        ),
+        xi: fq(
+            from_u256(11882213808513143293994894265765176245869305285611379364593291279901519522928)
+        ),
+        xin: fq(
+            from_u256(2547969369229319030019457190033843677010987911599058423863006450250883277211)
+        ),
+        zh: fq(
+            from_u256(2547969369229319030019457190033843677010987911599058423863006450250883277210)
+        ),
+        v1: fq(
+            from_u256(15525246157134916236476400018821255884822413269025828374216029504649227137669)
+        ),
+        v2: fq(
+            from_u256(21132627888087099743804979172433285392556642515445679407925856696706183143931)
+        ),
+        v3: fq(
+            from_u256(14811188092632618134958606395686769465009218042016000324383312979839817536369)
+        ),
+        v4: fq(
+            from_u256(4108746516280855064593980008751272222578296515181456478736767522256005393754)
+        ),
+        v5: fq(
+            from_u256(21273923665773393693442929292304958706950228002872333898227188355663509830744)
+        ),
+        u: fq(
+            from_u256(6089190548497707896050173528768502095987431640910795526240399704164855396906)
+        )
+    };
+    let D = g1(
+        4333398450220542935061332802082369181528242679087535767638817155055555907729,
+        3001452470579370622125939372942669046487921723785465821088780020440992474494
+    );
+    let F = PlonkVerifier::compute_F(proof, challenges, verification_key, D);
+    let correct_F = g1(
+        2447957664398607938229566909991195557288608349864545209476580844025113917745,
+        16981442144394521581137981015380711983763128730701172250766417640481995742343
+    );
+    assert_eq!(F.x, correct_F.x);
+    assert_eq!(F.y, correct_F.y);
+}
+#[test]
+fn test_compute_E() {
+    let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw) =
+        constants::proof();
+    let proof = PlonkProof {
+        A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
+    };
+    let challenges: PlonkChallenge = PlonkChallenge {
+        beta: fq(
+            from_u256(14498736666711970908375456476345180774162405747758964362513385423508335735322)
+        ),
+        gamma: fq(
+            from_u256(12473575158495020584075331747768007427040808349100262643951655593347205212105)
+        ),
+        alpha: fq(
+            from_u256(1638659385023515386554508818708523991148437210157968065970684882752976352387)
+        ),
+        xi: fq(
+            from_u256(11882213808513143293994894265765176245869305285611379364593291279901519522928)
+        ),
+        xin: fq(
+            from_u256(2547969369229319030019457190033843677010987911599058423863006450250883277211)
+        ),
+        zh: fq(
+            from_u256(2547969369229319030019457190033843677010987911599058423863006450250883277210)
+        ),
+        v1: fq(
+            from_u256(15525246157134916236476400018821255884822413269025828374216029504649227137669)
+        ),
+        v2: fq(
+            from_u256(21132627888087099743804979172433285392556642515445679407925856696706183143931)
+        ),
+        v3: fq(
+            from_u256(14811188092632618134958606395686769465009218042016000324383312979839817536369)
+        ),
+        v4: fq(
+            from_u256(4108746516280855064593980008751272222578296515181456478736767522256005393754)
+        ),
+        v5: fq(
+            from_u256(21273923665773393693442929292304958706950228002872333898227188355663509830744)
+        ),
+        u: fq(
+            from_u256(6089190548497707896050173528768502095987431640910795526240399704164855396906)
+        )
+    };
 
-//     let R0: u256 = 8252012205077960742641393316361079931166529015625841574934366119104137152715;
-//     let E = PlonkVerifier::compute_E(proof, challenges, fq(from_u256(R0)));
-//     let correct_E = g1(
-//         2484568790068257088204458404505761583129899393337173775535121851653226285099,
-//         6454403560011284872933736696278881925473069516668053066370404348177163484123
-//     );
-//     assert_eq!(E.x, correct_E.x);
-//     assert_eq!(E.y, correct_E.y);
-// }
+    let R0: u256 = 8252012205077960742641393316361079931166529015625841574934366119104137152715;
+    let E = PlonkVerifier::compute_E(proof, challenges, fq(from_u256(R0)));
+    let correct_E = g1(
+        2484568790068257088204458404505761583129899393337173775535121851653226285099,
+        6454403560011284872933736696278881925473069516668053066370404348177163484123
+    );
+    assert_eq!(E.x, correct_E.x);
+    assert_eq!(E.y, correct_E.y);
+}
 #[test]
 fn test_valid_pairing() {
     let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw) =

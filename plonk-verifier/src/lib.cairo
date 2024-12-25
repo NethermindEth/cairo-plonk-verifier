@@ -39,10 +39,10 @@ mod fields {
 
     #[cfg(test)]
     mod tests {
-        // mod fq;
-// mod fq2;
+        // mod fq12;
 // mod fq6;
-// mod fq12;
+// mod fq2;
+// mod fq;
 // mod fq12_expo;
 // mod fq_sparse;
 // mod u512;

@@ -73,53 +73,32 @@ impl Fq12Squaring of Fq12SquaringTrait {
         // Si = gi^2
         if g2.c0 == FieldUtils::zero() && g2.c1 == FieldUtils::zero() {
             // g1 = 2g4g5/g3
-            // let t2g4g5 = x2(g4 * g5);
-            // let g1 = t2g4g5 * g3.inv(field_nz);
-
-            // // g0 = (2S1 - 3g3g4)ξ + 1
-            // let S1 = g1.u_sqr();
-            // let T_g3g4 = g3.u_mul(g4);
-            // let Tmp = X2(S1 - T_g3g4); // 2S1 - 2g3g4
-            // let G0 = Tmp - T_g3g4; // 2S1 - 3g3g4
-            // let mut g0: Fq2 = G0.to_fq(field_nz).mul_by_nonresidue(); // (2S1 - 3g3g4)ξ
-            // g0.c0.c0 = g0.c0.c0 + 1; // Add 1, POTENTIAL OVERFLOW
-
             let tg24g5 = x2(g4.mul(g5));
             let g1 = tg24g5.mul(g3.inv(field_nz));
 
-            let S1 = g1.sqr().scale(2);
-            let T_g3g4 = g3.mul(g4).scale(3);
-            let mut g0 = (S1 - T_g3g4).mul_by_nonresidue();
-            g0.c0.add(FieldUtils::one());
+            // g0 = (2S1 - 3g3g4)ξ + 1
+            let S1 = g1.sqr();
+            let T_g3g4 = g3.mul(g4);
+            let Tmp = (S1 - T_g3g4).scale(2);
+            let mut g0 = (Tmp - T_g3g4).mul_by_nonresidue();
+            g0 = g0.add(FieldUtils::one());
 
             Fq12 { c0: Fq6 { c0: g0, c1: g4, c2: g3 }, c1: Fq6 { c0: g2, c1: g1, c2: g5 } }
         } else {
             // g1 = (S5ξ + 3S4 - 2g3)/4g2
-            // let S5xi = mul_by_xi_nz(g5.u_sqr(), field_nz);
-            // let S4 = g4.u_sqr();
-            // let Tmp = S4.u512_sub_fq(g3); // S4 - g3
-            // let g1: Fq2 = (S5xi + S4.u_add(Tmp.u_add(Tmp))).to_fq(field_nz); // (S5ξ + 3S4 -
-            // 2g3)
-            // let g1 = g1.mul(ufq2_inv(x4(g2), field_nz)); // div by 4g2
-
-            // // g0 = (2S1 + g2g5 - 3g3g4)ξ + 1
-            // let S1 = g1.u_sqr();
-            // let T_g3g4 = g3.u_mul(g4);
-            // let T_g2g5 = g2.u_mul(g5);
-            // let Tmp = X2(S1 - T_g3g4); // 2S1 - 2g3g4
-            // let G0 = Tmp + T_g2g5 - T_g3g4; // 2S1 + g2g5 - 3g3g4
-            // let mut g0: Fq2 = G0.to_fq(field_nz).mul_by_nonresidue(); // (2S1 + g2g5 - 3g3g4)ξ
-            // g0.c0.c0 = g0.c0.c0 + 1; // Add 1, POTENTIAL OVERFLOW
             let S5xi = mul_by_xi_nz_as_circuit(g5.sqr());
             let S4 = g4.sqr();
-            let g1 = (S5xi + S4 + (S4 - g3).add(S4 - g3));
+            let Tmp = S4.sub(g3);
+            let g1 = (S5xi + S4.add(Tmp.add(Tmp)));
             let g1 = g1.mul(ufq2_inv(x4(g2), field_nz));
 
-            let S1 = g1.sqr().scale(2);
-            let T_g3g4 = g3.mul(g4).scale(3);
+            // // g0 = (2S1 + g2g5 - 3g3g4)ξ + 1
+            let S1 = g1.sqr();
+            let T_g3g4 = g3.mul(g4);
             let T_g2g5 = g2.mul(g5);
-            let mut g0 = (S1 + T_g2g5 - T_g3g4).mul_by_nonresidue();
-            g0.c0.add(FieldUtils::one());
+            let Tmp = (S1 - T_g3g4).scale(2);
+            let mut g0 = (Tmp + T_g2g5 - T_g3g4).mul_by_nonresidue();
+            g0 = g0.add(FieldUtils::one());
             Fq12 { c0: Fq6 { c0: g0, c1: g4, c2: g3 }, c1: Fq6 { c0: g2, c1: g1, c2: g5 } }
         }
     }
@@ -131,52 +110,28 @@ impl Fq12Squaring of Fq12SquaringTrait {
         let Fq12 { c0: Fq6 { c0: _g0, c1: g1, c2: g2 }, c1: Fq6 { c0: g3, c1: _g4, c2: g5 } } =
             self;
 
-        // let S1: (u512, u512) = g1.u_sqr();
-        // let S2: (u512, u512) = g2.u_sqr();
-        // let S3: (u512, u512) = g3.u_sqr();
-        // let S5: (u512, u512) = g5.u_sqr();
-        // let S1_5: (u512, u512) = (g1 + g5).u_sqr();
-        // let S2_3: (u512, u512) = (g2 + g3).u_sqr();
-
-        // // h1 = 3 * g3² + 3 * nr * g2² - 2*g1
-        // let Tmp = S3 + mul_by_xi_nz(S2, field_nz); // g3² + nr * g2²
-        // let h1 = X2(Tmp.u512_sub_fq(g1)) + Tmp;
-        // let h1 = h1.to_fq(field_nz);
-
-        // // h2 = 3 * nr * g5² + 3 * g1² - 2*g2
-        // let Tmp = mul_by_xi_nz(S5, field_nz) + S1; // nr * g5² + g1²
-        // let h2 = X2(Tmp.u512_sub_fq(g2)) + Tmp;
-        // let h2 = h2.to_fq(field_nz);
-
-        // // 2 * g1 * g5 = (S1_5 - S1 - S5)
-        // // h3 = 6 * nr * g1 * g5 + 2*g3
-        // let Tmp = mul_by_xi_nz(S1_5 - S1 - S5, field_nz); // 2 * g1 * g5
-        // let h3 = X2(Tmp.u512_add_fq(g3)) + Tmp;
-        // let h3 = h3.to_fq(field_nz);
-
-        // // 2 * g3 * g2 = (S2_3 - S2 - S3)
-        // // h5 = 6 * g3 * g2 + 2*g5
-        // let Tmp = S2_3 - S2 - S3; // 2 * g2 * g3
-        // let h5 = X2(Tmp.u512_add_fq(g5)) + Tmp;
-        // let h5 = h5.to_fq(field_nz);
         let S1 = g1.sqr();
+        // let S1_c0_c0: u256 = (S1.c0.c0).try_into().unwrap();
+        // let S1_c0_c1: u256 = (S1.c1.c0).try_into().unwrap();
+        // println!("S1_c0_c0 {:?}", S1_c0_c0);
+        // println!("S1_c0_c1 {:?}", S1_c0_c1);
         let S2 = g2.sqr();
         let S3 = g3.sqr();
         let S5 = g5.sqr();
-        let S1_5 = g1.add(g5).sqr();
-        let S2_3 = g2.add(g3).sqr();
+        let S1_5 = (g1 + g5).sqr();
+        let S2_3 = (g2 + g3).sqr();
 
-        let Tmp = S3.add(mul_by_xi_nz_as_circuit(S2));
-        let h1 = Tmp.sub(g1).add(Tmp);
+        let Tmp = S3 + mul_by_xi_nz_as_circuit(S2);
+        let h1 = Tmp.sub(g1).scale(2) + Tmp;
 
-        let Tmp = mul_by_xi_nz_as_circuit(S5).add(S1);
-        let h2 = Tmp.sub(g2).scale(2).add(Tmp);
+        let Tmp = mul_by_xi_nz_as_circuit(S5) + S1;
+        let h2 = Tmp.sub(g2).scale(2) + Tmp;
 
-        let Tmp = mul_by_xi_nz_as_circuit(S1_5.sub(S1).sub(S5));
-        let h3 = Tmp.add(g3).scale(3).add(Tmp);
+        let Tmp = mul_by_xi_nz_as_circuit(S1_5 - S1 - S5);
+        let h3 = Tmp.add(g3).scale(2) + Tmp;
 
-        let Tmp = S2_3.sub(S2).sub(S3);
-        let h5 = Tmp.add(g5).scale(3).add(Tmp);
+        let Tmp = S2_3 - S2 - S3;
+        let h5 = Tmp.add(g5).scale(2) + Tmp;
 
         let _0 = FieldUtils::zero();
 
@@ -190,34 +145,6 @@ impl Fq12Squaring of Fq12SquaringTrait {
         // Input: self = (a2 +a3s)t+(a4 +a5s)t2 ∈ Gφ6(Fp2)
         // Output: self^2 = (c2 +c3s)t+(c4 +c5s)t2 ∈ Gφ6 (Fp2 ).
         let Krbn2345 { g2, g3, g4, g5 } = self;
-
-        // // Si,j = (gi + gj )^2 and Si = gi^2
-        // let S2: (u512, u512) = g2.u_sqr();
-        // let S3: (u512, u512) = g3.u_sqr();
-        // let S4: (u512, u512) = g4.u_sqr();
-        // let S5: (u512, u512) = g5.u_sqr();
-        // let S4_5: (u512, u512) = (g4 + g5).u_sqr();
-        // let S2_3: (u512, u512) = (g2 + g3).u_sqr();
-
-        // // h2 = 3(S4_5 − S4 − S5)ξ + 2g2;
-        // let Tmp = mul_by_xi_nz(S4_5 - S4.u_add(S5), field_nz);
-        // let h2 = X2(Tmp.u512_add_fq(g2)) + Tmp;
-        // let h2 = h2.to_fq(field_nz);
-
-        // // h3 = 3(S4 + S5ξ) - 2g3;
-        // let Tmp = S4 + mul_by_xi_nz(S5, field_nz);
-        // let h3 = X2(Tmp.u512_sub_fq(g3)) + Tmp;
-        // let h3 = h3.to_fq(field_nz);
-
-        // // h4 = 3(S2 + S3ξ) - 2g4;
-        // let Tmp = S2 + mul_by_xi_nz(S3, field_nz);
-        // let h4 = X2(Tmp.u512_sub_fq(g4)) + Tmp;
-        // let h4 = h4.to_fq(field_nz);
-
-        // // h5 = 3(S2_3 - S2 - S3) + 2g5;
-        // let Tmp = S2_3 - S2.u_add(S3);
-        // let h5 = X2(Tmp.u512_add_fq(g5)) + Tmp;
-        // let h5 = h5.to_fq(field_nz);
 
         let S2 = g2.sqr();
         let S3 = g3.sqr();
@@ -303,11 +230,12 @@ impl Fq12Squaring of Fq12SquaringTrait {
         let z5 = self.c1.c2;
         // let tmp = z0 * z1;
         // let Tmp = z0.u_mul(z1);
-        // // let t0 = (z0 + z1) * (z1.mul_by_nonresidue() + z0) - tmp - tmp.mul_by_nonresidue();
+        // let t0 = (z0 + z1) * (z1.mul_by_nonresidue() + z0) - tmp - tmp.mul_by_nonresidue();
         // let T0 = z0.u_add(z1).u_mul(z1.mul_by_nonresidue().u_add(z0))
         //     - Tmp
         //     - mul_by_xi_nz(Tmp, field_nz);
-        // // let t1 = tmp + tmp;
+
+        // let t1 = tmp + tmp;
         // let T1 = Tmp + Tmp;
 
         // // let tmp = z2 * z3;
@@ -354,9 +282,12 @@ impl Fq12Squaring of Fq12SquaringTrait {
         // let Z5 = Z5 + T3;
 
         let tmp = z0.mul(z1);
-        let T0 = z0.add(z1).mul(z1.mul_by_nonresidue().add(z0))
-            - tmp
-            - mul_by_xi_nz_as_circuit(tmp);
+        let T0 = z0
+            .add(z1)
+            .mul(z1.mul_by_nonresidue().add(z0))
+            .sub(tmp)
+            .sub(mul_by_xi_nz_as_circuit(tmp));
+
         let T1 = tmp.add(tmp);
 
         let tmp = z2.mul(z3);
@@ -371,12 +302,32 @@ impl Fq12Squaring of Fq12SquaringTrait {
             - tmp
             - mul_by_xi_nz_as_circuit(tmp);
         let T5 = tmp.add(tmp);
-        let Z0 = T0.sub(z0).add(T0).add(T0);
-        let Z1 = T1.add(z1).add(T1).add(T1);
-        let Z2 = mul_by_xi_nz_as_circuit(T5).add(z2).add(T5).add(T5);
-        let Z3 = T4.sub(z3).add(T4).add(T4);
-        let Z4 = T2.sub(z4).add(T2).add(T2);
-        let Z5 = T3.add(z5).add(T3).add(T3);
+
+        let Z0 = T0.sub(z0);
+        let Z0 = Z0 + Z0;
+        let Z0 = Z0 + T0;
+
+        let Z1 = T1.add(z1);
+        let Z1 = Z1 + Z1;
+        let Z1 = Z1 + T1;
+
+        let tmp = mul_by_xi_nz_as_circuit(T5);
+
+        let Z2 = tmp.add(z2);
+        let Z2 = Z2 + Z2;
+        let Z2 = Z2 + tmp;
+
+        let Z3 = T4.sub(z3);
+        let Z3 = Z3 + Z3;
+        let Z3 = Z3 + T4;
+
+        let Z4 = T2.sub(z4);
+        let Z4 = Z4 + Z4;
+        let Z4 = Z4 + T2;
+
+        let Z5 = T3.add(z5);
+        let Z5 = Z5 + Z5;
+        let Z5 = Z5 + T3;
 
         Fq12 { c0: Fq6 { c0: Z0, c1: Z4, c2: Z3 }, c1: Fq6 { c0: Z2, c1: Z1, c2: Z5 }, }
     }

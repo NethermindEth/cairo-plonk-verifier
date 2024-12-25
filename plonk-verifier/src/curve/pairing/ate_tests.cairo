@@ -1,4 +1,5 @@
 use core::traits::TryInto;
+use core::circuit::conversions::from_u256;
 use super::optimal_ate_utils::{step_double, step_dbl_add, correction_step, PtG1, PtG2};
 use super::optimal_ate_impls::{SingleMillerPrecompute, SingleMillerSteps, PreCompute};
 use plonk_verifier::curve::{FIELD, get_field_nz};
@@ -37,13 +38,13 @@ fn test_step_double() {
     );
 
     let expected_c3 = fq2(
-        0x1c43298c88df08230fee9d84ac09ee48d34a29e278e8d58cb18769030ec4438,
-        0x1c5954ca0cd04a09cd9b039b450f0241731c800e47aaa858c7e7142df032479c,
+        from_u256(0x1c43298c88df08230fee9d84ac09ee48d34a29e278e8d58cb18769030ec4438),
+        from_u256(0x1c5954ca0cd04a09cd9b039b450f0241731c800e47aaa858c7e7142df032479c),
     );
 
     let expected_c4 = fq2(
-        0x2269a2f98ab148f9c027b04961479c312d53748fc7eeba24a6a08850431486e7,
-        0x200812b02c8345ebc2ac8cfd83b0ab717735e789edc6fbed6427646339d76800,
+        from_u256(0x2269a2f98ab148f9c027b04961479c312d53748fc7eeba24a6a08850431486e7),
+        from_u256(0x200812b02c8345ebc2ac8cfd83b0ab717735e789edc6fbed6427646339d76800),
     );
 
     assert(lines.c3 == expected_c3, 'wrong dbl c3');
@@ -73,23 +74,23 @@ fn test_step_dbl_add() {
     );
 
     let expected_l1c3 = fq2(
-        0x2ea01bda18a3afa787515bde36c0b9790a4cc7f340e33d3471081586a790b90f,
-        0x140af9a8d461561feab5421b3c72561c2464ea8320c72234743977e8e84ab5ab,
+        from_u256(0x2ea01bda18a3afa787515bde36c0b9790a4cc7f340e33d3471081586a790b90f),
+        from_u256(0x140af9a8d461561feab5421b3c72561c2464ea8320c72234743977e8e84ab5ab),
     );
 
     let expected_l1c4 = fq2(
-        0xdfaab795680572ff828956d2039bc2c6a2df601a0831068958003c695687660,
-        0x105c3bc2b4ae5a3df5a3b8b8fdd0acec204b83077aaace9fd7f927b39ea59547,
+        from_u256(0xdfaab795680572ff828956d2039bc2c6a2df601a0831068958003c695687660),
+        from_u256(0x105c3bc2b4ae5a3df5a3b8b8fdd0acec204b83077aaace9fd7f927b39ea59547),
     );
 
     let expected_l2c3 = fq2(
-        0x25891a7b883843168b2ed6ed8b42d4fdada5df85402f00d884d7937fae24e496,
-        0x1dfb565c82eac32c96880b9b1da38241175076b36ae8abbb8379ebec2f907b81,
+        from_u256(0x25891a7b883843168b2ed6ed8b42d4fdada5df85402f00d884d7937fae24e496),
+        from_u256(0x1dfb565c82eac32c96880b9b1da38241175076b36ae8abbb8379ebec2f907b81),
     );
 
     let expected_l2c4 = fq2(
-        0x2558f709e26d6843da2ffd7122906325c7fd61e6efd90886e94177d2520a6a50,
-        0x2a0a12744f9deeb8e3aa6a42ee95f27d9939cdd9e62904e1f65cb72b98e9dfd8,
+        from_u256(0x2558f709e26d6843da2ffd7122906325c7fd61e6efd90886e94177d2520a6a50),
+        from_u256(0x2a0a12744f9deeb8e3aa6a42ee95f27d9939cdd9e62904e1f65cb72b98e9dfd8),
     );
 
     assert(acc == expected, 'wrong dbl_add point');
@@ -120,23 +121,23 @@ fn test_step_correction() {
     // );
 
     let expected_l1c3 = fq2(
-        0xd238aea84f1c5f3cc252629ef407db0ad7b441dd6616b994e374fb8c0413383,
-        0x304554bb4d99a4cebabe260f60ef18d59e887078e74321d4fdba79a9eeab1ddb,
+        from_u256(0xd238aea84f1c5f3cc252629ef407db0ad7b441dd6616b994e374fb8c0413383),
+        from_u256(0x304554bb4d99a4cebabe260f60ef18d59e887078e74321d4fdba79a9eeab1ddb),
     );
 
     let expected_l1c4 = fq2(
-        0x907fba323881daa70e1c572f69e77964e70ba22fb812dd9abcf304140574def,
-        0x404c3e3275e836536af9a08a8dff1fe867efac4a34ca9a42e10706f4d811b8d,
+        from_u256(0x907fba323881daa70e1c572f69e77964e70ba22fb812dd9abcf304140574def),
+        from_u256(0x404c3e3275e836536af9a08a8dff1fe867efac4a34ca9a42e10706f4d811b8d),
     );
 
     let expected_l2c3 = fq2(
-        0xd06e75cebbc8df7fd2ee7b4afe5a42586c26a96c3fc205128dfd9184f131d92,
-        0x1a80e9ca6ed93b661603d4f1acc3c982065301e91154bf63203e815a11befb0f,
+        from_u256(0xd06e75cebbc8df7fd2ee7b4afe5a42586c26a96c3fc205128dfd9184f131d92),
+        from_u256(0x1a80e9ca6ed93b661603d4f1acc3c982065301e91154bf63203e815a11befb0f),
     );
 
     let expected_l2c4 = fq2(
-        0x1fe98cea2f6991fdf8d51c06b75b57ee944309336cb488c4c85e2966afaf5dba,
-        0x16d794265926a808f8ce74b6d4b31606c9b429603f4f522be6e2cb3fcb069dcd,
+        from_u256(0x1fe98cea2f6991fdf8d51c06b75b57ee944309336cb488c4c85e2966afaf5dba),
+        from_u256(0x16d794265926a808f8ce74b6d4b31606c9b429603f4f522be6e2cb3fcb069dcd),
     );
 
     assert(l1.c3 == expected_l1c3, 'wrong correction l1c3');

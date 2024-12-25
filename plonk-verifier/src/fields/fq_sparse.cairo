@@ -187,7 +187,7 @@ impl FqSparse of FqSparseTrait {
         // tmp = c3 + c4
         // x34 = d3 + d4
         // x34 = x34 * tmp
-        let x34 = d3.u_add(d4).mul(c3.u_add(c4)); // d3c3 + d3c4 + d4c3 + d4c4
+        let x34 = d3.add(d4).mul(c3.add(c4)); // d3c3 + d3c4 + d4c3 + d4c4
         // x34 = x34 - x3
         let x34 = x34 - c3d3; // d3c4 + d4c3 + d4c4
         // x34 = x34 - x4
@@ -222,7 +222,7 @@ impl FqSparse of FqSparseTrait {
         // tmp = c3 + c4
         // x34 = c3 + c4
         // x34 = x34 * tmp
-        let x34 = c3.u_add(c4).sqr(); // c3_sq + c3c4 + c4c3 + c4_sq
+        let x34 = c3.add(c4).sqr(); // c3_sq + c3c4 + c4c3 + c4_sq
         // x34 = x34 - x3
         let x34 = x34 - c3_sq; // c3c4 + c4c3 + c4_sq
         // x34 = x34 - x4
@@ -236,7 +236,7 @@ impl FqSparse of FqSparseTrait {
         // zC1B1 = x04
 
         let mut zC0B0: Fq2 = c4_sq.mul_by_nonresidue();
-        zC0B0.c0 = zC0B0.c0.u_add(FieldUtils::one()); // POTENTIAL OVERFLOW
+        zC0B0.c0 = zC0B0.c0.add(FieldUtils::one()); // POTENTIAL OVERFLOW
         Fq12Sparse01234 {
             c0: Fq6 { c0: zC0B0, c1: c3_sq, c2: x34 }, c1: Fq6Sparse01 { c0: x03, c1: x04 },
         }
@@ -252,10 +252,10 @@ impl FqSparse of FqSparseTrait {
         // b := e.MulBy01(&z.C1, c3, c4)
         let B = a1.mul_01(sparse_fq6(c3, c4));
         // c3 = e.Ext2.Add(e.Ext2.One(), c3)
-        c3.c0 = c3.c0.u_add(FieldUtils::one()); // POTENTIAL OVERFLOW
+        c3.c0 = c3.c0.add(FieldUtils::one()); // POTENTIAL OVERFLOW
         // d := e.Ext6.Add(&z.C0, &z.C1)
         // Requires reduction, or overflow in next step
-        let d = a0.u_add(a1);
+        let d = a0.add(a1);
         // d = e.MulBy01(d, c3, c4)
         let D = d.mul_01(sparse_fq6(c3, c4));
 
@@ -286,7 +286,7 @@ impl FqSparse of FqSparseTrait {
 
         // a := e.Ext6.Add(e.Ext6.One(), &E6{B0: *z3, B1: *z4, B2: *e.Ext2.Zero()})
         let mut a = sparse_fq6(z3, z4);
-        a.c0.c0 = a.c0.c0.u_add(FieldUtils::one()); // POTENTIAL OVERFLOW
+        a.c0.c0 = a.c0.c0.add(FieldUtils::one()); // POTENTIAL OVERFLOW
         // b := e.Ext6.Add(a0, a1)
         let mut b = a0;
         b.c0 = b.c0 + a1.c0;

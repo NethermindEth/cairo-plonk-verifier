@@ -1,5 +1,7 @@
 use debug::PrintTrait;
 
+use core::circuit::conversions::from_u256;
+use core::circuit::u384
 use plonk_verifier::traits::FieldOps;
 use plonk_verifier::fields::{fq, Fq, fq2, Fq2, FieldUtils, FqMulShort};
 use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
@@ -8,17 +10,17 @@ use plonk_verifier::curve::{FIELD, get_field_nz};
 
 fn ops() -> Array<Fq> {
     array![ //
-        fq(256) - fq(56), //
-        fq(256) + fq(56), //
-        fq(256) * fq(56), //
-        fq(256) / fq(56), //
-        -fq(256), //
+        fq(from_u256(256)) - fq(from_u256(56)), //
+        fq(from_u256(256)) + fq(from_u256(56)), //
+        fq(from_u256(256)) * fq(from_u256(56)), //
+        fq(from_u256(256)) / fq(from_u256(56)), //
+        -fq(from_u256(256)), //
     ]
 }
 
 use plonk_verifier::curve::{sub_u, add, mul, div, neg,};
 
-fn u256_mod_ops() -> Array<u256> {
+fn u256_mod_ops() -> Array<u384> {
     array![ //
     sub_u(256, 56), //
      add(256, 56), //
