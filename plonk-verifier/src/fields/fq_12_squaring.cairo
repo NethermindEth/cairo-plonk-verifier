@@ -111,10 +111,6 @@ impl Fq12Squaring of Fq12SquaringTrait {
             self;
 
         let S1 = g1.sqr();
-        // let S1_c0_c0: u256 = (S1.c0.c0).try_into().unwrap();
-        // let S1_c0_c1: u256 = (S1.c1.c0).try_into().unwrap();
-        // println!("S1_c0_c0 {:?}", S1_c0_c0);
-        // println!("S1_c0_c1 {:?}", S1_c0_c1);
         let S2 = g2.sqr();
         let S3 = g3.sqr();
         let S5 = g5.sqr();
