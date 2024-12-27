@@ -1,6 +1,6 @@
 use std::ops::{Add, Sub, Mul, Div, Neg};
 use crate::circuit::*;
-use super::FieldOps;
+use super::{FieldConstants, FieldOps};
 
 #[derive(Debug, Clone)]
 pub struct Fq {
@@ -60,6 +60,18 @@ impl FieldOps for Fq {
 
     fn inv(&self) -> Self {
         Self { c0: Circuit::circuit_inv(&self.c0), inp: None }
+    }
+}
+
+impl FieldConstants for Fq {
+    fn one() -> Self {
+        let c0 = Self::new_input(0); 
+        &c0 / &c0
+    }
+
+    fn zero() -> Self {
+        let c0 = Self::new_input(0); 
+        &c0 - &c0
     }
 }
 

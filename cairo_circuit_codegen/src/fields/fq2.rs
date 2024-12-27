@@ -31,7 +31,21 @@ impl Fq2 {
     
     // Todo: Optimize by passing in 9 as circuit input and remove scaling 9 function
     pub fn mul_by_xi(&self) -> Self {
-        Self {c0: &self.c0().scl_9() - &self.c1(), c1: &self.c1().scl_9() + &self.c0(), inp: None }
+        Self { c0: &self.c0().scl_9() - &self.c1(), c1: &self.c1().scl_9() + &self.c0(), inp: None }
+    }
+
+    // For πₚ frobeneus map
+    pub fn fq2_mul_nr(&self, inp: [usize; 2]) -> Self {
+        self * &Fq2::new_input(inp)
+    }
+
+    // For πₚ² frobeneus map
+    pub fn fq2_scale_nr(&self, inp: usize) -> Self {
+        self.scale(&Fq::new_input(inp))
+    }
+
+    pub fn conjugate(&self) -> Self {
+        Self { c0: self.c0().clone(), c1: -self.c1(), inp: None }
     }
 }
 
@@ -91,7 +105,6 @@ impl FieldOps for Fq2 {
     }
     
 }
-
 
 impl Add for Fq2 {
     type Output = Fq2;

@@ -36,7 +36,7 @@ impl Fq6 {
         &self.c2
     }
 
-    pub fn mul_01(&self, rhs: Fq6Sparse01) -> Fq6 {
+    pub fn mul_01(&self, rhs: &Fq6Sparse01) -> Fq6 {
         let (a0, a1, a2) = (self.c0(), self.c1(), self.c2());
         let (b0, b1) = (rhs.c0(), rhs.c1());
 
