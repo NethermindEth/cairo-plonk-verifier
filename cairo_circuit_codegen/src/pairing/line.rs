@@ -5,7 +5,7 @@ use crate::fields::{affine::Affine, fq::Fq, fq12::Fq12, fq2::Fq2, sparse::Fq12Sp
 use super::MillerSteps;
 
 #[derive(Debug, Clone)]
-struct PreCompute {
+pub struct Precompute {
     p: Affine<Fq>,
     q: Affine<Fq2>,
     neg_q: Affine<Fq2>,
@@ -14,7 +14,7 @@ struct PreCompute {
 }
 
 // Fix Clones
-impl PreCompute {
+impl Precompute {
     pub fn precompute(p: Affine<Fq>, q: Affine<Fq2>, inp: Option<[usize; 6]>) -> (Self, Affine<Fq2>) {
         let ppc = PPre::p_precompute(p.clone());
         let precompute = Self { p, q: q.clone(), neg_q: q.neg(), ppc, inp };
@@ -23,7 +23,7 @@ impl PreCompute {
 }
 
 #[derive(Debug, Clone)]
-struct PPre {
+pub struct PPre {
     neg_x_over_y: Fq,
     y_inv: Fq,
 }
@@ -43,7 +43,7 @@ impl PPre {
     }
 }
 
-impl MillerSteps for PreCompute {    
+impl MillerSteps for Precompute {    
     fn sqr_target(&mut self, i: u32, acc: &mut Affine<Fq2>, f: &mut Fq12) {
         *f = f.sqr();
     }
@@ -67,11 +67,10 @@ impl MillerSteps for PreCompute {
     fn miller_bit_n(&mut self, i: u32, acc: &mut Affine<Fq2>, f: &mut Fq12) {
         miller_utils::step_dbl_add_to_f(acc, f, &self.ppc, &self.p, &self.neg_q);
     }
-
-
-
     
-    
+    fn miller_last(&mut self, acc: &mut Affine<Fq2>, f: &mut Fq12, pi_idx: [usize; 6]) {
+        miller_utils::correction_step_to_f(acc, f, &self.ppc, &self.p, &self.q, pi_idx);
+    }    
 }
 
 mod miller_utils {
@@ -94,6 +93,16 @@ mod miller_utils {
 
     pub fn step_dbl_add_to_f(acc: &mut Affine<Fq2>, f: &mut Fq12, p_pre: &PPre, p: &Affine<Fq>, q: &Affine<Fq2>) {
         let (l1, l2) = step_dbl_add(acc, p_pre, p, q);
+        *f = f.mul_01234(l1.mul_034_by_034(&l2));
+    }
+
+    pub fn correction_step(acc: &mut Affine<Fq2>, p_pre: &PPre, p: &Affine<Fq>, q: &Affine<Fq2>, pi_idx: [usize; 6]) -> (Fq12Sparse034, Fq12Sparse034) {
+        let (lf1, lf2) = LineFn::correction_step(acc, q, pi_idx);
+        (LineFn::line_fn_at_p(&lf1, p_pre), LineFn::line_fn_at_p(&lf2, p_pre))
+    }
+
+    pub fn correction_step_to_f(acc: &mut Affine<Fq2>, f: &mut Fq12, p_pre: &PPre, p: &Affine<Fq>, q: &Affine<Fq2>, pi_idx: [usize; 6]) {
+        let (l1, l2) = correction_step(acc, p_pre, p, q, pi_idx);
         *f = f.mul_01234(l1.mul_034_by_034(&l2));
     }
 }
@@ -154,13 +163,22 @@ impl LineFn {
     }
 
     pub fn correction_step(acc: &mut Affine<Fq2>, q: &Affine<Fq2>, pi_idx: [usize; 6]) -> (LineFn, LineFn) {
+        // Circuit input indexes for constants
         let q1x2_idx: [usize; 2] = [pi_idx[0], pi_idx[1]];
         let q1x3_idx: [usize; 2] = [pi_idx[2], pi_idx[3]];
         let q2x2_idx: usize = pi_idx[4];
         let q2x3_idx: usize = pi_idx[5];
+        let affine_q1_idx: [usize; 4] = [pi_idx[0], pi_idx[1], pi_idx[2], pi_idx[3]];
+        let affine_q2_idx: [usize; 4] = [pi_idx[4], pi_idx[5], 0, 0];
 
-        let q1 =  Affine::<Fq2>::new()
+        let q1 =  Affine::<Fq2>::new(q.x().conjugate().fq2_mul_nr(q1x2_idx), q.y().conjugate().fq2_mul_nr(q1x3_idx), affine_q1_idx);
+        let q2 = Affine::<Fq2>::new(q.x().fq2_scale_nr(q2x2_idx), q.y().fq2_scale_nr(q2x3_idx).neg(), affine_q2_idx);
 
+        let d = Self::step_add(acc, &q1);
+        let slope = acc.chord(&q2);
+        let e = LineFn::line_fn(&slope, acc);
+
+        (d, e)
     }
 }
 
