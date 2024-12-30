@@ -28,7 +28,6 @@ use core::circuit::{
 	CircuitInput as CI,
 	CircuitElement as CE,
 };
-use plonk_verifier::curve::groups::AffineG2;
 use debug::PrintTrait;
 use plonk_verifier::fields::circuits::fq_12_circuits::{add_circuit, mul_circuit, sqr_circuit, neg_circuit, sub_circuit};
 #[derive(Copy, Drop, Debug)]

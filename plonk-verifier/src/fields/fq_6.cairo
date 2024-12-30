@@ -5,7 +5,7 @@ use plonk_verifier::curve::{FIELD, get_field_nz};
 // };
 use plonk_verifier::curve::{mul_by_xi_nz_as_circuit};
 // use plonk_verifier::fields::print::{FqPrintImpl, Fq2PrintImpl, Fq6PrintImpl, Fq12PrintImpl};
-use plonk_verifier::fields::{Fq2, Fq2Ops, Fq2Short, Fq2Utils, fq, fq2, Fq2Frobenius};
+use plonk_verifier::fields::{Fq, Fq2, Fq2Ops, Fq2Short, Fq2Utils, fq, fq2, Fq2Frobenius};
 use plonk_verifier::traits::{FieldUtils, FieldOps, FieldShortcuts, FieldMulShortcuts};
 use plonk_verifier::fields::frobenius::fp6 as frob;
 use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
@@ -22,7 +22,15 @@ use core::circuit::{
 };
 
 use debug::PrintTrait;
-
+use core::circuit::{
+	AddModGate as A,
+	SubModGate as S,
+	MulModGate as M,
+	InverseGate as I,
+	CircuitInput as CI,
+	CircuitElement as CE,
+};
+use plonk_verifier::fields::circuits::fq_6_circuits::{add_circuit, mul_circuit, sqr_circuit, neg_circuit, sub_circuit};
 #[derive(Copy, Drop, Debug)]
 struct Fq6 {
     c0: Fq2,
@@ -193,35 +201,63 @@ impl Fq6Ops of FieldOps<Fq6> {
 
         // (C0, C1, C2)
 
-        let v0 = Fq2Ops::mul(self.c0, rhs.c0);
-        let v1 = Fq2Ops::mul(self.c1, rhs.c1);
-        let v2 = Fq2Ops::mul(self.c2, rhs.c2);
+        // let v0 = Fq2Ops::mul(self.c0, rhs.c0);
+        // let v1 = Fq2Ops::mul(self.c1, rhs.c1);
+        // let v2 = Fq2Ops::mul(self.c2, rhs.c2);
 
-        let a1_add_a2 = Fq2Ops::add(self.c1, self.c2);
-        let b1_add_b2 = Fq2Ops::add(rhs.c1, rhs.c2);
-        let t0 = Fq2Ops::mul(a1_add_a2, b1_add_b2);
-        let t0 = Fq2Ops::sub(t0, v1);
-        let t0 = Fq2Ops::sub(t0, v2);
-        let t0_scaled = mul_by_xi_nz_as_circuit(t0);
-        let c0 = Fq2Ops::add(v0, t0_scaled);
+        // let a1_add_a2 = Fq2Ops::add(self.c1, self.c2);
+        // let b1_add_b2 = Fq2Ops::add(rhs.c1, rhs.c2);
+        // let t0 = Fq2Ops::mul(a1_add_a2, b1_add_b2);
+        // let t0 = Fq2Ops::sub(t0, v1);
+        // let t0 = Fq2Ops::sub(t0, v2);
+        // let t0_scaled = mul_by_xi_nz_as_circuit(t0);
+        // let c0 = Fq2Ops::add(v0, t0_scaled);
 
-        let a0_add_a1 = Fq2Ops::add(self.c0, self.c1);
-        let b0_add_b1 = Fq2Ops::add(rhs.c0, rhs.c1);
-        let t1 = Fq2Ops::mul(a0_add_a1, b0_add_b1);
-        let t1 = Fq2Ops::sub(t1, v0);
-        let t1 = Fq2Ops::sub(t1, v1);
-        let t1_scaled = mul_by_xi_nz_as_circuit(v2);
-        let c1 = Fq2Ops::add(t1, t1_scaled);
+        // let a0_add_a1 = Fq2Ops::add(self.c0, self.c1);
+        // let b0_add_b1 = Fq2Ops::add(rhs.c0, rhs.c1);
+        // let t1 = Fq2Ops::mul(a0_add_a1, b0_add_b1);
+        // let t1 = Fq2Ops::sub(t1, v0);
+        // let t1 = Fq2Ops::sub(t1, v1);
+        // let t1_scaled = mul_by_xi_nz_as_circuit(v2);
+        // let c1 = Fq2Ops::add(t1, t1_scaled);
 
-        let a0_add_a2 = Fq2Ops::add(self.c0, self.c2);
-        let b0_add_b2 = Fq2Ops::add(rhs.c0, rhs.c2);
-        let t2 = Fq2Ops::mul(a0_add_a2, b0_add_b2);
-        let t2 = Fq2Ops::sub(t2, v0);
-        let t2 = Fq2Ops::add(t2, v1);
-        let c2 = Fq2Ops::sub(t2, v2);
+        // let a0_add_a2 = Fq2Ops::add(self.c0, self.c2);
+        // let b0_add_b2 = Fq2Ops::add(rhs.c0, rhs.c2);
+        // let t2 = Fq2Ops::mul(a0_add_a2, b0_add_b2);
+        // let t2 = Fq2Ops::sub(t2, v0);
+        // let t2 = Fq2Ops::add(t2, v1);
+        // let c2 = Fq2Ops::sub(t2, v2);
 
-        let res = Fq6 { c0: c0, c1: c1, c2: c2 };
-        res
+        // let res = Fq6 { c0: c0, c1: c1, c2: c2 };
+        // res
+
+        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+
+        let (c0, c1, c2, c3, c4, c5) = mul_circuit(); 
+
+        let outputs = match (c0, c1, c2, c3, c4, c5).new_inputs()
+            .next(self.c0.c0.c0)
+            .next(self.c0.c1.c0)
+            .next(self.c1.c0.c0)
+            .next(self.c1.c1.c0)
+            .next(self.c2.c0.c0)
+            .next(self.c2.c1.c0)
+            .next(rhs.c0.c0.c0)
+            .next(rhs.c0.c1.c0)
+            .next(rhs.c1.c0.c0)
+            .next(rhs.c1.c1.c0)
+            .next(rhs.c2.c0.c0)
+            .next(rhs.c2.c1.c0)
+            .done().eval(modulus) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
+        };
+
+        Fq6 { 
+            c0: Fq2 { c0: Fq { c0: outputs.get_output(c0) }, c1: Fq { c0: outputs.get_output(c1) } }, 
+            c1: Fq2 { c0: Fq { c0: outputs.get_output(c2) }, c1: Fq { c0: outputs.get_output(c3) } }, 
+            c2: Fq2 { c0: Fq { c0: outputs.get_output(c4) }, c1: Fq { c0: outputs.get_output(c5) } } 
+        }
     }
     #[inline(always)]
     fn div(self: Fq6, rhs: Fq6) -> Fq6 {
@@ -241,18 +277,40 @@ impl Fq6Ops of FieldOps<Fq6> {
 
     #[inline(always)]
     fn sqr(self: Fq6) -> Fq6 {
-        let s0 = Fq2Ops::sqr(self.c0);
-        let ab = Fq2Ops::mul(self.c0, self.c1);
-        let s1 = Fq2Ops::add(ab, ab);
-        let s2 = Fq2Ops::sqr(Fq2Ops::sub(Fq2Ops::add(self.c0, self.c2), self.c1));
-        let bc = Fq2Ops::mul(self.c1, self.c2);
-        let s3 = Fq2Ops::add(bc, bc);
-        let s4 = Fq2Ops::sqr(self.c2);
-        let c0 = Fq2Ops::add(s0, Fq2Utils::mul_by_nonresidue(s3));
-        let c1 = Fq2Ops::add(s1, Fq2Utils::mul_by_nonresidue(s4));
-        let c2 = Fq2Ops::sub(Fq2Ops::add(Fq2Ops::add(s1, s2), s3), Fq2Ops::add(s0, s4));
-        let res = Fq6 { c0: c0, c1: c1, c2: c2 };
-        res
+        // let s0 = Fq2Ops::sqr(self.c0);
+        // let ab = Fq2Ops::mul(self.c0, self.c1);
+        // let s1 = Fq2Ops::add(ab, ab);
+        // let s2 = Fq2Ops::sqr(Fq2Ops::sub(Fq2Ops::add(self.c0, self.c2), self.c1));
+        // let bc = Fq2Ops::mul(self.c1, self.c2);
+        // let s3 = Fq2Ops::add(bc, bc);
+        // let s4 = Fq2Ops::sqr(self.c2);
+        // let c0 = Fq2Ops::add(s0, Fq2Utils::mul_by_nonresidue(s3));
+        // let c1 = Fq2Ops::add(s1, Fq2Utils::mul_by_nonresidue(s4));
+        // let c2 = Fq2Ops::sub(Fq2Ops::add(Fq2Ops::add(s1, s2), s3), Fq2Ops::add(s0, s4));
+        // let res = Fq6 { c0: c0, c1: c1, c2: c2 };
+        // res
+
+        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+
+        let (c0, c1, c2, c3, c4, c5) = sqr_circuit(); 
+
+        let outputs = match (c0, c1, c2, c3, c4, c5).new_inputs()
+            .next(self.c0.c0.c0)
+            .next(self.c0.c1.c0)
+            .next(self.c1.c0.c0)
+            .next(self.c1.c1.c0)
+            .next(self.c2.c0.c0)
+            .next(self.c2.c1.c0)
+            .done().eval(modulus) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
+        };
+
+        Fq6 { 
+            c0: Fq2 { c0: Fq { c0: outputs.get_output(c0) }, c1: Fq { c0: outputs.get_output(c1) } }, 
+            c1: Fq2 { c0: Fq { c0: outputs.get_output(c2) }, c1: Fq { c0: outputs.get_output(c3) } }, 
+            c2: Fq2 { c0: Fq { c0: outputs.get_output(c4) }, c1: Fq { c0: outputs.get_output(c5) } } 
+        }
     }
 
     #[inline(always)]

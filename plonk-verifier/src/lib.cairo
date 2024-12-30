@@ -39,8 +39,11 @@ mod fields {
     mod utils;
     mod circuits {
         mod typedefs {
+            mod fq_6_type;
             mod fq_12_type; 
+            mod add_sub_neg;
         }
+        mod fq_6_circuits;
         mod fq_12_circuits;
         mod outputs;
     }
