@@ -13,10 +13,10 @@ use plonk_verifier::curve::constants::FIELD_U384;
 use plonk_verifier::circuit_mod::{
     add_c, sub_c, neg_c, div_c, inv_c, mul_c, sqr_c, scl_c, one_384, zero_384
 };
-use plonk_verifier::curve::{FIELD, get_field_nz, add, sub_field, mul, scl, sqr, div, neg, inv};
-use plonk_verifier::curve::{
-    add_u, sub_u, mul_u, sqr_u, scl_u, u512_reduce, u512_add_u256, u512_sub_u256
-};
+use plonk_verifier::curve::{FIELD, get_field_nz}; //, add, sub_field, mul, scl, sqr, div, neg, inv};
+// use plonk_verifier::curve::{
+//     add_u, sub_u, mul_u, sqr_u, scl_u, u512_reduce, u512_add_u256, u512_sub_u256
+// };
 use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 use plonk_verifier::traits::{FieldUtils, FieldOps, FieldShortcuts, FieldMulShortcuts};
 

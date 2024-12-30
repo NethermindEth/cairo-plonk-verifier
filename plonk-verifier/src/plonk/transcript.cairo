@@ -6,7 +6,7 @@ use core::{
 use debug::PrintTrait;
 
 use plonk_verifier::{
-    curve::{constants::{ORDER, ORDER_NZ}, groups::{AffineG1, AffineG2, g1, g2}, mul_nz,},
+    curve::{constants::{ORDER, ORDER_NZ}, groups::{AffineG1, AffineG2, g1, g2}},
     fields::{fq, Fq, FqIntoU256}, traits::FieldMulShortcuts,
     plonk::utils::{
         byte_array_to_decimal_without_ascii_without_rev, convert_le_to_be, decimal_to_byte_array,

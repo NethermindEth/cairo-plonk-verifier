@@ -7,11 +7,11 @@ use plonk_verifier::fields::frobenius::fp12 as frob;
 // use plonk_verifier::fields::print::{Fq6Display};
 use plonk_verifier::curve::constants::FIELD_U384;
 use plonk_verifier::curve::{FIELD, get_field_nz};
-use plonk_verifier::curve::{
-    u512, U512BnAdd, Tuple2Add, Tuple3Add, U512BnSub, Tuple2Sub, Tuple3Sub, u512_reduce,
-    mul_by_v_nz, mul_by_v_nz_as_circuit, U512Fq6Ops
-};
-
+// use plonk_verifier::curve::{
+//     u512, U512BnAdd, Tuple2Add, Tuple3Add, U512BnSub, Tuple2Sub, Tuple3Sub, u512_reduce,
+//     mul_by_v_nz, mul_by_v_nz_as_circuit, U512Fq6Ops
+// };
+use plonk_verifier::curve::{mul_by_v_nz_as_circuit};
 use core::circuit::conversions::from_u256;
 use core::traits::TryInto;
 use core::circuit::{
@@ -203,7 +203,7 @@ impl Fq12Utils of FieldUtils<Fq12, Fq6> {
     }
 }
 
-type Fq6U512 = ((u512, u512), (u512, u512), (u512, u512));
+// type Fq6U512 = ((u512, u512), (u512, u512), (u512, u512));
 
 impl Fq12Ops of FieldOps<Fq12> {
     fn add(self: Fq12, rhs: Fq12) -> Fq12 {

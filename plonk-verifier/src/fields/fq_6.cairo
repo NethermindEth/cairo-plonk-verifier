@@ -1,8 +1,9 @@
 use plonk_verifier::curve::{FIELD, get_field_nz};
-use plonk_verifier::curve::{
-    U512Fq2Ops, u512, U512BnAdd, Tuple2Add, U512BnSub, Tuple2Sub, mul_by_xi, mul_by_xi_nz,
-    mul_by_xi_nz_as_circuit, u512_reduce, u512_add, u512_sub
-};
+// use plonk_verifier::curve::{
+//     U512Fq2Ops, u512, U512BnAdd, Tuple2Add, U512BnSub, Tuple2Sub, mul_by_xi, mul_by_xi_nz,
+//     mul_by_xi_nz_as_circuit, u512_reduce, u512_add, u512_sub
+// };
+use plonk_verifier::curve::{mul_by_xi_nz_as_circuit};
 // use plonk_verifier::fields::print::{FqPrintImpl, Fq2PrintImpl, Fq6PrintImpl, Fq12PrintImpl};
 use plonk_verifier::fields::{Fq2, Fq2Ops, Fq2Short, Fq2Utils, fq, fq2, Fq2Frobenius};
 use plonk_verifier::traits::{FieldUtils, FieldOps, FieldShortcuts, FieldMulShortcuts};
@@ -156,11 +157,11 @@ impl Fq6Short of FieldShortcuts<Fq6> {
     }
 }
 
-type SixU512 = ((u512, u512), (u512, u512), (u512, u512),);
+// type SixU512 = ((u512, u512), (u512, u512), (u512, u512),);
 
-fn u512_dud() -> u512 {
-    u512 { limb0: 1, limb1: 0, limb2: 0, limb3: 0, }
-}
+// fn u512_dud() -> u512 {
+//     u512 { limb0: 1, limb1: 0, limb2: 0, limb3: 0, }
+// }
 
 impl Fq6Ops of FieldOps<Fq6> {
     #[inline(always)]
