@@ -1,4 +1,4 @@
-use super::{fq::Fq, fq2::Fq2, fq6::Fq6, sparse::{Fq12Sparse01234, Fq12Sparse034, Fq6Sparse01}, FieldConstants};
+use super::{fq::Fq, fq2::Fq2, fq6::Fq6, sparse::{Fq12Sparse01234, Fq12Sparse034, Fq6Sparse01}, FieldConstants, FieldOps};
 
 #[derive(Clone, Debug, Default)]
 pub struct Fq12 {
@@ -26,27 +26,6 @@ impl Fq12 {
 
     pub fn c1(&self) -> &Fq6 {
         &self.c1
-    }
-
-    pub fn mul(&self, rhs: &Self) -> Self {
-        let (a0, a1) = (self.c0(), self.c1());
-        let (b0, b1) = (rhs.c0(), rhs.c1());
-        
-        let u = a0 * b0;
-        let v = a1 * b1;
-        let c0 = &v.mul_by_v() + &u;
-        let c1 = (a0 + a1) * (b0 + b1) - u - v;
-
-        Self { c0, c1, inp: None }
-    }
-
-    pub fn sqr(&self) -> Self {
-        let (a0, a1) = (self.c0(), self.c1()); 
-        let v = a0 * a1;
-        let c0 = &(&((a0 + a1) * (a0 + &a1.mul_by_v())) - &v) - &v.mul_by_v();
-        let c1 = &v + &v;
-
-        Fq12 { c0, c1, inp: None }
     }
 
     pub fn mul_034(&self, rhs: &Fq12Sparse034) -> Fq12 {
@@ -84,10 +63,55 @@ impl Fq12 {
     }
 }
 
+impl FieldOps for Fq12 {
+    fn add(&self, rhs: &Self) -> Self {
+        Self { c0: &self.c0 + &rhs.c0, c1: &self.c1 + &rhs.c1, inp: None }
+    }
+
+    fn sub(&self, rhs: &Self) -> Self {
+        Self { c0: &self.c0 - &rhs.c0, c1: &self.c1 - &rhs.c1, inp: None }
+    }
+
+    fn mul(&self, rhs: &Self) -> Self {
+        let (a0, a1) = (self.c0(), self.c1());
+        let (b0, b1) = (rhs.c0(), rhs.c1());
+        
+        let u = a0 * b0;
+        let v = a1 * b1;
+        let c0 = &v.mul_by_v() + &u;
+        let c1 = (a0 + a1) * (b0 + b1) - u - v;
+
+        Self { c0, c1, inp: None }
+    }
+
+    fn div(&self, rhs: &Self) -> Self {
+        FieldOps::mul(self, &rhs.inv())
+    }
+
+    fn sqr(&self,) -> Self {
+        let (a0, a1) = (self.c0(), self.c1()); 
+        let v = a0 * a1;
+        let c0 = &(&((a0 + a1) * (a0 + &a1.mul_by_v())) - &v) - &v.mul_by_v();
+        let c1 = &v + &v;
+
+        Fq12 { c0, c1, inp: None }
+    }
+
+    fn neg(&self,) -> Self {
+        Self { c0: -&self.c0, c1: -&self.c1, inp: None }
+    }
+
+    fn inv(&self,) -> Self {
+        let t = (&self.c0().sqr() - &self.c1().sqr().mul_by_v()).inv();
+
+        Self { c0: self.c0() * &t, c1: -(self.c1() * &t), inp: None }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::{Fq12, Fq2};
-    use crate::{circuit::builder::CairoCodeBuilder, utils::utils::write_stdout}; 
+    use crate::{circuit::builder::CairoCodeBuilder, fields::FieldOps, utils::utils::write_stdout}; 
     #[test]
     pub fn test_fq12() {
         let idx_0: [usize; 12] = (0..=11).collect::<Vec<usize>>().try_into().unwrap();

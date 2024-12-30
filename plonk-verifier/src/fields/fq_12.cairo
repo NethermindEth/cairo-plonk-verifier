@@ -358,6 +358,7 @@ impl Fq12Ops of FieldOps<Fq12> {
     }
 
     fn inv(self: Fq12, field_nz: NonZero<u256>) -> Fq12 {
+        println!("sadsda");
         core::internal::revoke_ap_tracking();
         let t = (self.c0.u_sqr() - mul_by_v_nz(self.c1.u_sqr(), field_nz))
             .to_fq(field_nz)

@@ -3,8 +3,6 @@ mod pairing;
 mod utils;
 mod fields; 
 
-
-
 #[cfg(test)]
 mod tests {
     use super::*;

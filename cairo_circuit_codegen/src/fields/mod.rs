@@ -5,11 +5,6 @@ pub(crate) mod fq12;
 pub(crate) mod affine;
 pub(crate) mod sparse;
 
-// Utils for Code Generation
-pub trait CircuitUtils<F: FieldOps> {
-    fn match_circuit(&mut self, field_name: &str) -> &mut Self;
-}
-
 pub trait FieldUtils {
     type FieldChild; 
     fn scale(&self, by: &Self::FieldChild) -> Self; 
