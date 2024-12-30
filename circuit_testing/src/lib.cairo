@@ -44,48 +44,48 @@ use core::array::ArrayTrait;
         
         // fn verify(ref self: ContractState, verification_key: PlonkVerificationKey, proof: PlonkProof, publicSignals: Array<u256>) { 
         fn verify(ref self: ContractState) {     
-            // let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
-            // constants::verification_key();
-            // let verification_key:PlonkVerificationKey  = PlonkVerificationKey {
-            //     n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
-            // };
+            let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
+            constants::verification_key();
+            let verification_key:PlonkVerificationKey  = PlonkVerificationKey {
+                n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
+            };
 
-            // // proof
-            // let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2,
-            // eval_zw) =
-            //     constants::proof();
-            // let proof: PlonkProof = PlonkProof {
-            //     A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
-            // };
+            // proof
+            let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2,
+            eval_zw) =
+                constants::proof();
+            let proof: PlonkProof = PlonkProof {
+                A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
+            };
 
-            // //public_signals
-            // let public_signals = constants::public_inputs();
-            // let verified: bool = plonk_verifier::plonk::verify::PlonkVerifier::verify(verification_key, proof, public_signals);
-            // assert(verified, 'plonk verification failed'); 
+            //public_signals
+            let public_signals = constants::public_inputs();
+            let verified: bool = plonk_verifier::plonk::verify::PlonkVerifier::verify(verification_key, proof, public_signals);
+            assert(verified, 'plonk verification failed'); 
 
-            let lhs: Fq12 = Fq12 { 
-                c0: Fq6 { 
-                    c0: Fq2 { c0: Fq { c0: 0 }, c1: Fq { c0: 1 } }, 
-                    c1: Fq2 { c0: Fq { c0: 2 }, c1: Fq { c0: 3 } }, 
-                    c2: Fq2 { c0: Fq { c0: 4 }, c1: Fq { c0: 5 } } }, 
-                c1: Fq6 { 
-                    c0: Fq2 { c0: Fq { c0: 6 }, c1: Fq { c0: 7 } }, 
-                    c1: Fq2 { c0: Fq { c0: 8 }, c1: Fq { c0: 9 } }, 
-                    c2: Fq2 { c0: Fq { c0: 10 }, c1: Fq { c0: 11 } } 
-                } 
-            };    
+            // let lhs: Fq12 = Fq12 { 
+            //     c0: Fq6 { 
+            //         c0: Fq2 { c0: Fq { c0: 0 }, c1: Fq { c0: 1 } }, 
+            //         c1: Fq2 { c0: Fq { c0: 2 }, c1: Fq { c0: 3 } }, 
+            //         c2: Fq2 { c0: Fq { c0: 4 }, c1: Fq { c0: 5 } } }, 
+            //     c1: Fq6 { 
+            //         c0: Fq2 { c0: Fq { c0: 6 }, c1: Fq { c0: 7 } }, 
+            //         c1: Fq2 { c0: Fq { c0: 8 }, c1: Fq { c0: 9 } }, 
+            //         c2: Fq2 { c0: Fq { c0: 10 }, c1: Fq { c0: 11 } } 
+            //     } 
+            // };    
         
-            let rhs: Fq12 = Fq12 { 
-                c0: Fq6 { 
-                    c0: Fq2 { c0: Fq { c0: 12 }, c1: Fq { c0: 13 } }, 
-                    c1: Fq2 { c0: Fq { c0: 14 }, c1: Fq { c0: 15 } }, 
-                    c2: Fq2 { c0: Fq { c0: 16 }, c1: Fq { c0: 17 } } }, 
-                c1: Fq6 { 
-                    c0: Fq2 { c0: Fq { c0: 18 }, c1: Fq { c0: 19 } }, 
-                    c1: Fq2 { c0: Fq { c0: 20 }, c1: Fq { c0: 21 } }, 
-                    c2: Fq2 { c0: Fq { c0: 22 }, c1: Fq { c0: 23 } } 
-                } 
-            };    
+            // let rhs: Fq12 = Fq12 { 
+            //     c0: Fq6 { 
+            //         c0: Fq2 { c0: Fq { c0: 12 }, c1: Fq { c0: 13 } }, 
+            //         c1: Fq2 { c0: Fq { c0: 14 }, c1: Fq { c0: 15 } }, 
+            //         c2: Fq2 { c0: Fq { c0: 16 }, c1: Fq { c0: 17 } } }, 
+            //     c1: Fq6 { 
+            //         c0: Fq2 { c0: Fq { c0: 18 }, c1: Fq { c0: 19 } }, 
+            //         c1: Fq2 { c0: Fq { c0: 20 }, c1: Fq { c0: 21 } }, 
+            //         c2: Fq2 { c0: Fq { c0: 22 }, c1: Fq { c0: 23 } } 
+            //     } 
+            // };    
         
             // let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         
@@ -157,7 +157,7 @@ use core::array::ArrayTrait;
             //     } 
             // };    
         
-            let norm_out = lhs * rhs; 
+            // let norm_out = lhs * rhs; 
         }
     }
     fn test() {

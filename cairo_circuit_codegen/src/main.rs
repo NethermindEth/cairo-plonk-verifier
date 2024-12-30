@@ -1,5 +1,6 @@
 use std::fs;
-use cairo_circuit_codegen::circuit::{generate_cairo_code, CairoCodeBuilder};
+
+use cairo_circuit_codegen::circuit::utils::generate_cairo_code;
 
 fn main() {
     let code = generate_cairo_code();

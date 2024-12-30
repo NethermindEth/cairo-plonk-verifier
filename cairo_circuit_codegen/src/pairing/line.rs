@@ -1,8 +1,6 @@
 use miller_utils::step_dbl_add;
-
 use crate::fields::{affine::Affine, fq::Fq, fq12::Fq12, fq2::Fq2, sparse::Fq12Sparse034, ECOperations, FieldOps, FieldUtils};
-
-use super::MillerSteps;
+use super::{MillerPrecompute, MillerSteps};
 
 #[derive(Debug, Clone)]
 pub struct Precompute {
@@ -13,33 +11,57 @@ pub struct Precompute {
     inp: Option<[usize; 6]>,
 }
 
-// Fix Clones
-impl Precompute {
-    pub fn precompute(p: Affine<Fq>, q: Affine<Fq2>, inp: Option<[usize; 6]>) -> (Self, Affine<Fq2>) {
-        let ppc = PPre::p_precompute(p.clone());
-        let precompute = Self { p, q: q.clone(), neg_q: q.neg(), ppc, inp };
-        (precompute, q)
-    }
-}
-
 #[derive(Debug, Clone)]
 pub struct PPre {
     neg_x_over_y: Fq,
     y_inv: Fq,
 }
 
-impl PPre {
-    pub fn p_precompute(p: Affine<Fq>) -> Self {
-        let y_inv = p.y().inv();
-        Self { neg_x_over_y: -p.x() * y_inv.clone(), y_inv }
+#[derive(Debug, Clone)]
+struct LineFn {
+    slope: Fq2,
+    c: Fq2,
+}
+
+impl Precompute {
+    pub fn p(&self) -> &Affine<Fq> {
+        &self.p
     }
 
+    pub fn q(&self) -> &Affine<Fq2> {
+        &self.q
+    }
+
+    pub fn neg_q(&self) -> &Affine<Fq2> {
+        &self.neg_q
+    }
+
+    pub fn ppc(&self) -> &PPre{
+        &self.ppc
+    }
+}
+
+impl MillerPrecompute for Precompute {
+    type Precompute = Precompute;
+    fn precompute(p: Affine<Fq>, q: Affine<Fq2>, inp: Option<[usize; 6]>) -> (Self, Affine<Fq2>) {
+        let ppc = PPre::p_precompute(&p);
+        let precompute = Self { p, q: q.clone(), neg_q: q.neg(), ppc, inp }; // refactor clones
+        (precompute, q)
+    }
+}
+
+impl PPre {
     pub fn neg_x_over_y(&self) -> &Fq {
         &self.neg_x_over_y
     }
 
     pub fn y_inv(&self) -> &Fq {
         &self.y_inv
+    }
+
+    pub fn p_precompute(p: &Affine<Fq>) -> Self {
+        let y_inv = p.y().inv();
+        Self { neg_x_over_y: -p.x() * y_inv.clone(), y_inv }
     }
 }
 
@@ -53,7 +75,8 @@ impl MillerSteps for Precompute {
         let f_01234 = l0.sqr_034();
 
         let (l1, l2) = step_dbl_add(acc, &self.ppc, &self.p, &self.neg_q);
-        f_01234.mul_01234_01234(&l1.mul_034_by_034(&l2))
+        // f_01234.mul_01234_01234(&l1.mul_034_by_034(&l2))
+        Fq12::default()
     }
 
     fn miller_bit_o(&mut self, i: u32, acc: &mut Affine<Fq2>, f: &mut Fq12) {
@@ -71,46 +94,6 @@ impl MillerSteps for Precompute {
     fn miller_last(&mut self, acc: &mut Affine<Fq2>, f: &mut Fq12, pi_idx: [usize; 6]) {
         miller_utils::correction_step_to_f(acc, f, &self.ppc, &self.p, &self.q, pi_idx);
     }    
-}
-
-mod miller_utils {
-    use crate::fields::{affine::Affine, fq::Fq, fq12::Fq12, fq2::Fq2, sparse::Fq12Sparse034};
-    use super::{LineFn, PPre};
-
-    pub fn step_double_to_f(acc: &mut Affine<Fq2>, f: &mut Fq12, p_pre: &PPre, p: &Affine<Fq>) {
-        *f = f.mul_034(&step_double(acc, p_pre, p));
-    }
-
-    pub fn step_double(acc: &mut Affine<Fq2>, p_pre: &PPre, p: &Affine<Fq>) -> Fq12Sparse034 {
-        let lf = LineFn::step_double(acc);
-        LineFn::line_fn_at_p(&lf, &p_pre)
-    }
-
-    pub fn step_dbl_add(acc: &mut Affine<Fq2>, p_pre: &PPre, p: &Affine<Fq>, q: &Affine<Fq2>) -> (Fq12Sparse034, Fq12Sparse034) {
-        let (lf1, lf2) = LineFn::step_dbl_add(acc, q);
-        (LineFn::line_fn_at_p(&lf1, p_pre), LineFn::line_fn_at_p(&lf2, p_pre))
-    }
-
-    pub fn step_dbl_add_to_f(acc: &mut Affine<Fq2>, f: &mut Fq12, p_pre: &PPre, p: &Affine<Fq>, q: &Affine<Fq2>) {
-        let (l1, l2) = step_dbl_add(acc, p_pre, p, q);
-        *f = f.mul_01234(l1.mul_034_by_034(&l2));
-    }
-
-    pub fn correction_step(acc: &mut Affine<Fq2>, p_pre: &PPre, p: &Affine<Fq>, q: &Affine<Fq2>, pi_idx: [usize; 6]) -> (Fq12Sparse034, Fq12Sparse034) {
-        let (lf1, lf2) = LineFn::correction_step(acc, q, pi_idx);
-        (LineFn::line_fn_at_p(&lf1, p_pre), LineFn::line_fn_at_p(&lf2, p_pre))
-    }
-
-    pub fn correction_step_to_f(acc: &mut Affine<Fq2>, f: &mut Fq12, p_pre: &PPre, p: &Affine<Fq>, q: &Affine<Fq2>, pi_idx: [usize; 6]) {
-        let (l1, l2) = correction_step(acc, p_pre, p, q, pi_idx);
-        *f = f.mul_01234(l1.mul_034_by_034(&l2));
-    }
-}
-
-#[derive(Debug, Clone)]
-struct LineFn {
-    slope: Fq2,
-    c: Fq2,
 }
 
 impl LineFn {
@@ -179,6 +162,40 @@ impl LineFn {
         let e = LineFn::line_fn(&slope, acc);
 
         (d, e)
+    }
+}
+
+mod miller_utils {
+    use crate::fields::{affine::Affine, fq::Fq, fq12::Fq12, fq2::Fq2, sparse::Fq12Sparse034};
+    use super::{LineFn, PPre};
+
+    pub fn step_double_to_f(acc: &mut Affine<Fq2>, f: &mut Fq12, p_pre: &PPre, p: &Affine<Fq>) {
+        *f = f.mul_034(&step_double(acc, p_pre, p));
+    }
+
+    pub fn step_double(acc: &mut Affine<Fq2>, p_pre: &PPre, p: &Affine<Fq>) -> Fq12Sparse034 {
+        let lf = LineFn::step_double(acc);
+        LineFn::line_fn_at_p(&lf, &p_pre)
+    }
+
+    pub fn step_dbl_add(acc: &mut Affine<Fq2>, p_pre: &PPre, p: &Affine<Fq>, q: &Affine<Fq2>) -> (Fq12Sparse034, Fq12Sparse034) {
+        let (lf1, lf2) = LineFn::step_dbl_add(acc, q);
+        (LineFn::line_fn_at_p(&lf1, p_pre), LineFn::line_fn_at_p(&lf2, p_pre))
+    }
+
+    pub fn step_dbl_add_to_f(acc: &mut Affine<Fq2>, f: &mut Fq12, p_pre: &PPre, p: &Affine<Fq>, q: &Affine<Fq2>) {
+        let (l1, l2) = step_dbl_add(acc, p_pre, p, q);
+        *f = f.mul_01234(l1.mul_034_by_034(&l2));
+    }
+
+    pub fn correction_step(acc: &mut Affine<Fq2>, p_pre: &PPre, p: &Affine<Fq>, q: &Affine<Fq2>, pi_idx: [usize; 6]) -> (Fq12Sparse034, Fq12Sparse034) {
+        let (lf1, lf2) = LineFn::correction_step(acc, q, pi_idx);
+        (LineFn::line_fn_at_p(&lf1, p_pre), LineFn::line_fn_at_p(&lf2, p_pre))
+    }
+
+    pub fn correction_step_to_f(acc: &mut Affine<Fq2>, f: &mut Fq12, p_pre: &PPre, p: &Affine<Fq>, q: &Affine<Fq2>, pi_idx: [usize; 6]) {
+        let (l1, l2) = correction_step(acc, p_pre, p, q, pi_idx);
+        *f = f.mul_01234(l1.mul_034_by_034(&l2));
     }
 }
 

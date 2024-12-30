@@ -1,17 +1,19 @@
 use super::{fq::Fq, fq12::Fq12, fq2::Fq2, fq6::Fq6, FieldConstants, FieldOps};
 
-#[derive(Debug, Clone,)]
+#[derive(Clone, Debug, Default)]
 pub struct Fq12Sparse034 {
     c3: Fq2,
     c4: Fq2,
 }
+
+#[derive(Clone, Debug, Default)]
 
 pub struct Fq12Sparse01234 {
     c0: Fq6,
     c1: Fq6Sparse01,
 }
 
-#[derive(Debug, Clone,)]
+#[derive(Clone, Debug, Default)]
 pub struct Fq6Sparse01 {
     c0: Fq2,
     c1: Fq2,

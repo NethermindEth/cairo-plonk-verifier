@@ -1,6 +1,6 @@
 use super::{fq::Fq, fq2::Fq2, fq6::Fq6, sparse::{Fq12Sparse01234, Fq12Sparse034, Fq6Sparse01}, FieldConstants};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Fq12 {
     c0: Fq6,
     c1: Fq6,
@@ -87,8 +87,7 @@ impl Fq12 {
 #[cfg(test)]
 mod test {
     use super::{Fq12, Fq2};
-    use crate::circuit::CairoCodeBuilder;
-    use crate::utils::utils::write_stdout; 
+    use crate::{circuit::builder::CairoCodeBuilder, utils::utils::write_stdout}; 
     #[test]
     pub fn test_fq12() {
         let idx_0: [usize; 12] = (0..=11).collect::<Vec<usize>>().try_into().unwrap();
@@ -100,7 +99,7 @@ mod test {
         let out = Fq12::mul(in0, in1);
 
         let mut builder: CairoCodeBuilder = CairoCodeBuilder::new();
-        builder.add_fq12(out);
+        builder.add_circuit(out, None);
 
         let code = builder.build();
         write_stdout("out.cairo", code);
@@ -114,7 +113,7 @@ mod test {
         let out = Fq12::sqr(in0);
 
         let mut builder: CairoCodeBuilder = CairoCodeBuilder::new();
-        builder.add_fq12(out);
+        builder.add_circuit(out, None);
 
         let code = builder.build();
         write_stdout("out.cairo", code);

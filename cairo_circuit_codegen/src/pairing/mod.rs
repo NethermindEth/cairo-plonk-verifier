@@ -1,11 +1,11 @@
 use crate::fields::{affine::Affine, fq::Fq, fq12::Fq12, fq2::Fq2};
 
-mod line;
+pub mod line;
 mod ate_miller;
 
 pub trait MillerPrecompute {
     type Precompute; 
-    fn precompute(g1: Affine<Fq>, g2: Affine<Fq2>) -> (Self::Precompute, Affine<Fq2>);
+    fn precompute(g1: Affine<Fq>, g2: Affine<Fq2>, inp: Option<[usize; 6]>) -> (Self::Precompute, Affine<Fq2>);
 }
 
 pub trait MillerSteps {

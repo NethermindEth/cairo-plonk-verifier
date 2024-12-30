@@ -231,7 +231,7 @@ type AffineG2 = Affine<Fq2>;
 
 
 
-#[derive(Copy, Drop, Serde)]
+#[derive(Copy, Drop, Serde, Debug)]
 struct Affine<T> {
     x: T,
     y: T

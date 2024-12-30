@@ -14,6 +14,24 @@ use plonk_verifier::curve::pairing::optimal_ate_utils::{
     PPrecompute, p_precompute, step_dbl_add_to_f, step_dbl_add, step_double_to_f, step_double,
     correction_step_to_f
 };
+use core::circuit::conversions::from_u256;
+use core::traits::TryInto;
+use core::circuit::{
+    CircuitElement, CircuitInput, circuit_add, circuit_sub, circuit_mul, circuit_inverse,
+    EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus, AddInputResultTrait, CircuitInputs,
+    EvalCircuitResult,
+};
+use plonk_verifier::curve::constants::FIELD_U384;
+
+use debug::PrintTrait;
+use core::circuit::{
+	AddModGate as A,
+	SubModGate as S,
+	MulModGate as M,
+	InverseGate as I,
+	CircuitInput as CI,
+	CircuitElement as CE,
+};
 
 #[derive(Copy, Drop)]
 struct PreCompute {
@@ -54,7 +72,7 @@ impl SingleMillerSteps of MillerSteps<PreCompute, PtG2, Fq12> {
 
     // 0 bit
     fn miller_bit_o(self: @PreCompute, i: u32, ref acc: PtG2, ref f: Fq12) {
-        step_double_to_f(ref acc, ref f, self.ppc, *self.p, *self.field_nz);
+        step_double_to_f(ref acc, ref f, self.ppc, *self.p, *self.field_nz);        
     }
 
     // 1 bit

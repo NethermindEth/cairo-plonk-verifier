@@ -2,7 +2,7 @@ use std::ops::{Add, Sub, Mul, Div, Neg};
 use super::{fq::Fq, fq2::Fq2, FieldOps};
 use super::sparse::Fq6Sparse01;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Fq6 {
     c0: Fq2,
     c1: Fq2,

@@ -1,8 +1,9 @@
 use std::ops::{Add, Sub, Mul, Div, Neg};
-use crate::circuit::*;
+use crate::circuit::circuit::Circuit;
+
 use super::{FieldConstants, FieldOps};
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct Fq {
     c0: Circuit,
     inp: Option<usize>,
@@ -157,8 +158,9 @@ impl<'a> Neg for &'a Fq {
 
 #[cfg(test)]
 mod test {
-    use super::{CairoCodeBuilder, Fq};
-    use crate::utils::utils::write_stdout; 
+    use crate::{circuit::builder::CairoCodeBuilder, utils::utils::write_stdout};
+    use super::Fq; 
+
     #[test]
     pub fn test_fq() {
         let in0 = Fq::new_input(0);
@@ -166,7 +168,7 @@ mod test {
 
         let out = (in0 + in1).c0().format_circuit();
         let mut builder: CairoCodeBuilder = CairoCodeBuilder::new();
-        builder.add_circuit("out", out);
+        builder.assign_variable("out", out);
         
         let code = builder.build();
         write_stdout("out.cairo", code);
