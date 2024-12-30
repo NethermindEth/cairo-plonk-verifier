@@ -23,6 +23,7 @@ mod math {
 use math::circuit_mod;
 // use math::fast_mod;
 
+// Fix imports with proper libs
 mod fields {
     mod fq_generics;
     mod fq_sparse;
@@ -36,6 +37,13 @@ mod fields {
     mod frobenius;
     mod print;
     mod utils;
+    mod circuits {
+        mod typedefs {
+            mod fq_12_type; 
+        }
+        mod fq_12_circuits;
+        mod outputs;
+    }
 
     #[cfg(test)]
     mod tests {
