@@ -45,7 +45,6 @@ mod fields {
         }
         mod fq_6_circuits;
         mod fq_12_circuits;
-        mod outputs;
     }
 
     #[cfg(test)]
