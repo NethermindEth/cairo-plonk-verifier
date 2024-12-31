@@ -13,9 +13,9 @@ use core::circuit::conversions::from_u256;
 use plonk_verifier::{
     curve::{
         groups::{g1, g2, AffineG1, AffineG2, AffineG2Impl, ECOperations, ECOperationsCircuitFq},
-        constants::{FIELD_U384, ORDER, ORDER_384, ORDER_NZ, ORDER_U384, get_field_nz}, neg_o,
-        sqr_nz, mul, mul_u, mul_nz, div_nz, add_nz, sub_u, sub, u512,
+        constants::{FIELD_U384, ORDER, ORDER_384, ORDER_NZ, ORDER_U384, get_field_nz},
     },
+        //neg_o, sqr_nz, mul, mul_u, mul_nz, div_nz, add_nz, sub_u, sub, u512,
     fields::{fq, Fq, Fq12, Fq12Exponentiation, Fq12Utils, FqUtils},
     math::circuit_mod::{
         mul_c, sqr_c, sqr_co, sub_c, sub_co, add_c, add_co, div_c, div_co, neg_co, mul_co

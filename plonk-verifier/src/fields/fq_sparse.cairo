@@ -4,15 +4,17 @@ use plonk_verifier::traits::FieldShortcuts;
 use plonk_verifier::traits::FieldMulShortcuts;
 use core::array::ArrayTrait;
 use plonk_verifier::curve::{t_naf, FIELD, FIELD_X2};
-use plonk_verifier::curve::{
-    u512, mul_by_xi_nz, mul_by_xi_nz_as_circuit, mul_by_v_nz, mul_by_v_nz_as_circuit, U512BnAdd,
-    U512BnSub, Tuple2Add, Tuple2Sub, Tuple3Add, Tuple3Sub, U512Fq6Ops
-};
-use plonk_verifier::curve::{u512_add, u512_sub, u512_high_add, u512_high_sub, U512Fq2Ops};
+// use plonk_verifier::curve::{
+//     u512, mul_by_xi_nz, mul_by_xi_nz_as_circuit, mul_by_v_nz, mul_by_v_nz_as_circuit, U512BnAdd,
+//     U512BnSub, Tuple2Add, Tuple2Sub, Tuple3Add, Tuple3Sub, U512Fq6Ops
+// };
+use plonk_verifier::curve::{mul_by_xi_nz_as_circuit, mul_by_v_nz_as_circuit};
+
+// use plonk_verifier::curve::{u512_add, u512_sub, u512_high_add, u512_high_sub, U512Fq2Ops};
 use plonk_verifier::fields::{
     FieldUtils, FieldOps, fq, Fq, Fq2, Fq6, Fq2Ops, fq6, Fq12, fq12, Fq12Frobenius, Fq12Squaring
 };
-use plonk_verifier::fields::SixU512;
+// use plonk_verifier::fields::SixU512;
 use plonk_verifier::fields::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 // use plonk_verifier::fields::print::{Fq2Display, FqDisplay, u512Display};
 use plonk_verifier::circuit_mod::{

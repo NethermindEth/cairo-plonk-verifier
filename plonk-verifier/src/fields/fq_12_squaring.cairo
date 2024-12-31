@@ -2,11 +2,12 @@ use plonk_verifier::traits::FieldShortcuts;
 use plonk_verifier::traits::FieldMulShortcuts;
 use core::array::ArrayTrait;
 use plonk_verifier::curve::{t_naf, FIELD, FIELD_X2};
-use plonk_verifier::curve::{
-    u512, mul_by_xi_nz, mul_by_v, U512BnAdd, U512BnSub, Tuple2Add, Tuple2Sub,
-    mul_by_xi_nz_as_circuit
-};
-use plonk_verifier::curve::{u512_add, u512_sub, u512_high_add, u512_high_sub, U512Fq2Ops};
+// use plonk_verifier::curve::{
+//     u512, mul_by_xi_nz, mul_by_v, U512BnAdd, U512BnSub, Tuple2Add, Tuple2Sub,
+//     mul_by_xi_nz_as_circuit
+// };
+use plonk_verifier::curve::{mul_by_xi_nz_as_circuit};
+// use plonk_verifier::curve::{u512_add, u512_sub, u512_high_add, u512_high_sub, U512Fq2Ops};
 use plonk_verifier::fields::{
     FieldUtils, FieldOps, fq, Fq, Fq2, ufq2_inv, Fq6, Fq12, fq12, Fq12Frobenius
 };
@@ -39,10 +40,10 @@ fn x4(a: Fq2) -> Fq2 {
     a_twice.u_add(a_twice)
 }
 
-#[inline(always)]
-fn X2(a: (u512, u512)) -> (u512, u512) {
-    a + a
-}
+// #[inline(always)]
+// fn X2(a: (u512, u512)) -> (u512, u512) {
+//     a + a
+// }
 
 #[generate_trait]
 impl Fq12Squaring of Fq12SquaringTrait {

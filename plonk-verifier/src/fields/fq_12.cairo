@@ -2,16 +2,16 @@ use plonk_verifier::traits::FieldShortcuts;
 use plonk_verifier::traits::FieldMulShortcuts;
 use plonk_verifier::traits::{FieldUtils, FieldOps};
 use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
-use plonk_verifier::fields::{fq, fq2, Fq2Ops, Fq6, fq6, Fq6Utils, Fq6Frobenius, Fq6Short, Fq6Ops};
+use plonk_verifier::fields::{fq, fq2, Fq, Fq2, Fq2Ops, Fq6, fq6, Fq6Utils, Fq6Frobenius, Fq6Short, Fq6Ops};
 use plonk_verifier::fields::frobenius::fp12 as frob;
 // use plonk_verifier::fields::print::{Fq6Display};
 use plonk_verifier::curve::constants::FIELD_U384;
 use plonk_verifier::curve::{FIELD, get_field_nz};
-use plonk_verifier::curve::{
-    u512, U512BnAdd, Tuple2Add, Tuple3Add, U512BnSub, Tuple2Sub, Tuple3Sub, u512_reduce,
-    mul_by_v_nz, mul_by_v_nz_as_circuit, U512Fq6Ops
-};
-
+// use plonk_verifier::curve::{
+//     u512, U512BnAdd, Tuple2Add, Tuple3Add, U512BnSub, Tuple2Sub, Tuple3Sub, u512_reduce,
+//     mul_by_v_nz, mul_by_v_nz_as_circuit, U512Fq6Ops
+// };
+use plonk_verifier::curve::{mul_by_v_nz_as_circuit};
 use core::circuit::conversions::from_u256;
 use core::traits::TryInto;
 use core::circuit::{
@@ -20,8 +20,16 @@ use core::circuit::{
     EvalCircuitResult,
 };
 
+use core::circuit::{
+	AddModGate as A,
+	SubModGate as S,
+	MulModGate as M,
+	InverseGate as I,
+	CircuitInput as CI,
+	CircuitElement as CE,
+};
 use debug::PrintTrait;
-
+use plonk_verifier::fields::circuits::fq_12_circuits::{add_circuit, mul_circuit, sqr_circuit, neg_circuit, sub_circuit};
 #[derive(Copy, Drop, Debug)]
 struct Fq12 {
     c0: Fq6,
@@ -203,15 +211,103 @@ impl Fq12Utils of FieldUtils<Fq12, Fq6> {
     }
 }
 
-type Fq6U512 = ((u512, u512), (u512, u512), (u512, u512));
+// type Fq6U512 = ((u512, u512), (u512, u512), (u512, u512));
 
 impl Fq12Ops of FieldOps<Fq12> {
     fn add(self: Fq12, rhs: Fq12) -> Fq12 {
-        Fq12 { c0: self.c0 + rhs.c0, c1: self.c1 + rhs.c1, }
+        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+
+        let (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = add_circuit(); 
+
+        let outputs = match (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11).new_inputs()
+            .next(self.c0.c0.c0.c0)
+            .next(self.c0.c0.c1.c0)
+            .next(self.c0.c1.c0.c0)
+            .next(self.c0.c1.c1.c0)
+            .next(self.c0.c2.c0.c0)
+            .next(self.c0.c2.c1.c0)
+            .next(self.c1.c0.c0.c0)
+            .next(self.c1.c0.c1.c0)
+            .next(self.c1.c1.c0.c0)
+            .next(self.c1.c1.c1.c0)
+            .next(self.c1.c2.c0.c0)
+            .next(self.c1.c2.c1.c0)
+            .next(rhs.c0.c0.c0.c0)
+            .next(rhs.c0.c0.c1.c0)
+            .next(rhs.c0.c1.c0.c0)
+            .next(rhs.c0.c1.c1.c0)
+            .next(rhs.c0.c2.c0.c0)
+            .next(rhs.c0.c2.c1.c0)
+            .next(rhs.c1.c0.c0.c0)
+            .next(rhs.c1.c0.c1.c0)
+            .next(rhs.c1.c1.c0.c0)
+            .next(rhs.c1.c1.c1.c0)
+            .next(rhs.c1.c2.c0.c0)
+            .next(rhs.c1.c2.c1.c0)
+            .done().eval(modulus) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
+        };
+
+        Fq12 { 
+            c0: Fq6 { 
+                c0: Fq2 { c0: Fq { c0: outputs.get_output(c0) }, c1: Fq { c0: outputs.get_output(c1) } }, 
+                c1: Fq2 { c0: Fq { c0: outputs.get_output(c2) }, c1: Fq { c0: outputs.get_output(c3) } }, 
+                c2: Fq2 { c0: Fq { c0: outputs.get_output(c4) }, c1: Fq { c0: outputs.get_output(c5) } } }, 
+            c1: Fq6 { 
+                c0: Fq2 { c0: Fq { c0: outputs.get_output(c6) }, c1: Fq { c0: outputs.get_output(c7) } }, 
+                c1: Fq2 { c0: Fq { c0: outputs.get_output(c8) }, c1: Fq { c0: outputs.get_output(c9) } }, 
+                c2: Fq2 { c0: Fq { c0: outputs.get_output(c10) }, c1: Fq { c0: outputs.get_output(c11) } } 
+            } 
+        } 
     }
 
     fn sub(self: Fq12, rhs: Fq12) -> Fq12 {
-        Fq12 { c0: self.c0 - rhs.c0, c1: self.c1 - rhs.c1, }
+        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+
+        let (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = sub_circuit(); 
+
+        let outputs = match (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11).new_inputs()
+            .next(self.c0.c0.c0.c0)
+            .next(self.c0.c0.c1.c0)
+            .next(self.c0.c1.c0.c0)
+            .next(self.c0.c1.c1.c0)
+            .next(self.c0.c2.c0.c0)
+            .next(self.c0.c2.c1.c0)
+            .next(self.c1.c0.c0.c0)
+            .next(self.c1.c0.c1.c0)
+            .next(self.c1.c1.c0.c0)
+            .next(self.c1.c1.c1.c0)
+            .next(self.c1.c2.c0.c0)
+            .next(self.c1.c2.c1.c0)
+            .next(rhs.c0.c0.c0.c0)
+            .next(rhs.c0.c0.c1.c0)
+            .next(rhs.c0.c1.c0.c0)
+            .next(rhs.c0.c1.c1.c0)
+            .next(rhs.c0.c2.c0.c0)
+            .next(rhs.c0.c2.c1.c0)
+            .next(rhs.c1.c0.c0.c0)
+            .next(rhs.c1.c0.c1.c0)
+            .next(rhs.c1.c1.c0.c0)
+            .next(rhs.c1.c1.c1.c0)
+            .next(rhs.c1.c2.c0.c0)
+            .next(rhs.c1.c2.c1.c0)
+            .done().eval(modulus) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
+        };
+
+        Fq12 { 
+            c0: Fq6 { 
+                c0: Fq2 { c0: Fq { c0: outputs.get_output(c0) }, c1: Fq { c0: outputs.get_output(c1) } }, 
+                c1: Fq2 { c0: Fq { c0: outputs.get_output(c2) }, c1: Fq { c0: outputs.get_output(c3) } }, 
+                c2: Fq2 { c0: Fq { c0: outputs.get_output(c4) }, c1: Fq { c0: outputs.get_output(c5) } } }, 
+            c1: Fq6 { 
+                c0: Fq2 { c0: Fq { c0: outputs.get_output(c6) }, c1: Fq { c0: outputs.get_output(c7) } }, 
+                c1: Fq2 { c0: Fq { c0: outputs.get_output(c8) }, c1: Fq { c0: outputs.get_output(c9) } }, 
+                c2: Fq2 { c0: Fq { c0: outputs.get_output(c10) }, c1: Fq { c0: outputs.get_output(c11) } } 
+            } 
+        } 
     }
 
     fn div(self: Fq12, rhs: Fq12) -> Fq12 {
@@ -219,7 +315,39 @@ impl Fq12Ops of FieldOps<Fq12> {
     }
 
     fn neg(self: Fq12) -> Fq12 {
-        Fq12 { c0: -self.c0, c1: -self.c1, }
+        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+
+        let (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = neg_circuit(); 
+
+        let outputs = match (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11).new_inputs()
+            .next(self.c0.c0.c0.c0)
+            .next(self.c0.c0.c1.c0)
+            .next(self.c0.c1.c0.c0)
+            .next(self.c0.c1.c1.c0)
+            .next(self.c0.c2.c0.c0)
+            .next(self.c0.c2.c1.c0)
+            .next(self.c1.c0.c0.c0)
+            .next(self.c1.c0.c1.c0)
+            .next(self.c1.c1.c0.c0)
+            .next(self.c1.c1.c1.c0)
+            .next(self.c1.c2.c0.c0)
+            .next(self.c1.c2.c1.c0)
+            .done().eval(modulus) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
+        };
+
+        Fq12 { 
+            c0: Fq6 { 
+                c0: Fq2 { c0: Fq { c0: outputs.get_output(c0) }, c1: Fq { c0: outputs.get_output(c1) } }, 
+                c1: Fq2 { c0: Fq { c0: outputs.get_output(c2) }, c1: Fq { c0: outputs.get_output(c3) } }, 
+                c2: Fq2 { c0: Fq { c0: outputs.get_output(c4) }, c1: Fq { c0: outputs.get_output(c5) } } }, 
+            c1: Fq6 { 
+                c0: Fq2 { c0: Fq { c0: outputs.get_output(c6) }, c1: Fq { c0: outputs.get_output(c7) } }, 
+                c1: Fq2 { c0: Fq { c0: outputs.get_output(c8) }, c1: Fq { c0: outputs.get_output(c9) } }, 
+                c2: Fq2 { c0: Fq { c0: outputs.get_output(c10) }, c1: Fq { c0: outputs.get_output(c11) } } 
+            } 
+        } 
     }
 
     fn eq(lhs: @Fq12, rhs: @Fq12) -> bool {
@@ -229,30 +357,109 @@ impl Fq12Ops of FieldOps<Fq12> {
     fn mul(self: Fq12, rhs: Fq12) -> Fq12 {
         core::internal::revoke_ap_tracking();
 
-        let Fq12 { c0: a0, c1: a1 } = self;
-        let Fq12 { c0: b0, c1: b1 } = rhs;
+        // let Fq12 { c0: a0, c1: a1 } = self;
+        // let Fq12 { c0: b0, c1: b1 } = rhs;
 
-        let U = Fq6Ops::mul(a0, b0);
-        let V = Fq6Ops::mul(a1, b1);
-        let c0 = Fq6Ops::add(mul_by_v_nz_as_circuit(V), U);
-        let c1 = Fq6Ops::sub(Fq6Ops::sub(Fq6Ops::mul(a0 + a1, b0 + b1), U), V);
+        // let U = Fq6Ops::mul(a0, b0);
+        // let V = Fq6Ops::mul(a1, b1);
+        // let c0 = Fq6Ops::add(mul_by_v_nz_as_circuit(V), U);
+        // let c1 = Fq6Ops::sub(Fq6Ops::sub(Fq6Ops::mul(a0 + a1, b0 + b1), U), V);
+        // Fq12 { c0: c0, c1: c1 }
 
-        Fq12 { c0: c0, c1: c1 }
+        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+
+        let (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = mul_circuit(); 
+
+        let outputs = match (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11).new_inputs()
+            .next(self.c0.c0.c0.c0)
+            .next(self.c0.c0.c1.c0)
+            .next(self.c0.c1.c0.c0)
+            .next(self.c0.c1.c1.c0)
+            .next(self.c0.c2.c0.c0)
+            .next(self.c0.c2.c1.c0)
+            .next(self.c1.c0.c0.c0)
+            .next(self.c1.c0.c1.c0)
+            .next(self.c1.c1.c0.c0)
+            .next(self.c1.c1.c1.c0)
+            .next(self.c1.c2.c0.c0)
+            .next(self.c1.c2.c1.c0)
+            .next(rhs.c0.c0.c0.c0)
+            .next(rhs.c0.c0.c1.c0)
+            .next(rhs.c0.c1.c0.c0)
+            .next(rhs.c0.c1.c1.c0)
+            .next(rhs.c0.c2.c0.c0)
+            .next(rhs.c0.c2.c1.c0)
+            .next(rhs.c1.c0.c0.c0)
+            .next(rhs.c1.c0.c1.c0)
+            .next(rhs.c1.c1.c0.c0)
+            .next(rhs.c1.c1.c1.c0)
+            .next(rhs.c1.c2.c0.c0)
+            .next(rhs.c1.c2.c1.c0)
+            .done().eval(modulus) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
+        };
+
+        Fq12 { 
+            c0: Fq6 { 
+                c0: Fq2 { c0: Fq { c0: outputs.get_output(c0) }, c1: Fq { c0: outputs.get_output(c1) } }, 
+                c1: Fq2 { c0: Fq { c0: outputs.get_output(c2) }, c1: Fq { c0: outputs.get_output(c3) } }, 
+                c2: Fq2 { c0: Fq { c0: outputs.get_output(c4) }, c1: Fq { c0: outputs.get_output(c5) } } }, 
+            c1: Fq6 { 
+                c0: Fq2 { c0: Fq { c0: outputs.get_output(c6) }, c1: Fq { c0: outputs.get_output(c7) } }, 
+                c1: Fq2 { c0: Fq { c0: outputs.get_output(c8) }, c1: Fq { c0: outputs.get_output(c9) } }, 
+                c2: Fq2 { c0: Fq { c0: outputs.get_output(c10) }, c1: Fq { c0: outputs.get_output(c11) } } 
+            } 
+        } 
     }
 
     fn sqr(self: Fq12) -> Fq12 {
         core::internal::revoke_ap_tracking();
-        let Fq12 { c0: a0, c1: a1 } = self;
-        let V = Fq6Ops::mul(a0, a1);
-        let c0 = Fq6Ops::sub(
-            Fq6Ops::sub(
-                Fq6Ops::mul(Fq6Ops::add(a0, a1), Fq6Ops::add(a0, a1.mul_by_nonresidue())), V
-            ),
-            mul_by_v_nz_as_circuit(V)
-        );
-        let c1 = Fq6Ops::add(V, V);
+        // let Fq12 { c0: a0, c1: a1 } = self;
+        // let V = Fq6Ops::mul(a0, a1);
+        // let c0 = Fq6Ops::sub(
+        //     Fq6Ops::sub(
+        //         Fq6Ops::mul(Fq6Ops::add(a0, a1), Fq6Ops::add(a0, a1.mul_by_nonresidue())), V
+        //     ),
+        //     mul_by_v_nz_as_circuit(V)
+        // );
+        // let c1 = Fq6Ops::add(V, V);
 
-        Fq12 { c0: c0, c1: c1 }
+        // Fq12 { c0: c0, c1: c1 }
+
+        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+
+        let (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = sqr_circuit();
+
+        let outputs = match (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11).new_inputs()
+            .next(self.c0.c0.c0.c0)
+            .next(self.c0.c0.c1.c0)
+            .next(self.c0.c1.c0.c0)
+            .next(self.c0.c1.c1.c0)
+            .next(self.c0.c2.c0.c0)
+            .next(self.c0.c2.c1.c0)
+            .next(self.c1.c0.c0.c0)
+            .next(self.c1.c0.c1.c0)
+            .next(self.c1.c1.c0.c0)
+            .next(self.c1.c1.c1.c0)
+            .next(self.c1.c2.c0.c0)
+            .next(self.c1.c2.c1.c0)
+            .done().eval(modulus) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
+        };
+
+        Fq12 { 
+            c0: Fq6 { 
+                c0: Fq2 { c0: Fq { c0: outputs.get_output(c0) }, c1: Fq { c0: outputs.get_output(c1) } }, 
+                c1: Fq2 { c0: Fq { c0: outputs.get_output(c2) }, c1: Fq { c0: outputs.get_output(c3) } }, 
+                c2: Fq2 { c0: Fq { c0: outputs.get_output(c4) }, c1: Fq { c0: outputs.get_output(c5) } } }, 
+            c1: Fq6 { 
+                c0: Fq2 { c0: Fq { c0: outputs.get_output(c6) }, c1: Fq { c0: outputs.get_output(c7) } }, 
+                c1: Fq2 { c0: Fq { c0: outputs.get_output(c8) }, c1: Fq { c0: outputs.get_output(c9) } }, 
+                c2: Fq2 { c0: Fq { c0: outputs.get_output(c10) }, c1: Fq { c0: outputs.get_output(c11) } } 
+            } 
+        } 
     }
 
     fn inv(self: Fq12, field_nz: NonZero<u256>) -> Fq12 {

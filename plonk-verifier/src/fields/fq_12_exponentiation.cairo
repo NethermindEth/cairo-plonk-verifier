@@ -5,8 +5,8 @@ use plonk_verifier::traits::FieldShortcuts;
 use plonk_verifier::traits::FieldMulShortcuts;
 use core::array::ArrayTrait;
 use plonk_verifier::curve::{t_naf, get_field_nz, FIELD_X2};
-use plonk_verifier::curve::{u512, mul_by_v, U512BnAdd, U512BnSub, Tuple2Add, Tuple2Sub,};
-use plonk_verifier::curve::{u512_add, u512_sub, u512_high_add, u512_high_sub, U512Fq2Ops};
+// use plonk_verifier::curve::{u512, mul_by_v, U512BnAdd, U512BnSub, Tuple2Add, Tuple2Sub,};
+// use plonk_verifier::curve::{u512_add, u512_sub, u512_high_add, u512_high_sub, U512Fq2Ops};
 use plonk_verifier::fields::{
     FieldUtils, FieldOps, fq, Fq, Fq2, Fq6, Fq12, fq12, Fq12Frobenius, Fq12Squaring,
     Fq12SquaringCircuit
@@ -196,7 +196,7 @@ impl Fq12ExponentiationCircuit of PairingExponentiationTraitCircuit {
         // 4: T4 ← T0 ⊖ T1
         let T4 = T0.u_sub(T1);
         // 5: return c = (T4 + T3i)
-        let o = (T4, T3);
+        // let o = (T4, T3);
 
         let a0 = CircuitElement::<CircuitInput<0>> {};
         let a1 = CircuitElement::<CircuitInput<1>> {};
