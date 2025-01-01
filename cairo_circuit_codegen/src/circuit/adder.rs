@@ -6,7 +6,7 @@ use crate::circuit::builder::CairoCodeBuilder;
 use crate::fields::fq2::Fq2;
 use crate::fields::fq6::Fq6;
 use crate::fields::{ECOperations, FieldOps};
-use crate::pairing::line::Precompute;
+use crate::pairing::line::{LineFn, Precompute};
 
 pub trait CairoCodeAdder {
     fn add_circuit(&self, builder: &mut CairoCodeBuilder, names: Option<Vec<&str>>); 
@@ -143,5 +143,16 @@ impl CairoCodeAdder for Precompute {
         self.ppc().neg_x_over_y().add_circuit(builder, Some(names[10..11].to_vec()));
         self.ppc().y_inv().add_circuit(builder, Some(names[10..12].to_vec()));
 
+    }
+}
+
+impl CairoCodeAdder for LineFn {
+    fn add_circuit(&self, builder: &mut CairoCodeBuilder, names: Option<Vec<&str>>) {
+        let names = names
+        .filter(|v| v.len() >= 4)
+        .unwrap_or(vec!["slope_c0", "slope_c1", "c0", "c1"]);
+
+        self.slope().add_circuit(builder, Some(names[0..2].to_vec()));
+        self.c().add_circuit(builder, Some(names[0..2].to_vec()));
     }
 }

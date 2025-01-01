@@ -1,4 +1,3 @@
-
 pub fn get_imports() -> String {
     "use core::circuit::{\n\t\
             AddModGate as A,\n\t\
