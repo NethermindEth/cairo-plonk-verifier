@@ -19,6 +19,9 @@ use core::circuit::{
 	CircuitElement as CE,
 };
 use debug::PrintTrait as Print;
+use plonk_verifier::circuits::affine_circuits::{
+    fq2_y_on_slope_circuit, fq2_pt_on_slope_circuit, fq2_chord_circuit, 
+    fq2_add_circuit, fq2_tangent_circuit, fq2_double_circuit};
 
 type AffineG1 = Affine<Fq>;
 type AffineG2 = Affine<Fq2>;

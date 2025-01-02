@@ -13,12 +13,15 @@ use traits::{FieldOps, FieldUtils};
 mod curve;
 use curve::{groups as g, pairing};
 
+// Todo: Refactor as individual mods. 
 mod circuits {
     mod typedefs {
+        mod affine;
         mod fq_6_type;
         mod fq_12_type; 
         mod add_sub_neg;
     }
+    mod affine_circuits;
     mod fq_6_circuits;
     mod fq_12_circuits;
 }
