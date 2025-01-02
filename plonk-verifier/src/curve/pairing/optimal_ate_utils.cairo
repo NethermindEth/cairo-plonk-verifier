@@ -1,7 +1,7 @@
 use plonk_verifier::fields::fq_2::Fq2FrobeniusTrait;
 use plonk_verifier::fields::fq_sparse::FqSparseTrait;
 use plonk_verifier::traits::{FieldShortcuts, FieldUtils};
-use plonk_verifier::curve::groups::ECOperations;
+//use plonk_verifier::curve::groups::ECOperationsCircuitFq2;
 use plonk_verifier::curve::groups::{g1, g2, ECGroup};
 use plonk_verifier::curve::groups::{Affine, AffineG1 as PtG1, AffineG2 as PtG2, AffineOps};
 use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
@@ -63,7 +63,7 @@ mod line_fn {
     use plonk_verifier::fields::fq_2::Fq2FrobeniusTrait;
     use plonk_verifier::fields::fq_sparse::FqSparseTrait;
     use plonk_verifier::traits::{FieldShortcuts, FieldUtils};
-    use plonk_verifier::curve::groups::ECOperations;
+    use plonk_verifier::curve::groups::ECOperationsCircuitFq2;
     use plonk_verifier::curve::groups::{g1, g2, ECGroup};
     use plonk_verifier::curve::groups::{Affine, AffineG1 as PtG1, AffineG2 as PtG2, AffineOps};
     use plonk_verifier::fields::fq_generics::{
@@ -119,7 +119,7 @@ mod line_fn {
     fn step_dbl_add(ref acc: PtG2, q: PtG2, field_nz: NZNum) -> (LineFn, LineFn) {
         let s = acc;
         // s + q
-        let slope1 = s.chord(q);
+        let slope1 = s.chord_as_circuit(q);
         let x1 = s.x_on_slope(slope1, q.x);
         let line1 = line_fn(slope1, s);
 
@@ -143,7 +143,7 @@ mod line_fn {
     fn step_double(ref acc: PtG2, field_nz: NZNum) -> LineFn {
         let s = acc;
         // λ = 3x²/2y
-        let slope = s.tangent();
+        let slope = s.tangent_as_circuit();
         // p = (λ²-2x, λ(x-xr)-y)
         acc = s.pt_on_slope(slope, acc.x);
         line_fn(slope, s)
@@ -155,7 +155,7 @@ mod line_fn {
     fn step_add(ref acc: PtG2, q: PtG2, field_nz: NZNum) -> LineFn {
         let s = acc;
         // λ = (yS−yQ)/(xS−xQ)
-        let slope = s.chord(q);
+        let slope = s.chord_as_circuit(q);
         // p = (λ²-2x, λ(x-xr)-y)
         acc = s.pt_on_slope(slope, q.x);
         line_fn(slope, s)
@@ -188,7 +188,7 @@ mod line_fn {
         // e ← (gT,−Q2)(P), T ← T − Q2
         // we can skip the T ← T − Q2 step coz we don't need the final point, just the line
         // function
-        let slope = acc.chord(q2);
+        let slope = acc.chord_as_circuit(q2);
         let e = line_fn(slope, acc);
 
         // f ← f·(d·e) is left for the caller
