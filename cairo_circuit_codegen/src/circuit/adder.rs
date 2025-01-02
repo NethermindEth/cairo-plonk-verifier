@@ -16,8 +16,8 @@ impl CairoCodeAdder for Fq {
     fn add_circuit(&self, builder: &mut CairoCodeBuilder, names: Option<Vec<&str>>) {
         // Default if name is not supplied
         let names = names
-        .filter(|v| v.len() >= 1)
-        .unwrap_or(vec!["c0"]);
+            .filter(|v| v.len() >= 1)
+            .unwrap_or(vec!["c0"]);
 
         let c0 = self.c0().format_circuit();
         
@@ -28,8 +28,8 @@ impl CairoCodeAdder for Fq {
 impl CairoCodeAdder for Fq2 {
     fn add_circuit(&self, builder: &mut CairoCodeBuilder, names: Option<Vec<&str>>) {
         let names = names
-        .filter(|v| v.len() >= 2)
-        .unwrap_or(vec!["c0", "c1"]);
+            .filter(|v| v.len() >= 2)
+            .unwrap_or(vec!["c0", "c1"]);
 
         let c0 = self.c0().c0().format_circuit();
         let c1 = self.c1().c0().format_circuit();
@@ -99,8 +99,8 @@ impl CairoCodeAdder for Fq12 {
 impl CairoCodeAdder for Affine<Fq> {
     fn add_circuit(&self, builder: &mut CairoCodeBuilder, names: Option<Vec<&str>>) {
         let names = names
-        .filter(|v| v.len() >= 2)
-        .unwrap_or(vec!["x0", "y0"]);
+            .filter(|v| v.len() >= 2)
+            .unwrap_or(vec!["x0", "y0"]);
         
         let x0 = self.x().c0().format_circuit();
         let y0 = self.y().c0().format_circuit();
@@ -113,8 +113,8 @@ impl CairoCodeAdder for Affine<Fq> {
 impl CairoCodeAdder for Affine<Fq2> {
     fn add_circuit(&self, builder: &mut CairoCodeBuilder, names: Option<Vec<&str>>) {
         let names = names
-        .filter(|v| v.len() >= 4)
-        .unwrap_or(vec!["x0", "x1", "y0", "y1"]);
+            .filter(|v| v.len() >= 4)
+            .unwrap_or(vec!["x0", "x1", "y0", "y1"]);
 
         let x0 = self.x().c0().c0().format_circuit();
         let x1 = self.x().c1().c0().format_circuit();
@@ -134,14 +134,13 @@ impl CairoCodeAdder for Affine<Fq2> {
 impl CairoCodeAdder for Precompute {
     fn add_circuit(&self, builder: &mut CairoCodeBuilder, names: Option<Vec<&str>>) {
         let names = names
-        .filter(|v| v.len() >= 12)
-        .unwrap_or(vec!["p_x0", "p_y0", "q_x0", "q_x1", "q_y0", "q_y1", "nq_x0", "nq_x1", "nq_y0", "nq_y1", "neg_x_over_y", "y_inv"]);
+            .filter(|v| v.len() >= 12)
+            .unwrap_or(vec!["p_x0", "p_y0", "q_x0", "q_x1", "q_y0", "q_y1", "nq_x0", "nq_x1", "nq_y0", "nq_y1", "neg_x_over_y", "y_inv"]);
         
         self.p().add_circuit(builder, Some(names[0..2].to_vec()));
         self.q().add_circuit(builder, Some(names[2..6].to_vec()));
         self.neg_q().add_circuit(builder, Some(names[6..10].to_vec()));
         self.ppc().neg_x_over_y().add_circuit(builder, Some(names[10..11].to_vec()));
         self.ppc().y_inv().add_circuit(builder, Some(names[10..12].to_vec()));
-
     }
 }
