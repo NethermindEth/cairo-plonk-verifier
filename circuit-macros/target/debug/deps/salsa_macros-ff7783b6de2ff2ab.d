@@ -1,0 +1,8 @@
+/home/dev/cairo-plonk-verifier/circuit-macros/target/debug/deps/libsalsa_macros-ff7783b6de2ff2ab.so: /home/dev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rust-analyzer-salsa-macros-0.17.0-pre.6/src/lib.rs /home/dev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rust-analyzer-salsa-macros-0.17.0-pre.6/src/database_storage.rs /home/dev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rust-analyzer-salsa-macros-0.17.0-pre.6/src/parenthesized.rs /home/dev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rust-analyzer-salsa-macros-0.17.0-pre.6/src/query_group.rs
+
+/home/dev/cairo-plonk-verifier/circuit-macros/target/debug/deps/salsa_macros-ff7783b6de2ff2ab.d: /home/dev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rust-analyzer-salsa-macros-0.17.0-pre.6/src/lib.rs /home/dev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rust-analyzer-salsa-macros-0.17.0-pre.6/src/database_storage.rs /home/dev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rust-analyzer-salsa-macros-0.17.0-pre.6/src/parenthesized.rs /home/dev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rust-analyzer-salsa-macros-0.17.0-pre.6/src/query_group.rs
+
+/home/dev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rust-analyzer-salsa-macros-0.17.0-pre.6/src/lib.rs:
+/home/dev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rust-analyzer-salsa-macros-0.17.0-pre.6/src/database_storage.rs:
+/home/dev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rust-analyzer-salsa-macros-0.17.0-pre.6/src/parenthesized.rs:
+/home/dev/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rust-analyzer-salsa-macros-0.17.0-pre.6/src/query_group.rs:

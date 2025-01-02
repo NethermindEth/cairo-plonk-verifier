@@ -25,11 +25,9 @@ use plonk_verifier::fields::{fq, Fq, Fq12, Fq12Exponentiation, Fq12Utils};
 use plonk_verifier::curve::constants::{ORDER, ORDER_NZ, get_field_nz, FIELD_U384, ORDER_U384};
 use plonk_verifier::plonk::types::{PlonkProof, PlonkVerificationKey, PlonkChallenge};
 use plonk_verifier::plonk::transcript::{Transcript, TranscriptElement};
-use plonk_verifier::curve::{u512, neg_o, sqr_nz, mul, mul_u, div_nz, sub_u, sub};
+use plonk_verifier::curve::{u512, neg_o, sqr_nz, mul, mul_u, mul_nz, div_nz, add_nz, sub_u, sub};
 use plonk_verifier::pairing::tate_bkls::{tate_pairing, tate_miller_loop};
 use plonk_verifier::pairing::optimal_ate::{single_ate_pairing, ate_miller_loop};
-
-use plonk_verifier::curve::{mul_o, mul_f, add_o};
 
 #[generate_trait]
 impl PlonkVerifier of PVerifier {
@@ -194,10 +192,10 @@ impl PlonkVerifier of PVerifier {
         v_transcript.add_scalar(proof.eval_zw);
 
         challenges.v1 = v_transcript.get_challenge();
-        challenges.v2 = fq(mul_o(challenges.v1.c0, challenges.v1.c0));
-        challenges.v3 = fq(mul_o(challenges.v2.c0, challenges.v1.c0));
-        challenges.v4 = fq(mul_o(challenges.v3.c0, challenges.v1.c0));
-        challenges.v5 = fq(mul_o(challenges.v4.c0, challenges.v1.c0));
+        challenges.v2 = fq(mul_nz(challenges.v1.c0, challenges.v1.c0, ORDER_NZ));
+        challenges.v3 = fq(mul_nz(challenges.v2.c0, challenges.v1.c0, ORDER_NZ));
+        challenges.v4 = fq(mul_nz(challenges.v3.c0, challenges.v1.c0, ORDER_NZ));
+        challenges.v5 = fq(mul_nz(challenges.v4.c0, challenges.v1.c0, ORDER_NZ));
 
         // Challenge: u
         let mut u_transcript = Transcript::new();
@@ -237,12 +235,12 @@ impl PlonkVerifier of PVerifier {
         let mut j = 1;
         while j <= max(1, n_public) {
             let xi_sub_w: u256 = sub_u(challenges.xi.c0, w.c0);
-            let xi_mul_n: u256 = mul_o(n.c0, xi_sub_w);
-            let w_mul_zh: u256 = mul_o(w.c0, challenges.zh.c0);
+            let xi_mul_n: u256 = mul_nz(n.c0, xi_sub_w, ORDER_NZ);
+            let w_mul_zh: u256 = mul_nz(w.c0, challenges.zh.c0, ORDER_NZ);
             let l_i = div_nz(w_mul_zh, xi_mul_n, ORDER_NZ);
             lagrange_evaluations.append(fq(l_i));
 
-            w = fq(mul_o(w.c0, verification_key.w));
+            w = fq(mul_nz(w.c0, verification_key.w, ORDER_NZ));
 
             j += 1;
         };
@@ -257,7 +255,7 @@ impl PlonkVerifier of PVerifier {
 
         while i < publicSignals.len() {
             let w: u256 = publicSignals[i].clone();
-            let w_mul_L: u256 = mul_o(w, L[i + 1].c0.clone());
+            let w_mul_L: u256 = mul_nz(w, L[i + 1].c0.clone(), ORDER_NZ);
             let pi = sub(PI.c0, w_mul_L, ORDER);
 
             PI = fq(pi);
@@ -270,23 +268,23 @@ impl PlonkVerifier of PVerifier {
     // step 8: compute r constant
     fn compute_R0(proof: PlonkProof, challenges: PlonkChallenge, PI: Fq, L1: Fq) -> Fq {
         let e1: u256 = PI.c0;
-        let e2: u256 = mul_o(L1.c0, sqr_nz(challenges.alpha.c0, ORDER_NZ));
+        let e2: u256 = mul_nz(L1.c0, sqr_nz(challenges.alpha.c0, ORDER_NZ), ORDER_NZ);
 
-        let mut e3a = add_o(
-            proof.eval_a.c0, mul_o(challenges.beta.c0, proof.eval_s1.c0)
+        let mut e3a = add_nz(
+            proof.eval_a.c0, mul_nz(challenges.beta.c0, proof.eval_s1.c0, ORDER_NZ), ORDER_NZ
         );
-        e3a = add_o(e3a, challenges.gamma.c0);
+        e3a = add_nz(e3a, challenges.gamma.c0, ORDER_NZ);
 
-        let mut e3b = add_o(
-            proof.eval_b.c0, mul_o(challenges.beta.c0, proof.eval_s2.c0)
+        let mut e3b = add_nz(
+            proof.eval_b.c0, mul_nz(challenges.beta.c0, proof.eval_s2.c0, ORDER_NZ), ORDER_NZ
         );
-        e3b = add_o(e3b, challenges.gamma.c0);
+        e3b = add_nz(e3b, challenges.gamma.c0, ORDER_NZ);
 
-        let mut e3c = add_o(proof.eval_c.c0, challenges.gamma.c0);
+        let mut e3c = add_nz(proof.eval_c.c0, challenges.gamma.c0, ORDER_NZ);
 
-        let mut e3 = mul_o(mul_o(e3a, e3b), e3c);
-        e3 = mul_o(e3, proof.eval_zw.c0);
-        e3 = mul_o(e3, challenges.alpha.c0);
+        let mut e3 = mul_nz(mul_nz(e3a, e3b, ORDER_NZ), e3c, ORDER_NZ);
+        e3 = mul_nz(e3, proof.eval_zw.c0, ORDER_NZ);
+        e3 = mul_nz(e3, challenges.alpha.c0, ORDER_NZ);
 
         let r0 = sub(sub(e1, e2, ORDER), e3, ORDER);
 
@@ -297,51 +295,53 @@ impl PlonkVerifier of PVerifier {
     fn compute_D(
         proof: PlonkProof, challenges: PlonkChallenge, vk: PlonkVerificationKey, l1: Fq
     ) -> AffineG1 {
-        let mut d1 = vk.Qm.multiply_as_circuit((mul_o(proof.eval_a.c0, proof.eval_b.c0)));
+        let mut d1 = vk.Qm.multiply_as_circuit((mul_nz(proof.eval_a.c0, proof.eval_b.c0, ORDER_NZ)));
         d1 = d1.add(vk.Ql.multiply_as_circuit(proof.eval_a.c0));
         d1 = d1.add(vk.Qr.multiply_as_circuit(proof.eval_b.c0));
         d1 = d1.add(vk.Qo.multiply_as_circuit(proof.eval_c.c0));
         d1 = d1.add(vk.Qc);
 
-        let betaxi = mul_o(challenges.beta.c0, challenges.xi.c0);
-        let mut d2a1 = add_o(proof.eval_a.c0, betaxi);
-        d2a1 = add_o(d2a1, challenges.gamma.c0);
+        let betaxi = mul_nz(challenges.beta.c0, challenges.xi.c0, ORDER_NZ);
+        let mut d2a1 = add_nz(proof.eval_a.c0, betaxi, ORDER_NZ);
+        d2a1 = add_nz(d2a1, challenges.gamma.c0, ORDER_NZ);
 
-        let mut d2a2 = mul_o(betaxi, vk.k1);
-        d2a2 = add_o(proof.eval_b.c0, d2a2);
-        d2a2 = add_o(d2a2, challenges.gamma.c0);
+        let mut d2a2 = mul_nz(betaxi, vk.k1, ORDER_NZ);
+        d2a2 = add_nz(proof.eval_b.c0, d2a2, ORDER_NZ);
+        d2a2 = add_nz(d2a2, challenges.gamma.c0, ORDER_NZ);
 
-        let mut d2a3 = mul_o(betaxi, vk.k2);
-        d2a3 = add_o(proof.eval_c.c0, d2a3);
-        d2a3 = add_o(d2a3, challenges.gamma.c0);
+        let mut d2a3 = mul_nz(betaxi, vk.k2, ORDER_NZ);
+        d2a3 = add_nz(proof.eval_c.c0, d2a3, ORDER_NZ);
+        d2a3 = add_nz(d2a3, challenges.gamma.c0, ORDER_NZ);
 
-        let d2a = mul_o(
-            mul_o(mul_o(d2a1, d2a2), d2a3), challenges.alpha.c0
+        let d2a = mul_nz(
+            mul_nz(mul_nz(d2a1, d2a2, ORDER_NZ), d2a3, ORDER_NZ), challenges.alpha.c0, ORDER_NZ
         );
 
-        let d2b = mul_o(l1.c0, sqr_nz(challenges.alpha.c0, ORDER_NZ));
+        let d2b = mul_nz(l1.c0, sqr_nz(challenges.alpha.c0, ORDER_NZ), ORDER_NZ);
 
-        let d2 = proof.Z.multiply_as_circuit(add_o(add_o(d2a, d2b), challenges.u.c0));
+        let d2 = proof.Z.multiply_as_circuit(add_nz(add_nz(d2a, d2b, ORDER_NZ), challenges.u.c0, ORDER_NZ));
 
-        let d3a = add_o(
-            add_o(
-                proof.eval_a.c0, mul_o(challenges.beta.c0, proof.eval_s1.c0)
+        let d3a = add_nz(
+            add_nz(
+                proof.eval_a.c0, mul_nz(challenges.beta.c0, proof.eval_s1.c0, ORDER_NZ), ORDER_NZ
             ),
-            challenges.gamma.c0
+            challenges.gamma.c0,
+            ORDER_NZ
         );
 
-        let d3b = add_o(
-            add_o(
-                proof.eval_b.c0, mul_o(challenges.beta.c0, proof.eval_s2.c0)
+        let d3b = add_nz(
+            add_nz(
+                proof.eval_b.c0, mul_nz(challenges.beta.c0, proof.eval_s2.c0, ORDER_NZ), ORDER_NZ
             ),
-            challenges.gamma.c0
+            challenges.gamma.c0,
+            ORDER_NZ
         );
 
-        let d3c = mul_o(
-            mul_o(challenges.alpha.c0, challenges.beta.c0), proof.eval_zw.c0
+        let d3c = mul_nz(
+            mul_nz(challenges.alpha.c0, challenges.beta.c0, ORDER_NZ), proof.eval_zw.c0, ORDER_NZ
         );
 
-        let d3 = vk.S3.multiply_as_circuit(mul_o(mul_o(d3a, d3b), d3c));
+        let d3 = vk.S3.multiply_as_circuit(mul_nz(mul_nz(d3a, d3b, ORDER_NZ), d3c, ORDER_NZ));
 
         let d4low = proof.T1;
         let d4mid = proof.T2.multiply_as_circuit(challenges.xin.c0);
@@ -455,7 +455,7 @@ impl PlonkVerifier of PVerifier {
         A1 = A1.add_as_circuit(Wxiw_mul_u);
 
         let mut B1 = proof.Wxi.multiply_as_circuit(challenges.xi.c0);
-        let s = mul_o(mul_o(challenges.u.c0, challenges.xi.c0), vk.w);
+        let s = mul_nz(mul_nz(challenges.u.c0, challenges.xi.c0, ORDER_NZ), vk.w, ORDER_NZ);
 
         let Wxiw_mul_s = proof.Wxiw.multiply_as_circuit(s);
         B1 = B1.add_as_circuit(Wxiw_mul_s);

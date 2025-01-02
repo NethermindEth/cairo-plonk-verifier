@@ -4,28 +4,7 @@ use plonk_verifier::curve::groups::{AffineG1, AffineG2};
 use plonk_verifier::fields::{Fq};
 use core::fmt::{Display, Formatter, Error};
 
-
-#[derive(Serde, Copy, Drop)]
-struct PlonkVerificationKey {
-    n: u256,
-    power: u256,
-    k1: u256,
-    k2: u256,
-    nPublic: u256,
-    nLagrange: u256,
-    Qm: AffineG1,
-    Qc: AffineG1,
-    Ql: AffineG1,
-    Qr: AffineG1,
-    Qo: AffineG1,
-    S1: AffineG1,
-    S2: AffineG1,
-    S3: AffineG1,
-    X_2: AffineG2,
-    w: u256
-}
-
-#[derive(Serde, Copy, Drop)]
+#[derive(Copy, Drop)]
 struct PlonkProof {
     A: AffineG1,
     B: AffineG1,
@@ -45,6 +24,26 @@ struct PlonkProof {
 }
 
 #[derive(Copy, Drop)]
+struct PlonkVerificationKey {
+    n: u256,
+    power: u256,
+    k1: u256,
+    k2: u256,
+    nPublic: u256,
+    nLagrange: u256,
+    Qm: AffineG1,
+    Qc: AffineG1,
+    Ql: AffineG1,
+    Qr: AffineG1,
+    Qo: AffineG1,
+    S1: AffineG1,
+    S2: AffineG1,
+    S3: AffineG1,
+    X_2: AffineG2,
+    w: u256
+}
+
+#[derive(Debug, Drop, Copy)]
 struct PlonkChallenge {
     beta: Fq,
     gamma: Fq,

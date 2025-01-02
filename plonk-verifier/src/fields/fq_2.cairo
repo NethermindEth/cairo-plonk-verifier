@@ -16,28 +16,20 @@ use plonk_verifier::fields::{Fq, fq, FqOps};
 use plonk_verifier::fields::print::u512Display;
 use plonk_verifier::curve::constants::FIELD_U384;
 use plonk_verifier::fields::utils::conversions::into_u512;
-use core::circuit::{
-	AddModGate as A,
-	SubModGate as S,
-	MulModGate as M,
-	InverseGate as I,
-	CircuitInput as CI,
-	CircuitElement as CE,
-};
 
-#[derive(Default, Copy, Drop, Serde, Debug)]
+#[derive(Copy, Drop, Serde, Debug)]
 struct Fq2 {
     c0: Fq,
     c1: Fq,
 }
 
-// #[inline(always)]
+#[inline(always)]
 fn fq2(c0: u256, c1: u256) -> Fq2 {
     Fq2 { c0: fq(c0), c1: fq(c1), }
 }
 
 impl Fq2IntoU512Tuple of Into<Fq2, (u512, u512)> {
-    // #[inline(always)]
+    #[inline(always)]
     fn into(self: Fq2) -> (u512, u512) {
         (
             u512 { limb0: self.c0.c0.low, limb1: self.c0.c0.high, limb2: 0, limb3: 0, },
@@ -48,29 +40,29 @@ impl Fq2IntoU512Tuple of Into<Fq2, (u512, u512)> {
 
 #[generate_trait]
 impl Fq2Frobenius of Fq2FrobeniusTrait {
-    // #[inline(always)]
+    #[inline(always)]
     fn frob0(self: Fq2) -> Fq2 {
         self
     }
 
-    // #[inline(always)]
+    #[inline(always)]
     fn frob1(self: Fq2) -> Fq2 {
         self.conjugate()
     }
 }
 
 impl Fq2Utils of FieldUtils<Fq2, Fq> {
-    // #[inline(always)]
+    #[inline(always)]
     fn one() -> Fq2 {
         fq2(1, 0)
     }
 
-    // #[inline(always)]
+    #[inline(always)]
     fn zero() -> Fq2 {
         fq2(0, 0)
     }
 
-    // #[inline(always)]
+    #[inline(always)]
     fn scale(self: Fq2, by: Fq) -> Fq2 {
         let a_c0 = CircuitElement::<CircuitInput<0>> {};
         let a_c1 = CircuitElement::<CircuitInput<1>> {};
@@ -104,12 +96,12 @@ impl Fq2Utils of FieldUtils<Fq2, Fq> {
         res
     }
 
-    // #[inline(always)]
+    #[inline(always)]
     fn conjugate(self: Fq2) -> Fq2 {
         Fq2 { c0: self.c0, c1: -self.c1, }
     }
 
-    // #[inline(always)]
+    #[inline(always)]
     fn mul_by_nonresidue(self: Fq2,) -> Fq2 {
         let Fq2 { c0: a0, c1: a1 } = self;
         // fq2(9, 1)
@@ -120,7 +112,7 @@ impl Fq2Utils of FieldUtils<Fq2, Fq> {
         }
     }
 
-    // #[inline(always)]
+    #[inline(always)]
     fn frobenius_map(self: Fq2, power: usize) -> Fq2 {
         if power % 2 == 0 {
             self
@@ -132,7 +124,7 @@ impl Fq2Utils of FieldUtils<Fq2, Fq> {
 }
 
 impl Fq2Short of FieldShortcuts<Fq2> {
-    // #[inline(always)]
+    #[inline(always)]
     fn u_add(self: Fq2, rhs: Fq2) -> Fq2 {
         // Operation without modding can only be done like 4 times
         Fq2 { //
@@ -141,7 +133,7 @@ impl Fq2Short of FieldShortcuts<Fq2> {
          }
     }
 
-    // #[inline(always)]
+    #[inline(always)]
     fn u_sub(self: Fq2, rhs: Fq2) -> Fq2 {
         // Operation without modding can only be done like 4 times
         Fq2 { //
@@ -150,7 +142,7 @@ impl Fq2Short of FieldShortcuts<Fq2> {
          }
     }
 
-    // #[inline(always)]
+    #[inline(always)]
     fn fix_mod(self: Fq2) -> Fq2 {
         // Operation without modding can only be done like 4 times
         Fq2 { //
@@ -161,13 +153,13 @@ impl Fq2Short of FieldShortcuts<Fq2> {
 }
 
 impl Fq2MulShort of FieldMulShortcuts<Fq2, (u512, u512)> {
-    // #[inline(always)]
+    #[inline(always)]
     fn u512_add_fq(self: (u512, u512), rhs: Fq2) -> (u512, u512) {
         let (C0, C1) = self;
         (C0.u512_add_fq(rhs.c0), C1.u512_add_fq(rhs.c1))
     }
 
-    // #[inline(always)]
+    #[inline(always)]
     fn u512_sub_fq(self: (u512, u512), rhs: Fq2) -> (u512, u512) {
         let (C0, C1) = self;
         (C0.u512_sub_fq(rhs.c0), C1.u512_sub_fq(rhs.c1))
@@ -212,7 +204,7 @@ impl Fq2MulShort of FieldMulShortcuts<Fq2, (u512, u512)> {
         (T0, T1)
     }
 
-    // #[inline(always)]
+    #[inline(always)]
     fn to_fq(self: (u512, u512), field_nz: NonZero<u256>) -> Fq2 {
         let (C0, C1) = self;
         fq2(u512_reduce(C0, field_nz), u512_reduce(C1, field_nz))
@@ -220,17 +212,17 @@ impl Fq2MulShort of FieldMulShortcuts<Fq2, (u512, u512)> {
 }
 
 impl Fq2Ops of FieldOps<Fq2> {
-    // #[inline(always)]
+    #[inline(always)]
     fn add(self: Fq2, rhs: Fq2) -> Fq2 {
         Fq2 { c0: self.c0 + rhs.c0, c1: self.c1 + rhs.c1, }
     }
 
-    // #[inline(always)]
+    #[inline(always)]
     fn sub(self: Fq2, rhs: Fq2) -> Fq2 {
         Fq2 { c0: self.c0 - rhs.c0, c1: self.c1 - rhs.c1, }
     }
 
-    // #[inline(always)]
+    #[inline(always)]
     fn mul(self: Fq2, rhs: Fq2) -> Fq2 {
         let a0 = CircuitElement::<CircuitInput<0>> {};
         let a1 = CircuitElement::<CircuitInput<1>> {};
@@ -243,8 +235,8 @@ impl Fq2Ops of FieldOps<Fq2> {
         let b0_add_b1 = circuit_add(b0, b1);
         let t2 = circuit_mul(a0_add_a1, b0_add_b1);
         let t3 = circuit_add(t0, t1);
-        let t3: CE::<S::<M::<A::<CI::<0>, CI::<1>>, A::<CI::<2>, CI::<3>>>, A::<M::<CI::<0>, CI::<2>>, M::<CI::<1>, CI::<3>>>>> = circuit_sub(t2, t3);
-        let t4: CE::<S::<M::<CI::<0>, CI::<2>>, M::<CI::<1>, CI::<3>>>> = circuit_sub(t0, t1);
+        let t3 = circuit_sub(t2, t3);
+        let t4 = circuit_sub(t0, t1);
 
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
 
@@ -266,24 +258,24 @@ impl Fq2Ops of FieldOps<Fq2> {
         fq_t
     }
 
-    // #[inline(always)]
+    #[inline(always)]
     fn div(self: Fq2, rhs: Fq2) -> Fq2 {
         let inv_rhs = rhs.inv(get_field_nz());
         let res = Self::mul(self, inv_rhs);
         res
     }
 
-    // #[inline(always)]
+    #[inline(always)]
     fn neg(self: Fq2) -> Fq2 {
         Fq2 { c0: -self.c0, c1: -self.c1, }
     }
 
-    // #[inline(always)]
+    #[inline(always)]
     fn eq(lhs: @Fq2, rhs: @Fq2) -> bool {
         lhs.c0 == rhs.c0 && lhs.c1 == rhs.c1
     }
 
-    // #[inline(always)]
+    #[inline(always)]
     fn sqr(self: Fq2) -> Fq2 {
         // // Aranha sqr_u + 2r
         let a0 = CircuitElement::<CircuitInput<0>> {};
@@ -310,7 +302,7 @@ impl Fq2Ops of FieldOps<Fq2> {
     }
 
 
-    // #[inline(always)]
+    #[inline(always)]
     fn inv(self: Fq2, field_nz: NonZero<u256>) -> Fq2 {
         let Fq2 { c0, c1 } = self;
         let t = FqOps::inv(c0.sqr() + c1.sqr(), field_nz);
@@ -319,7 +311,7 @@ impl Fq2Ops of FieldOps<Fq2> {
 }
 
 // Inverse unreduced Fq2
-// #[inline(always)]
+#[inline(always)]
 fn ufq2_inv(self: Fq2, field_nz: NonZero<u256>) -> Fq2 {
     let Fq2 { c0, c1 } = self;
     let t = FqOps::inv((c0.sqr() + c1.sqr()), field_nz);

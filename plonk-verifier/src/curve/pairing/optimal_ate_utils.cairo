@@ -12,7 +12,6 @@ use plonk_verifier::fields::{Fq12Sparse034, Fq12Sparse01234, FqSparse};
 use plonk_verifier::fields::print::{Fq2Display, Fq12Display, FqDisplay};
 use plonk_verifier::fields::frobenius::pi;
 
-
 // This implementation follows the paper at https://eprint.iacr.org/2022/1162
 // Pairings in Rank-1 Constraint Systems, Youssef El Housni et al.
 // Section 6.1 Miller loop
@@ -58,14 +57,6 @@ struct LineFn {
     c: Fq2,
 }
 
-use plonk_verifier::curve::constants::FIELD_U384;
-use core::circuit::{
-    RangeCheck96, AddMod, MulMod, u96, CircuitElement, CircuitInput, circuit_add, circuit_sub,
-    circuit_mul, circuit_inverse, EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus,
-    AddInputResultTrait, CircuitInputs, EvalCircuitResult, CircuitElementTrait, IntoCircuitInputValue, 
-};
-use core::circuit::conversions::from_u256;
-
 mod line_fn {
     use plonk_verifier::fields::fq_2::Fq2FrobeniusTrait;
     use plonk_verifier::fields::fq_sparse::FqSparseTrait;
@@ -84,16 +75,6 @@ mod line_fn {
     use plonk_verifier::fields::print::{Fq2Display, Fq12Display, FqDisplay};
     use plonk_verifier::fields::frobenius::pi;
     use super::{LineFn, PPre, NZNum, F034};
-
-    use core::circuit::{
-        RangeCheck96, AddMod, MulMod, u96, CircuitElement, CircuitInput, circuit_add, circuit_sub,
-        circuit_mul, circuit_inverse, EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus,
-        AddInputResultTrait, CircuitInputs, EvalCircuitResult, CircuitElementTrait, IntoCircuitInputValue, 
-    };
-    use core::circuit::{AddModGate, SubModGate, MulModGate, InverseGate};
-    use plonk_verifier::curve::constants::FIELD_U384;
-
-    use core::circuit::conversions::from_u256;
 
     #[inline(always)]
     fn line_fn(slope: Fq2, s: PtG2) -> LineFn {
@@ -136,9 +117,7 @@ mod line_fn {
         let s = acc;
         // s + q
         let slope1 = s.chord(q);
-
         let x1 = s.x_on_slope(slope1, q.x);
-                
         let line1 = line_fn(slope1, s);
 
         // we skip y1 calculation and sub slope1 directly in second slope calculation
@@ -149,7 +128,7 @@ mod line_fn {
         let slope2 = -slope1 - (s.y.u_add(s.y)) / (x1 - s.x);
         acc = s.pt_on_slope(slope2, x1);
         let line2 = line_fn(slope2, s);
- 
+
         // line functions
         (line1, line2)
     }

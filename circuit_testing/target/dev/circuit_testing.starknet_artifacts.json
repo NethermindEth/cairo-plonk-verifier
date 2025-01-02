@@ -1,0 +1,1 @@
+{"version":1,"contracts":[{"id":"m9ev1sm5148d4","package_name":"circuit_testing","contract_name":"PLONK_Verifier","module_path":"circuit_testing::PLONK_Verifier","artifacts":{"sierra":"circuit_testing_PLONK_Verifier.contract_class.json","casm":"circuit_testing_PLONK_Verifier.compiled_contract_class.json"}}]}

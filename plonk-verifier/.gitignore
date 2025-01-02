@@ -1,5 +1,5 @@
 target
 .env
 commands.md
-.snfoundry_cache*
+/.snfoundry_cache
 bench.md

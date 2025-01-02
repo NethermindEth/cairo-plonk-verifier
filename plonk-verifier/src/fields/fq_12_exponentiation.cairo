@@ -189,9 +189,9 @@ impl Fq12ExponentiationCircuit of PairingExponentiationTraitCircuit {
         // 3: T3 ←T2 − T3
         let T3 = u512_sub(T2, T3);
         // 4: T4 ← T0 ⊖ T1
-        // let T4 = T0 - T1;
+        let T4 = T0 - T1;
         // 5: return c = (T4 + T3i)
-        // let o = (T4, T3);
+        let o = (T4, T3);
 
         let a0 = CircuitElement::<CircuitInput<0>> {};
         let a1 = CircuitElement::<CircuitInput<1>> {};

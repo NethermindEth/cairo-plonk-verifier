@@ -13,7 +13,7 @@ use plonk_verifier::curve::groups::{g1, g2, AffineG1, AffineG2};
 use plonk_verifier::fields::{fq, Fq, FqIntoU256};
 use plonk_verifier::traits::FieldMulShortcuts;
 use plonk_verifier::plonk::utils::{convert_le_to_be, hex_to_decimal, byte_array_to_decimal_without_ascii_without_rev, decimal_to_byte_array, reverse_endianness};
-use plonk_verifier::curve::{mul_o};
+use plonk_verifier::curve::{mul_nz};
 
 #[derive(Drop)]
 pub struct PlonkTranscript {
@@ -74,7 +74,7 @@ impl Transcript of Keccak256Transcript<PlonkTranscript> {
 
         let le_value = keccak::compute_keccak_byte_array(@buffer);
         let be_u256 = reverse_endianness(le_value);
-        let challenge: Fq = fq(mul_o(be_u256, 1));
+        let challenge: Fq = fq(mul_nz(be_u256, 1, ORDER_NZ));
 
         challenge
     }
