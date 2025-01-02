@@ -6,8 +6,8 @@ use core::circuit::{
 	CircuitInput as CI,
 	CircuitElement as CE,
 };
-use plonk_verifier::fields::circuits::typedefs::add_sub_neg::{Add, Sub, Neg};
-use plonk_verifier::fields::circuits::typedefs::fq_12_type::{
+use plonk_verifier::circuits::typedefs::add_sub_neg::{Add, Sub, Neg};
+use plonk_verifier::circuits::typedefs::fq_12_type::{
 	Fq12MulC0, Fq12MulC1, Fq12MulC2, Fq12MulC3, Fq12MulC4, Fq12MulC5, Fq12MulC6, Fq12MulC7, Fq12MulC8, Fq12MulC9, Fq12MulC10, Fq12MulC11, 
 	Fq12SqrC0, Fq12SqrC1, Fq12SqrC2, Fq12SqrC3, Fq12SqrC4,Fq12SqrC5, Fq12SqrC6, Fq12SqrC7, Fq12SqrC8, Fq12SqrC9, Fq12SqrC10, Fq12SqrC11
 };

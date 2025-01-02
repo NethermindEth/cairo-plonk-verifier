@@ -30,7 +30,7 @@ use core::circuit::{
 	CircuitInput as CI,
 	CircuitElement as CE,
 };
-use plonk_verifier::fields::circuits::fq_6_circuits::{add_circuit, mul_circuit, sqr_circuit, neg_circuit, sub_circuit};
+use plonk_verifier::circuits::fq_6_circuits::{add_circuit, mul_circuit, sqr_circuit, neg_circuit, sub_circuit};
 #[derive(Copy, Drop, Debug)]
 struct Fq6 {
     c0: Fq2,

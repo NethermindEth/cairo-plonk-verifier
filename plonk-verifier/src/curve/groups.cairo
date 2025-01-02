@@ -10,11 +10,28 @@ use core::circuit::{
 };
 use core::circuit::conversions::from_u256;
 use core::fmt::{Display, Formatter, Error};
-
+use core::circuit::{
+	AddModGate as A,
+	SubModGate as S,
+	MulModGate as M,
+	InverseGate as I,
+	CircuitInput as CI,
+	CircuitElement as CE,
+};
 use debug::PrintTrait as Print;
 
 type AffineG1 = Affine<Fq>;
 type AffineG2 = Affine<Fq2>;
+
+#[inline(always)]
+fn affine_fq1(c0: u384, c1: u384) -> Affine<Fq> {
+    Affine { x: fq(c0), y: fq(c1)}
+}
+
+#[inline(always)]
+fn affine_fq2(c0: u384, c1: u384, c2: u384, c3: u384) -> Affine<Fq2> {
+    Affine { x: fq2(c0, c1), y: fq2(c2, c3)}
+}
 
 #[derive(Copy, Drop, Serde)]
 struct Affine<T> {
@@ -48,6 +65,18 @@ trait ECOperationsCircuitFq {
     fn double_as_circuit(self: @Affine<Fq>) -> Affine<Fq>;
     fn multiply_as_circuit(self: @Affine<Fq>, multiplier: u384) -> Affine<Fq>;
     // fn neg(self: @Affine<Fq>) -> Affine<Fq>;
+}
+
+trait ECOperationsCircuitFq2 {
+    // fn x_on_slope(self: @Affine<Fq2>, slope: Fq2, x2: Fq2) -> Fq2;
+    fn y_on_slope(self: @Affine<Fq2>, slope: Fq2, x: Fq2) -> Fq2;
+    fn pt_on_slope(self: @Affine<Fq2>, slope: Fq2, x2: Fq2) -> Affine<Fq2>;
+    fn chord(self: @Affine<Fq2>, rhs: Affine<Fq2>) -> Fq2;
+    fn add_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>) -> Affine<Fq2>;
+    fn tangent(self: @Affine<Fq2>) -> Fq2;
+    fn double_as_circuit(self: @Affine<Fq2>) -> Affine<Fq2>;
+    // fn multiply_as_circuit(self: @Affine<Fq2>, multiplier: u384) -> Affine<Fq2>;
+    // fn neg(self: @Affine<Fq2>) -> Affine<Fq2>;
 }
 
 impl AffinePartialEq<T, +PartialEq<T>> of PartialEq<Affine<T>> {
@@ -294,6 +323,95 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
         Fq { c0: outputs.get_output(mul).try_into().unwrap() }
     }
 }
+
+//
+// impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
+//     fn y_on_slope(self: @Affine<Fq2>, slope: Fq2, x: Fq2) -> Fq2 {
+//         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+
+//         let c0 = CE::<S::<S::<M::<CI::<4>, S::<CI::<0>, CI::<6>>>, M::<CI::<5>, S::<CI::<1>, CI::<7>>>>, CI::<2>>> {};
+//         let c1 = CE::<S::<S::<M::<A::<CI::<4>, CI::<5>>, A::<S::<CI::<0>, CI::<6>>, S::<CI::<1>, CI::<7>>>>, A::<M::<CI::<4>, S::<CI::<0>, CI::<6>>>, M::<CI::<5>, S::<CI::<1>, CI::<7>>>>>, CI::<3>>> {};
+
+//         let out = match (c0, c1,)
+//             .new_inputs()
+//             .next(*self.x.c0.c0)
+//             .next(*self.x.c1.c0)
+//             .next(*self.y.c0.c0)
+//             .next(*self.y.c1.c0)
+//             .next(slope.c0.c0)
+//             .next(slope.c1.c0)
+//             .next(x.c0.c0)
+//             .next(x.c1.c0)
+//             .done()
+//             .eval(modulus) {
+//                 Result::Ok(out) => { out },
+//                 Result::Err(_) => { panic!("Expected success") }
+//         };
+
+//         fq2(out.get_output(c0), out.get_output(c1))
+//     }
+
+//     fn pt_on_slope(self: @Affine<Fq2>, slope: Fq2, x2: Fq2) -> Affine<Fq2> {
+//         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+        
+//         let out = match (c0, c1, c2, c3)
+//             .new_inputs()
+//             .next(*self.x.c0.c0)
+//             .next(*self.x.c1.c0)
+//             .next(*self.y.c0.c0)
+//             .next(*self.y.c1.c0)
+//             .next(slope.c0.c0)
+//             .next(slope.c1.c0)
+//             .next(x2.c0.c0)
+//             .next(x2.c1.c0)
+//             .done()
+//             .eval(modulus) {
+//                 Result::Ok(outputs) => { outputs },
+//                 Result::Err(_) => { panic!("Expected success") }
+//         };
+
+//         affine_fq2(out.get_output(c0), out.get_output(c1), out.get_output(c2), out.get_output(c3))
+//     }
+
+//     fn chord(self: @Affine<Fq2>, rhs: Affine<Fq2>) -> Fq2 {
+//         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+        
+        
+//         let out = match (c0, c1,)
+//             .new_inputs()
+//             .next(*self.x.c0.c0)
+//             .next(*self.x.c1.c0)
+//             .next(*self.y.c0.c0)
+//             .next(*self.y.c1.c0)
+//             .next(rhs.x.c0.c0)
+//             .next(rhs.x.c1.c0)
+//             .next(rhs.y.c0.c0)
+//             .next(rhs.y.c1.c0)
+//             .done()
+//             .eval(modulus) {
+//                 Result::Ok(outputs) => { outputs },
+//                 Result::Err(_) => { panic!("Expected success") }
+//         };
+
+//         fq2(out.get_output(c0), out.get_output(c1))
+//     }
+
+//     fn add_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>) -> Affine<Fq2> {
+
+//     }
+
+//     fn tangent(self: @Affine<Fq2>) -> Fq2 {
+
+//     }
+
+//     fn double_as_circuit(self: @Affine<Fq2>) -> Affine<Fq2> {
+
+//     }
+
+//     fn multiply_as_circuit(self: @Affine<Fq2>, multiplier: u384) -> Affine<Fq2> {
+
+//     }
+// }
 
 // Cairo does not support generic and specific implementations concurrently
 impl AffineOps<

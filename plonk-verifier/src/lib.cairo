@@ -13,6 +13,16 @@ use traits::{FieldOps, FieldUtils};
 mod curve;
 use curve::{groups as g, pairing};
 
+mod circuits {
+    mod typedefs {
+        mod fq_6_type;
+        mod fq_12_type; 
+        mod add_sub_neg;
+    }
+    mod fq_6_circuits;
+    mod fq_12_circuits;
+}
+
 mod math {
     mod circuit_mod;
     // mod i257;
@@ -37,16 +47,6 @@ mod fields {
     mod frobenius;
     mod print;
     mod utils;
-    mod circuits {
-        mod typedefs {
-            mod fq_6_type;
-            mod fq_12_type; 
-            mod add_sub_neg;
-        }
-        mod fq_6_circuits;
-        mod fq_12_circuits;
-    }
-
     #[cfg(test)]
     mod tests {
         // mod fq12;
