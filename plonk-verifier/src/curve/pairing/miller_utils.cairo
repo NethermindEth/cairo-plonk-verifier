@@ -1,8 +1,8 @@
 use core::debug::PrintTrait;
+use core::circuit::u384;
 use plonk_verifier::fields::{Fq12, Fq12Utils};
 use plonk_verifier::curve::groups::{Affine, AffineG1, AffineG2, AffineOps};
-use plonk_verifier::fields::{print::Fq12PrintImpl, FieldUtils, FieldOps, fq, Fq, Fq2, Fq6};
-
+use plonk_verifier::fields::{FieldUtils, FieldOps, fq, Fq, Fq2, Fq6};
 trait LineEvaluationsTrait<P1, P2> {
     /// The sloped line function for doubling a point
     fn at_tangent(self: P1, p: P2) -> Fq12;
@@ -15,10 +15,14 @@ impl G2LineEvals of LineEvaluationsTrait<AffineG2, AffineG1> {
     #[inline(always)]
     fn at_tangent(self: AffineG2, p: AffineG1) -> Fq12 {
         // -3px^2
-        let cx = -fq(3) * p.x.sqr();
+        let cx = -fq(u384 { limb0: 3, limb1: 0, limb2: 0, limb3: 0 }) * p.x.sqr();
         // 2p.y
         let cy = p.y + p.y;
-        sparse_fq12(p.y * p.y - fq(9), self.x.scale(cx), self.y.scale(cy))
+        sparse_fq12(
+            p.y * p.y - fq(u384 { limb0: 9, limb1: 0, limb2: 0, limb3: 0 }),
+            self.x.scale((cx.c0).try_into().unwrap()),
+            self.y.scale((cy.c0).try_into().unwrap())
+        )
     }
 
     /// The sloped line function for adding two points
@@ -26,7 +30,11 @@ impl G2LineEvals of LineEvaluationsTrait<AffineG2, AffineG1> {
     fn at_chord(self: AffineG2, p1: AffineG1, p2: AffineG1) -> Fq12 {
         let cx = p2.y - p1.y;
         let cy = p1.x - p2.x;
-        sparse_fq12(p1.y * p2.x - p2.y * p1.x, self.x.scale(cx), self.y.scale(cy))
+        sparse_fq12(
+            p1.y * p2.x - p2.y * p1.x,
+            self.x.scale((cx.c0).try_into().unwrap()),
+            self.y.scale((cy.c0).try_into().unwrap())
+        )
     }
 }
 

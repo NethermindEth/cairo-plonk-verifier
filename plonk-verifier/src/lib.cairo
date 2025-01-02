@@ -14,13 +14,16 @@ mod curve;
 use curve::{groups as g, pairing};
 
 mod math {
-    mod i257;
-    mod fast_mod;
+    mod circuit_mod;
+    // mod i257;
+    // mod fast_mod;
     // #[cfg(test)]
 // mod fast_mod_tests;
 }
-use math::fast_mod;
+use math::circuit_mod;
+// use math::fast_mod;
 
+// Fix imports with proper libs
 mod fields {
     mod fq_generics;
     mod fq_sparse;
@@ -34,13 +37,22 @@ mod fields {
     mod frobenius;
     mod print;
     mod utils;
+    mod circuits {
+        mod typedefs {
+            mod fq_6_type;
+            mod fq_12_type; 
+            mod add_sub_neg;
+        }
+        mod fq_6_circuits;
+        mod fq_12_circuits;
+    }
 
     #[cfg(test)]
     mod tests {
-        // mod fq;
-// mod fq2;
+        // mod fq12;
 // mod fq6;
-// mod fq12;
+// mod fq2;
+// mod fq;
 // mod fq12_expo;
 // mod fq_sparse;
 // mod u512;
@@ -49,11 +61,9 @@ mod fields {
     }
 
     use fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
-    use fq_1::{Fq, FqOps, FqShort, FqMulShort, FqUtils, fq, FqIntoU512Tuple, FqIntoU256};
-    use fq_2::{
-        Fq2, Fq2Ops, Fq2Short, Fq2MulShort, Fq2Utils, fq2, Fq2Frobenius, Fq2IntoU512Tuple, ufq2_inv
-    };
-    use fq_6::{Fq6, Fq6Ops, Fq6Short, Fq6MulShort, Fq6Utils, fq6, Fq6Frobenius, SixU512};
+    use fq_1::{Fq, FqOps, FqShort, FqMulShort, FqUtils, fq, FqIntoU256};
+    use fq_2::{Fq2, Fq2Ops, Fq2Short, Fq2Utils, fq2, Fq2Frobenius, ufq2_inv};
+    use fq_6::{Fq6, Fq6Ops, Fq6Short, Fq6Utils, fq6, Fq6Frobenius}; //, SixU512};
     use fq_12::{Fq12, Fq12Ops, Fq12Utils, fq12, Fq12Frobenius};
     use fq_12_exponentiation::Fq12Exponentiation;
     use fq_sparse::{

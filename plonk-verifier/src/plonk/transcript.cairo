@@ -1,19 +1,19 @@
-use core::traits::TryInto;
-use core::clone::Clone;
-use core::traits::Into;
-use core::traits::Destruct;
-use core::keccak;
-use core::byte_array::ByteArrayTrait;
-use core::to_byte_array::{FormatAsByteArray, AppendFormattedToByteArray};
-use core::fmt::{Display, Formatter, Error};
+use core::{
+    traits::{TryInto, Into, Destruct}, clone::Clone, fmt::{Display, Formatter, Error},
+    byte_array::ByteArrayTrait, to_byte_array::{FormatAsByteArray, AppendFormattedToByteArray},
+    keccak, circuit::conversions::from_u256
+};
 use debug::PrintTrait;
 
-use plonk_verifier::curve::constants::{ORDER, ORDER_NZ};
-use plonk_verifier::curve::groups::{g1, g2, AffineG1, AffineG2};
-use plonk_verifier::fields::{fq, Fq, FqIntoU256};
-use plonk_verifier::traits::FieldMulShortcuts;
-use plonk_verifier::plonk::utils::{convert_le_to_be, hex_to_decimal, byte_array_to_decimal_without_ascii_without_rev, decimal_to_byte_array, reverse_endianness};
-use plonk_verifier::curve::{mul_nz};
+use plonk_verifier::{
+    curve::{constants::{ORDER, ORDER_NZ}, groups::{AffineG1, AffineG2, g1, g2}},
+    fields::{fq, Fq, FqIntoU256}, traits::FieldMulShortcuts,
+    plonk::utils::{
+        byte_array_to_decimal_without_ascii_without_rev, convert_le_to_be, decimal_to_byte_array,
+        hex_to_decimal, reverse_endianness,
+    },
+    math::circuit_mod::{add_co, zero_384}
+};
 
 #[derive(Drop)]
 pub struct PlonkTranscript {
@@ -54,27 +54,31 @@ impl Transcript of Keccak256Transcript<PlonkTranscript> {
 
         let mut buffer: ByteArray = "";
 
-        for i in 0..self.data.len() {
-            match self.data.at(i) {
-                TranscriptElement::Polynomial(pt) => {
-                    let x = pt.x.c0.clone();
-                    let y = pt.y.c0.clone();
-                    let mut x_bytes: ByteArray = decimal_to_byte_array(x);
-                    let mut y_bytes: ByteArray = decimal_to_byte_array(y);
-                    buffer.append(@x_bytes);
-                    buffer.append(@y_bytes);
-                },
-                TranscriptElement::Scalar(scalar) => {
-                    let s: u256 = scalar.c0.clone();
-                    let mut s_bytes: ByteArray = decimal_to_byte_array(s);
-                    buffer.append(@s_bytes);
-                },
-            };
-        };
+        for i in 0
+            ..self
+                .data
+                .len() {
+                    match self.data.at(i) {
+                        TranscriptElement::Polynomial(pt) => {
+                            let x: u256 = (pt.x.c0.clone()).try_into().unwrap();
+                            let y: u256 = (pt.y.c0.clone()).try_into().unwrap();
+                            let mut x_bytes: ByteArray = decimal_to_byte_array(x);
+                            let mut y_bytes: ByteArray = decimal_to_byte_array(y);
+                            buffer.append(@x_bytes);
+                            buffer.append(@y_bytes);
+                        },
+                        TranscriptElement::Scalar(scalar) => {
+                            let s: u256 = (scalar.c0.clone()).try_into().unwrap();
+                            let mut s_bytes: ByteArray = decimal_to_byte_array(s);
+                            buffer.append(@s_bytes);
+                        },
+                    };
+                };
 
         let le_value = keccak::compute_keccak_byte_array(@buffer);
         let be_u256 = reverse_endianness(le_value);
-        let challenge: Fq = fq(mul_nz(be_u256, 1, ORDER_NZ));
+        let be_mod = add_co(from_u256(be_u256), zero_384);
+        let challenge: Fq = fq(be_mod);
 
         challenge
     }

@@ -2,7 +2,7 @@ use core::traits::TryInto;
 use plonk_verifier::traits::FieldOps;
 use plonk_verifier::curve::{FIELD, get_field_nz, u512, U512BnAdd, U512BnSub, u512Display};
 use plonk_verifier::curve::{u512_reduce, u512_sub_u256, u512_add_u256, reduce};
-use plonk_verifier::fields::{fq, Fq, fq2, Fq2, FieldUtils, FqIntoU512Tuple, Fq2IntoU512Tuple};
+use plonk_verifier::fields::{fq, Fq, fq2, Fq2, FieldUtils, Fq2IntoU512Tuple};
 use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 use debug::PrintTrait;
 const f30f: u128 = 0xffffffffffffffffffffffffffffffff;

@@ -4,7 +4,7 @@ mod conversions {
         bounded_int, bounded_int::{BoundedInt, AddHelper, MulHelper, DivRemHelper,}
     };
     use core::circuit::{u384, u96};
-    use plonk_verifier::curve::u512;
+    // use plonk_verifier::curve::u512;
 
     type ConstValue<const VALUE: felt252> = BoundedInt<VALUE, VALUE>;
     const POW32: felt252 = 0x100000000;
@@ -71,25 +71,25 @@ mod conversions {
         type Result = BoundedInt<0, { POW128 - 1 }>;
     }
 
-    pub fn into_u512(value: u384) -> u512 {
-        // warning: don't use, this function is not well tested
-        let (limb2_low32, limb1_high64) = bounded_int::div_rem(value.limb2, NZ_POW64_TYPED);
-        let (limb1_low64, limb0_high32) = bounded_int::div_rem(value.limb1, NZ_POW32_TYPED);
+    // pub fn into_u512(value: u384) -> u512 {
+    //     // warning: don't use, this function is not well tested
+    //     let (limb2_low32, limb1_high64) = bounded_int::div_rem(value.limb2, NZ_POW64_TYPED);
+    //     let (limb1_low64, limb0_high32) = bounded_int::div_rem(value.limb1, NZ_POW32_TYPED);
 
-        let shift_limb0_high32 = bounded_int::mul(limb0_high32, POW96_TYPED);
-        let limb0 = bounded_int::add(shift_limb0_high32, value.limb0);
+    //     let shift_limb0_high32 = bounded_int::mul(limb0_high32, POW96_TYPED);
+    //     let limb0 = bounded_int::add(shift_limb0_high32, value.limb0);
 
-        let shift_limb1_high64 = bounded_int::mul(limb1_high64, POW64_TYPED);
-        let limb1 = bounded_int::add(limb1_low64, shift_limb1_high64);
+    //     let shift_limb1_high64 = bounded_int::mul(limb1_high64, POW64_TYPED);
+    //     let limb1 = bounded_int::add(limb1_low64, shift_limb1_high64);
 
-        let shift_limb2_high96 = bounded_int::mul(value.limb3, POW32_TYPED);
-        let limb2 = bounded_int::add(limb2_low32, shift_limb2_high96);
+    //     let shift_limb2_high96 = bounded_int::mul(value.limb3, POW32_TYPED);
+    //     let limb2 = bounded_int::add(limb2_low32, shift_limb2_high96);
 
-        u512 {
-            limb0: upcast::<BoundedInt<0, { POW128 - 1 }>, u128>(limb0),
-            limb1: upcast::<BoundedInt<0, { POW128 - 1 }>, u128>(limb1),
-            limb2: upcast::<BoundedInt<0, { POW128 - 1 }>, u128>(limb2),
-            limb3: 0,
-        }
-    }
+    //     u512 {
+    //         limb0: upcast::<BoundedInt<0, { POW128 - 1 }>, u128>(limb0),
+    //         limb1: upcast::<BoundedInt<0, { POW128 - 1 }>, u128>(limb1),
+    //         limb2: upcast::<BoundedInt<0, { POW128 - 1 }>, u128>(limb2),
+    //         limb3: 0,
+    //     }
+    // }
 }
