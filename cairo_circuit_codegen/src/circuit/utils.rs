@@ -59,9 +59,7 @@ pub fn generate_fq6_field_ops() -> String {
 
 pub fn generate_affine_fq2_ops() -> String {
     let mut builder: CairoCodeBuilder = CairoCodeBuilder::new();
-    let idx_0: [usize; 6] = (0..=5).collect::<Vec<usize>>().try_into().unwrap();
-    let idx_1: [usize; 6] = (6..=11).collect::<Vec<usize>>().try_into().unwrap();
-    
+
     let lhs: Affine<Fq2> = Affine::<Fq2>::new_input([0, 1, 2, 3]);
     let rhs: Affine<Fq2> = Affine::<Fq2>::new_input([4, 5, 6, 7]);
     let slope: Fq2 = Fq2::new_input([4, 5]);
@@ -69,6 +67,8 @@ pub fn generate_affine_fq2_ops() -> String {
 
     builder
         .add_line("// Affine Fq2")
+        .add_line("// x_on_slope")
+        .add_circuit(lhs.x_on_slope(&slope, &x), None)
         .add_line("// y_on_slope")
         .add_circuit(lhs.y_on_slope(&slope, &x), None)
         .add_line("// pt_on_slope")
