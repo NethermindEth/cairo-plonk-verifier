@@ -5,18 +5,23 @@ use plonk_verifier::traits::FieldShortcuts;
 use plonk_verifier::traits::FieldMulShortcuts;
 use core::array::ArrayTrait;
 use plonk_verifier::curve::{t_naf, get_field_nz, FIELD_X2};
-use plonk_verifier::curve::{u512, mul_by_v, U512BnAdd, U512BnSub, Tuple2Add, Tuple2Sub,};
-use plonk_verifier::curve::{u512_add, u512_sub, u512_high_add, u512_high_sub, U512Fq2Ops};
+// use plonk_verifier::curve::{u512, mul_by_v, U512BnAdd, U512BnSub, Tuple2Add, Tuple2Sub,};
+// use plonk_verifier::curve::{u512_add, u512_sub, u512_high_add, u512_high_sub, U512Fq2Ops};
 use plonk_verifier::fields::{
-    FieldUtils, FieldOps, fq, Fq, Fq2, Fq6, Fq12, fq12, Fq12Frobenius, Fq12Squaring, Fq12SquaringCircuit
+    FieldUtils, FieldOps, fq, Fq, Fq2, Fq6, Fq12, fq12, Fq12Frobenius, Fq12Squaring,
+    Fq12SquaringCircuit
 };
 use plonk_verifier::fields::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
-use plonk_verifier::fields::print::{Fq2Display, FqDisplay, u512Display};
+// use plonk_verifier::fields::print::{Fq2Display, FqDisplay, u512Display};
 use plonk_verifier::curve::constants::FIELD_U384;
 use core::circuit::{
-    CircuitElement, CircuitInput, circuit_add, circuit_sub,
-    circuit_mul, circuit_inverse, EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus,
-    AddInputResultTrait, CircuitInputs, EvalCircuitResult,
+    CircuitElement, CircuitInput, circuit_add, circuit_sub, circuit_mul, circuit_inverse,
+    EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus, AddInputResultTrait, CircuitInputs,
+    EvalCircuitResult,
+};
+
+use plonk_verifier::circuit_mod::{
+    add_c, sub_c, neg_c, div_c, inv_c, mul_c, sqr_c, one_384, zero_384
 };
 
 
@@ -173,25 +178,25 @@ impl Fq12Exponentiation of PairingExponentiationTrait {
 
 #[generate_trait]
 impl Fq12ExponentiationCircuit of PairingExponentiationTraitCircuit {
-    // Reference circuit implenetation for Fq2 * Fq2
-    fn u_mul_circuit(self: Fq2, rhs: Fq2) -> (u256, u256) {
+    // Reference circuit implementation for Fq2 * Fq2
+    fn u_mul_circuit(self: Fq2, rhs: Fq2) -> (u384, u384) {
         // Input: a = (a0 + a1i) and b = (b0 + b1i) ∈ Fp2 Output: c = a·b = (c0 +c1i) ∈ Fp2
         let Fq2 { c0: a0, c1: a1 } = self;
         let Fq2 { c0: b0, c1: b1 } = rhs;
 
         // 1: T0 ←a0 × b0, T1 ←a1 × b1,
-        let T0 = a0.u_mul(b0); // Karatsuba V0
-        let T1 = a1.u_mul(b1); // Karatsuba V1
+        let T0 = a0.mul(b0); // Karatsuba V0
+        let T1 = a1.mul(b1); // Karatsuba V1
         // t0 ←a0 +a1, t1 ←b0 +b1 2: T2 ←t0 × t1
-        let T2 = a0.u_add(a1).u_mul(b0.u_add(b1));
+        let T2 = a0.u_add(a1).mul(b0.u_add(b1));
         // T3 ←T0 + T1
-        let T3 = u512_add(T0, T1);
+        let T3 = T0.u_add(T1);
         // 3: T3 ←T2 − T3
-        let T3 = u512_sub(T2, T3);
+        let T3 = T2.u_add(T3);
         // 4: T4 ← T0 ⊖ T1
-        let T4 = T0 - T1;
+        let T4 = T0.u_sub(T1);
         // 5: return c = (T4 + T3i)
-        let o = (T4, T3);
+        // let o = (T4, T3);
 
         let a0 = CircuitElement::<CircuitInput<0>> {};
         let a1 = CircuitElement::<CircuitInput<1>> {};
@@ -201,32 +206,25 @@ impl Fq12ExponentiationCircuit of PairingExponentiationTraitCircuit {
         let T0 = circuit_mul(a0, b0);
         let T1 = circuit_mul(a1, b1);
         let T2_0 = circuit_add(a0, a1);
-        let T2_1 = circuit_add(b0, b1); 
-        let T2 = circuit_mul(T2_0, T2_1); 
-        let T3_0 = circuit_add(T0, T1); 
+        let T2_1 = circuit_add(b0, b1);
+        let T2 = circuit_mul(T2_0, T2_1);
+        let T3_0 = circuit_add(T0, T1);
         let T3 = circuit_sub(T2, T3_0);
-        let T4 = circuit_sub(T0, T1); 
-        
+        let T4 = circuit_sub(T0, T1);
+
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-        let a0 = from_u256(self.c0.c0);
-        let a1 = from_u256(self.c1.c0);
-        let b0 = from_u256(rhs.c0.c0);
-        let b1 = from_u256(rhs.c1.c0);
-        
+        let a0 = self.c0.c0;
+        let a1 = self.c1.c0;
+        let b0 = rhs.c0.c0;
+        let b1 = rhs.c1.c0;
+
         let outputs =
-            match (T3, T4, )
-                .new_inputs()
-                .next(a0)
-                .next(a1)
-                .next(b0)
-                .next(b1)
-                .done()
-                .eval(modulus) {
+            match (T3, T4,).new_inputs().next(a0).next(a1).next(b0).next(b1).done().eval(modulus) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
-        let fq_c0: u256 = outputs.get_output(T4).try_into().unwrap();
-        let fq_c1: u256 = outputs.get_output(T3).try_into().unwrap();
+        let fq_c0 = outputs.get_output(T4).try_into().unwrap();
+        let fq_c1 = outputs.get_output(T3).try_into().unwrap();
 
         (fq_c0, fq_c1)
     }
@@ -238,30 +236,24 @@ impl Fq12ExponentiationCircuit of PairingExponentiationTraitCircuit {
 
         let a0_scale_9_2 = circuit_add(a0, a0);
         let a0_scale_9_4 = circuit_add(a0_scale_9_2, a0_scale_9_2);
-        let a0_scale_9 = circuit_add(a0_scale_9_4, a0); 
+        let a0_scale_9 = circuit_add(a0_scale_9_4, a0);
         let a1_scale_9_2 = circuit_add(a1, a1);
         let a1_scale_9_4 = circuit_add(a1_scale_9_2, a1_scale_9_2);
-        let a1_scale_9 = circuit_add(a1_scale_9_4, a0); 
+        let a1_scale_9 = circuit_add(a1_scale_9_4, a0);
         let fq_c0 = circuit_sub(a0_scale_9, a1);
-        let fq_c1 = circuit_add(a1_scale_9, a0); 
+        let fq_c1 = circuit_add(a1_scale_9, a0);
 
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-        let a0 = from_u256(self.c0.c0);
-        let a1 = from_u256(self.c1.c0);
-        
-        let outputs =
-            match (fq_c0, fq_c1, )
-                .new_inputs()
-                .next(a0)
-                .next(a1)
-                .done()
-                .eval(modulus) {
+        let a0 = self.c0.c0;
+        let a1 = self.c1.c0;
+
+        let outputs = match (fq_c0, fq_c1,).new_inputs().next(a0).next(a1).done().eval(modulus) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
-        let fq_c0: u256 = outputs.get_output(fq_c0).try_into().unwrap();
-        let fq_c1: u256 = outputs.get_output(fq_c1).try_into().unwrap();
+        let fq_c0 = outputs.get_output(fq_c0).try_into().unwrap();
+        let fq_c1 = outputs.get_output(fq_c1).try_into().unwrap();
 
-        Fq2 {c0: Fq{c0: fq_c0}, c1: Fq {c0: fq_c1}}
+        Fq2 { c0: Fq { c0: fq_c0 }, c1: Fq { c0: fq_c1 } }
     }
 }

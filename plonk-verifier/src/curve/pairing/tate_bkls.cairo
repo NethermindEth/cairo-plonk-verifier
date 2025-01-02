@@ -15,16 +15,15 @@
 // 10|     end if
 // 11|  end for
 // 12|  return f ← f^((q^k-1)/r)
-// 
+//
 // This can probably use a lot of optimisation from NAF/short miller loop implementations
 
 use core::debug::PrintTrait;
 use plonk_verifier::fields::{Fq12, Fq12Utils, Fq12Exponentiation};
 use plonk_verifier::curve::groups::{Affine, AffineG1, AffineG2, AffineOps};
 use plonk_verifier::fields::{print, FieldUtils, FieldOps, fq, Fq, Fq2, Fq6};
-use print::{FqPrintImpl, Fq2PrintImpl, Fq12PrintImpl};
+// use print::{FqPrintImpl, Fq2PrintImpl, Fq12PrintImpl};
 use plonk_verifier::curve::pairing::miller_utils::{LineEvaluationsTrait};
-
 fn tate_miller_loop(p: AffineG1, q: AffineG2) -> Fq12 {
     core::internal::revoke_ap_tracking();
 
@@ -40,6 +39,7 @@ fn tate_miller_loop(p: AffineG1, q: AffineG2) -> Fq12 {
                 f = f.sqr() * q.at_tangent(r);
 
                 // R ← [2]R
+                // r = r.double();
                 r = r.double();
 
                 if ate_bool { //
@@ -49,7 +49,7 @@ fn tate_miller_loop(p: AffineG1, q: AffineG2) -> Fq12 {
                     // R ← R + P
                     r = r.add(p);
                 }
-            //
+                //
             },
             Option::None => { break; }
         }

@@ -1,4 +1,4 @@
-use plonk_verifier::curve::{add, sub, mul, div, neg};
+// use plonk_verifier::curve::{add, sub, mul, div, neg};
 use plonk_verifier::traits::FieldOps;
 use plonk_verifier::fields::{Fq, Fq2, Fq6, Fq12};
 

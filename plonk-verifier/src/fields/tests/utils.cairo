@@ -16,7 +16,6 @@ fn test_into_u512() {
     // Test with small values
     let value = u384 { limb0: 0, limb1: 0, limb2: 1, limb3: 0 };
     let result = into_u512(value);
-    // println!("r limb 0{:?}", result.limb0);
     // Basic assertions
     assert(result.limb0 == 0, 'limb0 should be 0');
     assert(result.limb1 == 18446744073709551616, 'limb1 should not be 0');

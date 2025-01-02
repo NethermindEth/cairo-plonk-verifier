@@ -1,10 +1,11 @@
 use core::debug::PrintTrait;
+use core::circuit::conversions::from_u256;
 use plonk_verifier::fields::{Fq12, Fq12Utils};
 use plonk_verifier::curve::{groups, FIELD};
 use groups::{AffineG1, AffineG2, AffineG1Impl, AffineG2Impl, g1, g2};
-use plonk_verifier::fields::{print::Fq12PrintImpl, FieldUtils, FieldOps, fq12, Fq, Fq6};
+use plonk_verifier::fields::{FieldUtils, FieldOps, fq12, Fq, Fq6};
 use plonk_verifier::pairing::tate_bkls::{tate_miller_loop, tate_pairing};
-
+use plonk_verifier::pairing::optimal_ate::{single_ate_pairing};
 fn dbl_g2() -> AffineG2 {
     g2(
         18029695676650738226693292988307914797657423701064905010927197838374790804409,
@@ -22,18 +23,18 @@ fn dbl_g1() -> AffineG1 {
 
 fn pair_result() -> Fq12 {
     fq12(
-        0x1da92e958487e1515456e89aa06f4b08040231ec5492a3873c0e5a51743b93ae,
-        0x13b8616ce25df6105d793af41913a57b0ab221b193d48107e89204e19568411f,
-        0x1c8ab87de856aafdfb56d051cd79517ae10b4490cc01bd75b347a669d58698da,
-        0x2e7918e3f3702ec1f031bcd571b3c23730ab030a0e7a875c6f99f4536ab3f0bb,
-        0x21f3d1e320a26684b45a7f73a82bbcdabcee7b6b7f1b1073985de6d4f3867bcd,
-        0x2cbf9b28de156b9f479d3a97a216b566d98f9b976f25a5ca31fbab41d9de224d,
-        0x2da44e38ec26bde1ad31495943114856dd885beb7889c590079bb300bb6ec023,
-        0x1c40f4619c21dbd91ba610a8943188e35402e587a071361f60288e7e96fa33b,
-        0x9ebfb41a99f28109afed1112aab3c8ab4ff6dd90097e880669c960f11106b52,
-        0x2d0c275838257edb77665b9aafbbd40626b6a35fe12b4ccacee5613bf3408fc2,
-        0x289d6d934bc5994e10f4dc4bfe3a5ac9cddfce66ee76df1e751b064bfdb5533d,
-        0x1e18e64906693e6f4c9cd40273060c504a78843d903489abb13377666679d33f,
+        from_u256(0x1da92e958487e1515456e89aa06f4b08040231ec5492a3873c0e5a51743b93ae),
+        from_u256(0x13b8616ce25df6105d793af41913a57b0ab221b193d48107e89204e19568411f),
+        from_u256(0x1c8ab87de856aafdfb56d051cd79517ae10b4490cc01bd75b347a669d58698da),
+        from_u256(0x2e7918e3f3702ec1f031bcd571b3c23730ab030a0e7a875c6f99f4536ab3f0bb),
+        from_u256(0x21f3d1e320a26684b45a7f73a82bbcdabcee7b6b7f1b1073985de6d4f3867bcd),
+        from_u256(0x2cbf9b28de156b9f479d3a97a216b566d98f9b976f25a5ca31fbab41d9de224d),
+        from_u256(0x2da44e38ec26bde1ad31495943114856dd885beb7889c590079bb300bb6ec023),
+        from_u256(0x1c40f4619c21dbd91ba610a8943188e35402e587a071361f60288e7e96fa33b),
+        from_u256(0x9ebfb41a99f28109afed1112aab3c8ab4ff6dd90097e880669c960f11106b52),
+        from_u256(0x2d0c275838257edb77665b9aafbbd40626b6a35fe12b4ccacee5613bf3408fc2),
+        from_u256(0x289d6d934bc5994e10f4dc4bfe3a5ac9cddfce66ee76df1e751b064bfdb5533d),
+        from_u256(0x1e18e64906693e6f4c9cd40273060c504a78843d903489abb13377666679d33f),
     )
 }
 
@@ -43,14 +44,36 @@ fn miller() {
     assert(pair12 == pair_result(), 'incorrect pairing');
 }
 
+#[test]
+fn test_single_ate_pairing() {
+    let A1: AffineG1 = g1(
+        13889788560033703965469723652176623978872395682151357396956772682576518717948,
+        3614499051343101272387090424207008140899156868142260277531228689285034487324
+    );
+    let B1: AffineG1 = g1(
+        2904233706195205278446418248990831120077640953665441214729718332685839330830,
+        18303759544617848637676954280377415337991518189072362959534361691446551561217
+    );
+
+    let mut X_2 = g2(
+        2046742093474138364318819827031777645206433195128565824360788617741298981525,
+        1433753357665853869090569273359618677040253248059110079322274768858965861594,
+        1012593656704398130331921245405877456331931988986547477234119259528482165497,
+        4191056764018303486822079644163839762717699764181526746691927713416713155706
+    );
+    let g2_one = AffineG2Impl::one();
+    let pair1 = single_ate_pairing(A1, X_2);
+    let pair2 = single_ate_pairing(B1, g2_one);
+    assert(pair1 == pair2, 'incorrect single_ate_pairing');
+}
+
 #[cfg(test)]
 mod g1_line {
     use plonk_verifier::curve::pairing::miller_utils::LineEvaluationsTrait;
     use plonk_verifier::fields::{Fq12, Fq12Utils};
-    use plonk_verifier::fields::{
-        print::Fq12PrintImpl, FieldUtils, FieldOps, fq, fq12, Fq, Fq2, Fq6
-    };
+    use plonk_verifier::fields::{FieldUtils, FieldOps, fq, fq12, Fq, Fq2, Fq6};
     use plonk_verifier::curve::groups::{Affine, AffineG1, AffineG2, AffineOps, g1, g2};
+    use core::circuit::conversions::from_u256;
 
     fn p1() -> AffineG1 {
         g1(
@@ -77,34 +100,34 @@ mod g1_line {
 
     fn cord_res() -> Fq12 {
         fq12(
-            0x1f1eff6bc9b3365536da4297b029ae47cfafc7acce182e6990d1fc60dd6601ac,
-            0,
-            0x17f7d5c3a88b387da3cb0c2535b2cba2225a3dc4d23e808b323f382f600b055,
-            0x24f6134b1e3d93de96c2ae1a053962479be5d184b34512e363138707311da84b,
-            0,
-            0,
-            0,
-            0,
-            0xf0c605fc017ed82acf09ea938d715272ad2b3e40618b6fa68d6ff63509e0710,
-            0x1256b9f15a9f0a1605f688395421740450365c4ed28dc40f3247cbaed5403fa1,
-            0,
-            0,
+            from_u256(0x1f1eff6bc9b3365536da4297b029ae47cfafc7acce182e6990d1fc60dd6601ac),
+            from_u256(0),
+            from_u256(0x17f7d5c3a88b387da3cb0c2535b2cba2225a3dc4d23e808b323f382f600b055),
+            from_u256(0x24f6134b1e3d93de96c2ae1a053962479be5d184b34512e363138707311da84b),
+            from_u256(0),
+            from_u256(0),
+            from_u256(0),
+            from_u256(0),
+            from_u256(0xf0c605fc017ed82acf09ea938d715272ad2b3e40618b6fa68d6ff63509e0710),
+            from_u256(0x1256b9f15a9f0a1605f688395421740450365c4ed28dc40f3247cbaed5403fa1),
+            from_u256(0),
+            from_u256(0),
         )
     }
     fn tangent_res() -> Fq12 {
         fq12(
-            0x2ee84c3cee85e157e7149a463c0769d08bf2e421f653a85856ad859b84aca7a8,
-            0,
-            0x21fbda2f418fdd300d2203f122c2bc17e17ccb34e29ae5c949ccd51deb06bba9,
-            0x28671d3bee02ad0081f2c437704149ac70a312a28ddd449c86c38f82953aef85,
-            0,
-            0,
-            0,
-            0,
-            0x2cdd77b45c7b5c6704e5fbc1c6fc35d41d7ec3b71ee7ceecbc22ef8e944c81f7,
-            0x193ceb7899103f068db4603598043f43453592b27ca8e53f92191707cb5cbc73,
-            0,
-            0,
+            from_u256(0x2ee84c3cee85e157e7149a463c0769d08bf2e421f653a85856ad859b84aca7a8),
+            from_u256(0),
+            from_u256(0x21fbda2f418fdd300d2203f122c2bc17e17ccb34e29ae5c949ccd51deb06bba9),
+            from_u256(0x28671d3bee02ad0081f2c437704149ac70a312a28ddd449c86c38f82953aef85),
+            from_u256(0),
+            from_u256(0),
+            from_u256(0),
+            from_u256(0),
+            from_u256(0x2cdd77b45c7b5c6704e5fbc1c6fc35d41d7ec3b71ee7ceecbc22ef8e944c81f7),
+            from_u256(0x193ceb7899103f068db4603598043f43453592b27ca8e53f92191707cb5cbc73),
+            from_u256(0),
+            from_u256(0),
         )
     }
 

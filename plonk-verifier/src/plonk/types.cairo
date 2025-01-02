@@ -3,7 +3,7 @@ use core::traits::Into;
 use plonk_verifier::curve::groups::{AffineG1, AffineG2};
 use plonk_verifier::fields::{Fq};
 use core::fmt::{Display, Formatter, Error};
-
+use core::circuit::u384;
 #[derive(Copy, Drop)]
 struct PlonkProof {
     A: AffineG1,
@@ -27,8 +27,8 @@ struct PlonkProof {
 struct PlonkVerificationKey {
     n: u256,
     power: u256,
-    k1: u256,
-    k2: u256,
+    k1: u384,
+    k2: u384,
     nPublic: u256,
     nLagrange: u256,
     Qm: AffineG1,
@@ -40,7 +40,7 @@ struct PlonkVerificationKey {
     S2: AffineG1,
     S3: AffineG1,
     X_2: AffineG2,
-    w: u256
+    w: u384
 }
 
 #[derive(Debug, Drop, Copy)]
