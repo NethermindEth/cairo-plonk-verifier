@@ -1,6 +1,6 @@
 use plonk_verifier::curve::{circuit_scale_9, FIELD};
 use plonk_verifier::fields::{
-    FieldUtils, FieldOps, FieldShortcuts, fq, Fq, Fq2, Fq6, Fq12, fq12, FS01234, FS034, FS01
+    FieldUtils, FieldOps, fq, Fq, Fq2, Fq6, Fq12, fq12, FS01234, FS034, FS01
 };
 // use plonk_verifier::fields::print::{FqDisplay, Fq12Display};
 

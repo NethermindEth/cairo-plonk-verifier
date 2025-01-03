@@ -10,7 +10,7 @@ use debug::PrintTrait;
 use plonk_verifier::circuit_mod::{
     add_c, sub_c, neg_c, div_c, inv_c, mul_c, sqr_c, one_384, zero_384
 };
-use plonk_verifier::traits::{FieldUtils, FieldOps, FieldShortcuts};
+use plonk_verifier::traits::{FieldUtils, FieldOps};
 // use plonk_verifier::fast_mod::{u512_high_add};
 // use plonk_verifier::curve::{u512, U512BnAdd, U512BnSub, u512_reduce, u512_add, u512_sub};
 use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
@@ -117,25 +117,25 @@ impl Fq2Utils of FieldUtils<Fq2, u384> {
     }
 }
 
-impl Fq2Short of FieldShortcuts<Fq2> {
-    #[inline(always)]
-    fn u_add(self: Fq2, rhs: Fq2) -> Fq2 {
-        // Operation without modding can only be done like 4 times
-        Fq2 { //
-         c0: self.c0.u_add(rhs.c0), //
-         c1: self.c1.u_add(rhs.c1), //
-         }
-    }
+// impl Fq2Short of FieldShortcuts<Fq2> {
+//     #[inline(always)]
+//     fn u_add(self: Fq2, rhs: Fq2) -> Fq2 {
+//         // Operation without modding can only be done like 4 times
+//         Fq2 { //
+//          c0: self.c0.u_add(rhs.c0), //
+//          c1: self.c1.u_add(rhs.c1), //
+//          }
+//     }
 
-    #[inline(always)]
-    fn u_sub(self: Fq2, rhs: Fq2) -> Fq2 {
-        // Operation without modding can only be done like 4 times
-        Fq2 { //
-         c0: self.c0.u_sub(rhs.c0), //
-         c1: self.c1.u_sub(rhs.c1), //
-         }
-    }
-}
+//     #[inline(always)]
+//     fn u_sub(self: Fq2, rhs: Fq2) -> Fq2 {
+//         // Operation without modding can only be done like 4 times
+//         Fq2 { //
+//          c0: self.c0.u_sub(rhs.c0), //
+//          c1: self.c1.u_sub(rhs.c1), //
+//          }
+//     }
+// }
 
 impl Fq2Ops of FieldOps<Fq2> {
     #[inline(always)]

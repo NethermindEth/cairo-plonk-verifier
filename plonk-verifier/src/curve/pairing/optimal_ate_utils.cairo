@@ -1,6 +1,6 @@
 use plonk_verifier::fields::fq_2::Fq2FrobeniusTrait;
 use plonk_verifier::fields::fq_sparse::FqSparseTrait;
-use plonk_verifier::traits::{FieldShortcuts, FieldUtils};
+use plonk_verifier::traits::{FieldUtils};
 //use plonk_verifier::curve::groups::ECOperationsCircuitFq2;
 use plonk_verifier::curve::groups::{g1, g2, ECGroup};
 use plonk_verifier::curve::groups::{Affine, AffineG1 as PtG1, AffineG2 as PtG2, AffineOps};
@@ -62,7 +62,7 @@ mod line_fn {
 
     use plonk_verifier::fields::fq_2::Fq2FrobeniusTrait;
     use plonk_verifier::fields::fq_sparse::FqSparseTrait;
-    use plonk_verifier::traits::{FieldShortcuts, FieldUtils};
+    use plonk_verifier::traits::{FieldUtils};
     use plonk_verifier::curve::groups::ECOperationsCircuitFq2;
     use plonk_verifier::curve::groups::{g1, g2, ECGroup};
     use plonk_verifier::curve::groups::{Affine, AffineG1 as PtG1, AffineG2 as PtG2, AffineOps};
@@ -128,7 +128,7 @@ mod line_fn {
         // s + (s + q)
         // λ2 = (y2-y1)/(x2-x1), subbing y2 = λ(x2-x1)+y1
         // λ2 = -λ1-2y1/(x3-x1)
-        let slope2 = -slope1 - (s.y.u_add(s.y)) / (x1 - s.x);
+        let slope2 = -slope1 - (s.y.add(s.y)) / (x1 - s.x);
         acc = s.pt_on_slope(slope2, x1);
         let line2 = line_fn(slope2, s);
 

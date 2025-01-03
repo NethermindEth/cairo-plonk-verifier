@@ -5,8 +5,8 @@ use plonk_verifier::curve::{FIELD, get_field_nz};
 // };
 use plonk_verifier::curve::{mul_by_xi_nz_as_circuit};
 // use plonk_verifier::fields::print::{FqPrintImpl, Fq2PrintImpl, Fq6PrintImpl, Fq12PrintImpl};
-use plonk_verifier::fields::{Fq, Fq2, Fq2Ops, Fq2Short, Fq2Utils, fq, fq2, Fq2Frobenius};
-use plonk_verifier::traits::{FieldUtils, FieldOps, FieldShortcuts};
+use plonk_verifier::fields::{Fq, Fq2, Fq2Ops, Fq2Utils, fq, fq2, Fq2Frobenius};
+use plonk_verifier::traits::{FieldUtils, FieldOps};
 use plonk_verifier::fields::frobenius::fp6 as frob;
 use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 use plonk_verifier::curve::constants::FIELD_U384;
@@ -144,26 +144,26 @@ impl Fq6Utils of FieldUtils<Fq6, Fq2> {
     }
 }
 
-impl Fq6Short of FieldShortcuts<Fq6> {
-    #[inline(always)]
-    fn u_add(self: Fq6, rhs: Fq6) -> Fq6 {
-        // Operation without modding can only be done like 4 times
-        Fq6 { //
-            c0: self.c0.u_add(rhs.c0), //
-            c1: self.c1.u_add(rhs.c1), //
-            c2: self.c2.u_add(rhs.c2), //
-        }
-    }
-    #[inline(always)]
-    fn u_sub(self: Fq6, rhs: Fq6) -> Fq6 {
-        // Operation without modding can only be done like 4 times
-        Fq6 { //
-            c0: self.c0.u_sub(rhs.c0), //
-            c1: self.c1.u_sub(rhs.c1), //
-            c2: self.c2.u_sub(rhs.c2), //
-        }
-    }
-}
+// impl Fq6Short of FieldShortcuts<Fq6> {
+//     #[inline(always)]
+//     fn u_add(self: Fq6, rhs: Fq6) -> Fq6 {
+//         // Operation without modding can only be done like 4 times
+//         Fq6 { //
+//             c0: self.c0.u_add(rhs.c0), //
+//             c1: self.c1.u_add(rhs.c1), //
+//             c2: self.c2.u_add(rhs.c2), //
+//         }
+//     }
+//     #[inline(always)]
+//     fn u_sub(self: Fq6, rhs: Fq6) -> Fq6 {
+//         // Operation without modding can only be done like 4 times
+//         Fq6 { //
+//             c0: self.c0.u_sub(rhs.c0), //
+//             c1: self.c1.u_sub(rhs.c1), //
+//             c2: self.c2.u_sub(rhs.c2), //
+//         }
+//     }
+// }
 
 // type SixU512 = ((u512, u512), (u512, u512), (u512, u512),);
 

@@ -1,4 +1,4 @@
-use plonk_verifier::traits::{FieldOps as FOps, FieldShortcuts as FShort};
+use plonk_verifier::traits::{FieldOps as FOps};
 use plonk_verifier::fields::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg};
 // use plonk_verifier::fields::print::{FqPrintImpl, Fq2PrintImpl};
 use plonk_verifier::fields::{fq, Fq, fq2, Fq2};
@@ -466,7 +466,7 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
 }
 
 impl AffineOps<
-    T, +FOps<T>, +FShort<T>, +Copy<T>, +Drop<T>, impl ECGImpl: ECGroup<T>
+    T, +FOps<T>, +Copy<T>, +Drop<T>, impl ECGImpl: ECGroup<T>
 > of ECOperations<T> {
     #[inline(always)]
     fn x_on_slope(self: @Affine<T>, slope: T, x2: T) -> T {
@@ -508,7 +508,7 @@ impl AffineOps<
         // But BN curve has a == 0 so that's one less addition
         // λ = 3x^2 / 2y
         let x_2 = x.sqr();
-        (x_2 + x_2 + x_2) / y.u_add(y)
+        (x_2 + x_2 + x_2) / y.add(y)
     }
 
     // #[inline(always)]

@@ -1,5 +1,5 @@
 use plonk_verifier::fields::fq_sparse::FqSparseTrait;
-use plonk_verifier::traits::{FieldShortcuts, FieldUtils, MillerPrecompute, MillerSteps};
+use plonk_verifier::traits::{FieldUtils, MillerPrecompute, MillerSteps};
 use plonk_verifier::fields::{
     Fq, Fq2, fq2, Fq6, Fq12, FqOps, Fq2Utils, Fq2Ops, Fq12Utils, Fq12Ops, Fq12Exponentiation,
     Fq12Sparse034, Fq12Sparse01234, FqSparse,

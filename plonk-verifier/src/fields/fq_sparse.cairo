@@ -1,6 +1,5 @@
 use core::starknet::secp256_trait::Secp256PointTrait;
 use core::traits::TryInto;
-use plonk_verifier::traits::FieldShortcuts;
 use core::array::ArrayTrait;
 use plonk_verifier::curve::{FIELD, FIELD_X2};
 // use plonk_verifier::curve::{

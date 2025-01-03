@@ -7,11 +7,6 @@ trait FieldUtils<TFq, TFqChildren> {
     fn frobenius_map(self: TFq, power: usize) -> TFq;
 }
 
-trait FieldShortcuts<TFq> {
-    fn u_add(self: TFq, rhs: TFq) -> TFq;
-    fn u_sub(self: TFq, rhs: TFq) -> TFq;
-}
-
 trait FieldOps<TFq> {
     fn add(self: TFq, rhs: TFq) -> TFq;
     fn sub(self: TFq, rhs: TFq) -> TFq;
@@ -22,8 +17,6 @@ trait FieldOps<TFq> {
     fn eq(lhs: @TFq, rhs: @TFq) -> bool;
     fn inv(self: TFq) -> TFq;
 }
-
-use plonk_verifier::fields::Fq12;
 
 trait MillerPrecompute<TG1, TG2, TPreComp> {
     fn precompute(self: (TG1, TG2), field_nz: NonZero<u256>) -> (TPreComp, TG2);

@@ -1,7 +1,6 @@
-use plonk_verifier::traits::FieldShortcuts;
 use plonk_verifier::traits::{FieldUtils, FieldOps};
 use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
-use plonk_verifier::fields::{fq, fq2, Fq, Fq2, Fq2Ops, Fq6, fq6, Fq6Utils, Fq6Frobenius, Fq6Short, Fq6Ops};
+use plonk_verifier::fields::{fq, fq2, Fq, Fq2, Fq2Ops, Fq6, fq6, Fq6Utils, Fq6Frobenius, Fq6Ops};
 use plonk_verifier::fields::frobenius::fp12 as frob;
 // use plonk_verifier::fields::print::{Fq6Display};
 use plonk_verifier::curve::constants::FIELD_U384;

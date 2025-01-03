@@ -1,4 +1,3 @@
-use plonk_verifier::traits::FieldShortcuts;
 use core::array::ArrayTrait;
 use plonk_verifier::curve::{FIELD, FIELD_X2};
 // use plonk_verifier::curve::{
@@ -30,13 +29,13 @@ struct Krbn2345 {
 
 #[inline(always)]
 fn x2(a: Fq2) -> Fq2 {
-    a.u_add(a)
+    a.add(a)
 }
 
 #[inline(always)]
 fn x4(a: Fq2) -> Fq2 {
     let a_twice = x2(a);
-    a_twice.u_add(a_twice)
+    a_twice.add(a_twice)
 }
 
 const TWO: u384 = u384 { limb0: 2, limb1: 0, limb2: 0, limb3: 0 };

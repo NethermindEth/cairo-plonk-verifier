@@ -64,9 +64,9 @@ mod fields {
     }
 
     use fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
-    use fq_1::{Fq, FqOps, FqShort, FqUtils, fq, FqIntoU256};
-    use fq_2::{Fq2, Fq2Ops, Fq2Short, Fq2Utils, fq2, Fq2Frobenius};
-    use fq_6::{Fq6, Fq6Ops, Fq6Short, Fq6Utils, fq6, Fq6Frobenius}; //, SixU512};
+    use fq_1::{Fq, FqOps, FqUtils, fq, FqIntoU256};
+    use fq_2::{Fq2, Fq2Ops, Fq2Utils, fq2, Fq2Frobenius};
+    use fq_6::{Fq6, Fq6Ops, Fq6Utils, fq6, Fq6Frobenius}; //, SixU512};
     use fq_12::{Fq12, Fq12Ops, Fq12Utils, fq12, Fq12Frobenius};
     use fq_12_exponentiation::Fq12Exponentiation;
     use fq_sparse::{
@@ -76,6 +76,6 @@ mod fields {
     pub type FS01234 = Fq12Sparse01234;
     pub type FS01 = Fq6Sparse01;
     use fq_12_squaring::{Fq12Squaring, Fq12SquaringCircuit, Krbn2345};
-    use plonk_verifier::traits::{FieldUtils, FieldOps, FieldShortcuts};
+    use plonk_verifier::traits::{FieldUtils, FieldOps};
 }
 
