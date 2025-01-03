@@ -43,7 +43,7 @@ struct PPrecompute {
 }
 
 fn p_precompute(p: PtG1, field_nz: NonZero<u256>) -> PPrecompute {
-    let y_inv = (p.y).inv(field_nz);
+    let y_inv = (p.y).inv();
     PPrecompute { neg_x_over_y: -p.x * y_inv, y_inv }
 }
 

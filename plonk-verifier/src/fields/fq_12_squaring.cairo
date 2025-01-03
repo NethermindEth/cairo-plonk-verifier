@@ -9,7 +9,7 @@ use plonk_verifier::curve::{FIELD, FIELD_X2};
 use plonk_verifier::curve::{mul_by_xi_nz_as_circuit};
 // use plonk_verifier::curve::{u512_add, u512_sub, u512_high_add, u512_high_sub, U512Fq2Ops};
 use plonk_verifier::fields::{
-    FieldUtils, FieldOps, fq, Fq, Fq2, ufq2_inv, Fq6, Fq12, fq12, Fq12Frobenius
+    FieldUtils, FieldOps, fq, Fq, Fq2, Fq6, Fq12, fq12, Fq12Frobenius
 };
 use plonk_verifier::fields::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 // use plonk_verifier::fields::print::{Fq2Display, FqDisplay, u512Display};
@@ -78,7 +78,7 @@ impl Fq12Squaring of Fq12SquaringTrait {
         if g2.c0 == FieldUtils::zero() && g2.c1 == FieldUtils::zero() {
             // g1 = 2g4g5/g3
             let tg24g5 = x2(g4.mul(g5));
-            let g1 = tg24g5.mul(g3.inv(field_nz));
+            let g1 = tg24g5.mul(g3.inv());
 
             // g0 = (2S1 - 3g3g4)ξ + 1
             let S1 = g1.sqr();
@@ -94,7 +94,7 @@ impl Fq12Squaring of Fq12SquaringTrait {
             let S4 = g4.sqr();
             let Tmp = S4.sub(g3);
             let g1 = (S5xi + S4.add(Tmp.add(Tmp)));
-            let g1 = g1.mul(ufq2_inv(x4(g2), field_nz));
+            let g1 = g1.mul(x4(g2).inv());
 
             // // g0 = (2S1 + g2g5 - 3g3g4)ξ + 1
             let S1 = g1.sqr();

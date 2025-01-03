@@ -311,7 +311,7 @@ impl Fq12Ops of FieldOps<Fq12> {
     }
 
     fn div(self: Fq12, rhs: Fq12) -> Fq12 {
-        self.mul(rhs.inv(get_field_nz()))
+        self.mul(rhs.inv())
     }
 
     fn neg(self: Fq12) -> Fq12 {
@@ -462,9 +462,9 @@ impl Fq12Ops of FieldOps<Fq12> {
         } 
     }
 
-    fn inv(self: Fq12, field_nz: NonZero<u256>) -> Fq12 {
+    fn inv(self: Fq12) -> Fq12 {
         core::internal::revoke_ap_tracking();
-        let t = (self.c0.sqr() - mul_by_v_nz_as_circuit(self.c1.sqr())).inv(field_nz);
+        let t = (self.c0.sqr() - mul_by_v_nz_as_circuit(self.c1.sqr())).inv();
 
         Fq12 { c0: self.c0 * t, c1: -(self.c1 * t), }
     }

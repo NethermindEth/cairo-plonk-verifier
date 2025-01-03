@@ -159,7 +159,7 @@ impl FqOps of FieldOps<Fq> {
     }
 
     #[inline(always)]
-    fn inv(self: Fq, field_nz: NonZero<u256>) -> Fq {
+    fn inv(self: Fq) -> Fq {
         fq(inv_c(self.c0))
     }
 }

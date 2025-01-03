@@ -186,7 +186,7 @@ impl Fq2Ops of FieldOps<Fq2> {
 
     #[inline(always)]
     fn div(self: Fq2, rhs: Fq2) -> Fq2 {
-        let inv_rhs = rhs.inv(get_field_nz());
+        let inv_rhs = rhs.inv();
         let res = Self::mul(self, inv_rhs);
         res
     }
@@ -229,18 +229,9 @@ impl Fq2Ops of FieldOps<Fq2> {
 
 
     #[inline(always)]
-    fn inv(self: Fq2, field_nz: NonZero<u256>) -> Fq2 {
+    fn inv(self: Fq2) -> Fq2 {
         let Fq2 { c0, c1 } = self;
-        let t = FqOps::inv(c0.sqr() + c1.sqr(), field_nz);
+        let t = (c0.sqr() + c1.sqr()).inv();
         Fq2 { c0: c0.mul(t), c1: c1.mul(-t) }
     }
-}
-
-// Inverse unreduced Fq2
-#[inline(always)]
-fn ufq2_inv(self: Fq2, field_nz: NonZero<u256>) -> Fq2 {
-    let Fq2 { c0, c1 } = self;
-    let t = FqOps::inv((c0.sqr() + c1.sqr()), field_nz);
-
-    Fq2 { c0: c0.mul(t), c1: c1.mul(-t) }
 }

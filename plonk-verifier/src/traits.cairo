@@ -25,7 +25,7 @@ trait FieldOps<TFq> {
     fn sqr(self: TFq) -> TFq;
     fn neg(self: TFq) -> TFq;
     fn eq(lhs: @TFq, rhs: @TFq) -> bool;
-    fn inv(self: TFq, field_nz: NonZero<u256>) -> TFq;
+    fn inv(self: TFq) -> TFq;
 }
 
 use plonk_verifier::fields::Fq12;

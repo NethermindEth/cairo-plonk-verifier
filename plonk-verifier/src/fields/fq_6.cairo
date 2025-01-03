@@ -261,8 +261,7 @@ impl Fq6Ops of FieldOps<Fq6> {
     }
     #[inline(always)]
     fn div(self: Fq6, rhs: Fq6) -> Fq6 {
-        let field_nz = get_field_nz();
-        self.mul(rhs.inv(field_nz))
+        self.mul(rhs.inv())
     }
 
     #[inline(always)]
@@ -314,9 +313,9 @@ impl Fq6Ops of FieldOps<Fq6> {
     }
 
     #[inline(always)]
-    fn inv(self: Fq6, field_nz: NonZero<u256>) -> Fq6 {
+    fn inv(self: Fq6) -> Fq6 {
         core::internal::revoke_ap_tracking();
-        let field_nz = FIELD.try_into().unwrap();
+        // let field_nz = FIELD.try_into().unwrap();
         // let Fq6 { c0, c1, c2 } = self;
         // let v0 = c0.u_sqr() - mul_by_xi_nz(c1.u_mul(c2), field_nz);
         // let v0 = v0.to_fq(field_nz);
@@ -340,7 +339,7 @@ impl Fq6Ops of FieldOps<Fq6> {
         let c1_mul_v2 = Fq2Ops::mul(c1, v2);
         let c2_mul_v1_add_c1_mul_v2 = Fq2Ops::add(c2_mul_v1, c1_mul_v2);
         let t = mul_by_xi_nz_as_circuit(c2_mul_v1_add_c1_mul_v2) + Fq2Ops::mul(c0, v0);
-        let t_inv = Fq2Ops::inv(t, field_nz);
+        let t_inv = t.inv(); 
         let c0 = Fq2Ops::mul(v0, t_inv);
         let c1 = Fq2Ops::mul(v1, t_inv);
         let c2 = Fq2Ops::mul(v2, t_inv);
