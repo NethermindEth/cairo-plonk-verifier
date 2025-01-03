@@ -4,7 +4,7 @@ use plonk_verifier::fields::{Fq12, Fq12Utils, Fq12Exponentiation};
 use plonk_verifier::curve::{groups, pairing::optimal_ate_impls};
 use groups::{g1, g2, ECGroup};
 use groups::{Affine, AffineG1, AffineG2, AffineOps};
-use plonk_verifier::curve::{six_t_plus_2_naf_rev_trimmed, get_field_nz};
+use plonk_verifier::curve::{get_field_nz};
 use plonk_verifier::fields::{print, FieldUtils, FieldOps, fq, Fq, Fq2, Fq6};
 use optimal_ate_impls::{SingleMillerPrecompute, SingleMillerSteps};
 

@@ -21,8 +21,7 @@ use plonk_verifier::{
         mul_c, sqr_c, sqr_co, sub_c, sub_co, add_c, add_co, div_c, div_co, neg_co, mul_co
     },
     pairing::{
-        optimal_ate::{single_ate_pairing, ate_miller_loop},
-        tate_bkls::{tate_pairing, tate_miller_loop},
+        optimal_ate::{single_ate_pairing, ate_miller_loop}
     },
     plonk::{
         transcript::{Keccak256Transcript, Transcript, TranscriptElement},

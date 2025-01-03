@@ -13,9 +13,8 @@ mod groups;
 
 use constants::{
     T, ORDER, ORDER_NZ, get_order_nz, FIELD, FIELD_NZ, get_field_nz, FIELD_X2, FIELDSQLOW,
-    FIELDSQHIGH, U256_MOD_FIELD, U256_MOD_FIELD_INV, B, t_naf
+    FIELDSQHIGH, U256_MOD_FIELD, U256_MOD_FIELD_INV, B
 };
-use constants::{ATE_LOOP_COUNT, LOG_ATE_LOOP_COUNT, six_t_plus_2_naf_rev_trimmed};
 // use plonk_verifier::fields::print::u512Display;
 use groups::{AffineG1, AffineG2};
 
@@ -24,7 +23,6 @@ use groups::{AffineG1, AffineG2};
 
 mod pairing {
     mod miller_utils;
-    mod tate_bkls;
     mod optimal_ate_utils;
     mod optimal_ate_impls;
     mod optimal_ate;

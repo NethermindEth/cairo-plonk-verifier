@@ -3,7 +3,7 @@ use core::traits::TryInto;
 use plonk_verifier::traits::FieldShortcuts;
 use plonk_verifier::traits::FieldMulShortcuts;
 use core::array::ArrayTrait;
-use plonk_verifier::curve::{t_naf, FIELD, FIELD_X2};
+use plonk_verifier::curve::{FIELD, FIELD_X2};
 // use plonk_verifier::curve::{
 //     u512, mul_by_xi_nz, mul_by_xi_nz_as_circuit, mul_by_v_nz, mul_by_v_nz_as_circuit, U512BnAdd,
 //     U512BnSub, Tuple2Add, Tuple2Sub, Tuple3Add, Tuple3Sub, U512Fq6Ops

@@ -4,7 +4,7 @@ use core::traits::TryInto;
 use plonk_verifier::traits::FieldShortcuts;
 use plonk_verifier::traits::FieldMulShortcuts;
 use core::array::ArrayTrait;
-use plonk_verifier::curve::{t_naf, get_field_nz, FIELD_X2};
+use plonk_verifier::curve::{get_field_nz, FIELD_X2};
 // use plonk_verifier::curve::{u512, mul_by_v, U512BnAdd, U512BnSub, Tuple2Add, Tuple2Sub,};
 // use plonk_verifier::curve::{u512_add, u512_sub, u512_high_add, u512_high_sub, U512Fq2Ops};
 use plonk_verifier::fields::{
@@ -181,22 +181,22 @@ impl Fq12ExponentiationCircuit of PairingExponentiationTraitCircuit {
     // Reference circuit implementation for Fq2 * Fq2
     fn u_mul_circuit(self: Fq2, rhs: Fq2) -> (u384, u384) {
         // Input: a = (a0 + a1i) and b = (b0 + b1i) ∈ Fp2 Output: c = a·b = (c0 +c1i) ∈ Fp2
-        let Fq2 { c0: a0, c1: a1 } = self;
-        let Fq2 { c0: b0, c1: b1 } = rhs;
+        // let Fq2 { c0: a0, c1: a1 } = self;
+        // let Fq2 { c0: b0, c1: b1 } = rhs;
 
-        // 1: T0 ←a0 × b0, T1 ←a1 × b1,
-        let T0 = a0.mul(b0); // Karatsuba V0
-        let T1 = a1.mul(b1); // Karatsuba V1
-        // t0 ←a0 +a1, t1 ←b0 +b1 2: T2 ←t0 × t1
-        let T2 = a0.u_add(a1).mul(b0.u_add(b1));
-        // T3 ←T0 + T1
-        let T3 = T0.u_add(T1);
-        // 3: T3 ←T2 − T3
-        let T3 = T2.u_add(T3);
-        // 4: T4 ← T0 ⊖ T1
-        let T4 = T0.u_sub(T1);
-        // 5: return c = (T4 + T3i)
-        // let o = (T4, T3);
+        // // 1: T0 ←a0 × b0, T1 ←a1 × b1,
+        // let T0 = a0.mul(b0); // Karatsuba V0
+        // let T1 = a1.mul(b1); // Karatsuba V1
+        // // t0 ←a0 +a1, t1 ←b0 +b1 2: T2 ←t0 × t1
+        // let T2 = a0.u_add(a1).mul(b0.u_add(b1));
+        // // T3 ←T0 + T1
+        // let T3 = T0.u_add(T1);
+        // // 3: T3 ←T2 − T3
+        // let T3 = T2.u_add(T3);
+        // // 4: T4 ← T0 ⊖ T1
+        // let T4 = T0.u_sub(T1);
+        // // 5: return c = (T4 + T3i)
+        // // let o = (T4, T3);
 
         let a0 = CircuitElement::<CircuitInput<0>> {};
         let a1 = CircuitElement::<CircuitInput<1>> {};

@@ -1,7 +1,7 @@
 use plonk_verifier::traits::FieldShortcuts;
 use plonk_verifier::traits::FieldMulShortcuts;
 use core::array::ArrayTrait;
-use plonk_verifier::curve::{t_naf, FIELD, FIELD_X2};
+use plonk_verifier::curve::{FIELD, FIELD_X2};
 // use plonk_verifier::curve::{
 //     u512, mul_by_xi_nz, mul_by_v, U512BnAdd, U512BnSub, Tuple2Add, Tuple2Sub,
 //     mul_by_xi_nz_as_circuit
