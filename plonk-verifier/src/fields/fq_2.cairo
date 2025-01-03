@@ -83,8 +83,8 @@ impl Fq2Utils of FieldUtils<Fq2, u256> {
             Result::Err(_) => { panic!("Expected success") }
         };
 
-        let fq_c0 = Fq { c0: outputs.get_output(a_c0_scale).try_into().unwrap() };
-        let fq_c1 = Fq { c0: outputs.get_output(a_c1_scale).try_into().unwrap() };
+        let fq_c0 = Fq { c0: outputs.get_output(a_c0_scale) };
+        let fq_c1 = Fq { c0: outputs.get_output(a_c1_scale) };
 
         let res = Fq2 { c0: fq_c0, c1: fq_c1 };
         res
@@ -177,8 +177,8 @@ impl Fq2Ops of FieldOps<Fq2> {
             Result::Err(_) => { panic!("Expected success") }
         };
 
-        let fq_c0 = Fq { c0: outputs.get_output(t4).try_into().unwrap() };
-        let fq_c1 = Fq { c0: outputs.get_output(t3).try_into().unwrap() };
+        let fq_c0 = Fq { c0: outputs.get_output(t4) };
+        let fq_c1 = Fq { c0: outputs.get_output(t3) };
 
         let fq_t = Fq2 { c0: fq_c0, c1: fq_c1 };
         fq_t
@@ -220,8 +220,8 @@ impl Fq2Ops of FieldOps<Fq2> {
             Result::Err(_) => { panic!("Expected success") }
         };
 
-        let fq_t0 = Fq { c0: outputs.get_output(T0).try_into().unwrap() };
-        let fq_t1 = Fq { c0: outputs.get_output(T1).try_into().unwrap() };
+        let fq_t0 = Fq { c0: outputs.get_output(T0) };
+        let fq_t1 = Fq { c0: outputs.get_output(T1) };
 
         let fq_t = Fq2 { c0: fq_t0, c1: fq_t1 };
         fq_t

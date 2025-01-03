@@ -87,7 +87,7 @@ mod line_fn {
     // Multiply by Fp2::NONRESIDUE^(2((q^1) - 1)/6)
     #[inline(always)]
     fn fq2_mul_nr_1p_2(a: Fq2) -> Fq2 {
-        a * fq2(from_u256(pi::Q1X2_C0), from_u256(pi::Q1X2_C1))
+        a * fq2(pi::Q1X2_C0, pi::Q1X2_C1)
     }
 
 
@@ -95,7 +95,7 @@ mod line_fn {
     // Multiply by Fp2::NONRESIDUE^(3((q^1) - 1)/6)
     #[inline(always)]
     fn fq2_mul_nr_1p_3(a: Fq2) -> Fq2 {
-        a * fq2(from_u256(pi::Q1X3_C0), from_u256(pi::Q1X3_C1))
+        a * fq2(pi::Q1X3_C0, pi::Q1X3_C1)
     }
 
     // For πₚ² frobeneus map
