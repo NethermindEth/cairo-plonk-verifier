@@ -55,8 +55,8 @@ impl Fq6Frobenius of Fq6FrobeniusTrait {
         let Fq6 { c0, c1, c2 } = self;
         Fq6 {
             c0: c0.frob1(),
-            c1: c1.frob1() * fq2(from_u256(frob::Q_1_C0), from_u256(frob::Q_1_C1)),
-            c2: c2.frob1() * fq2(from_u256(frob::Q2_1_C0), from_u256(frob::Q2_1_C1)),
+            c1: c1.frob1() * fq2(frob::Q_1_C0, frob::Q_1_C1),
+            c2: c2.frob1() * fq2(frob::Q2_1_C0, frob::Q2_1_C1),
         }
     }
 
@@ -71,8 +71,8 @@ impl Fq6Frobenius of Fq6FrobeniusTrait {
         let Fq6 { c0, c1, c2 } = self;
         Fq6 {
             c0: c0.frob1(),
-            c1: c1.frob1() * fq2(from_u256(frob::Q_3_C0), from_u256(frob::Q_3_C1)),
-            c2: c2.frob1() * fq2(from_u256(frob::Q2_3_C0), from_u256(frob::Q2_3_C1)),
+            c1: c1.frob1() * fq2(frob::Q_3_C0, frob::Q_3_C1),
+            c2: c2.frob1() * fq2(frob::Q2_3_C0, frob::Q2_3_C1),
         }
     }
 
@@ -81,8 +81,8 @@ impl Fq6Frobenius of Fq6FrobeniusTrait {
         let Fq6 { c0, c1, c2 } = self;
         Fq6 {
             c0: c0.frob0(),
-            c1: c1.frob0() * fq2(from_u256(frob::Q_4_C0), from_u256(frob::Q_4_C1)),
-            c2: c2.frob0() * fq2(from_u256(frob::Q2_4_C0), from_u256(frob::Q2_4_C1)),
+            c1: c1.frob0() * fq2(frob::Q_4_C0, frob::Q_4_C1),
+            c2: c2.frob0() * fq2(frob::Q2_4_C0, frob::Q2_4_C1),
         }
     }
 
@@ -91,8 +91,8 @@ impl Fq6Frobenius of Fq6FrobeniusTrait {
         let Fq6 { c0, c1, c2 } = self;
         Fq6 {
             c0: c0.frob1(),
-            c1: c1.frob1() * fq2(from_u256(frob::Q_5_C0), from_u256(frob::Q_5_C1)),
-            c2: c2.frob1() * fq2(from_u256(frob::Q2_5_C0), from_u256(frob::Q2_5_C1)),
+            c1: c1.frob1() * fq2(frob::Q_5_C0, frob::Q_5_C1),
+            c2: c2.frob1() * fq2(frob::Q2_5_C0, frob::Q2_5_C1),
         }
     }
 }

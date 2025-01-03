@@ -40,11 +40,14 @@ fn x4(a: Fq2) -> Fq2 {
     a_twice.u_add(a_twice)
 }
 
+const TWO: u384 = u384 { limb0: 2, limb1: 0, limb2: 0, limb3: 0 };
+
 // #[inline(always)]
 // fn X2(a: (u512, u512)) -> (u512, u512) {
 //     a + a
 // }
 
+// Todo: Optimize Scaling functions by refactoring scale(2) as two addition circuits
 #[generate_trait]
 impl Fq12Squaring of Fq12SquaringTrait {
     // Karabina compress Fq12 a0, a1, a2, a3, a4, a5 to a2, a3, a4, a5
@@ -80,7 +83,7 @@ impl Fq12Squaring of Fq12SquaringTrait {
             // g0 = (2S1 - 3g3g4)ξ + 1
             let S1 = g1.sqr();
             let T_g3g4 = g3.mul(g4);
-            let Tmp = (S1 - T_g3g4).scale(2);
+            let Tmp = (S1 - T_g3g4).scale(TWO);
             let mut g0 = (Tmp - T_g3g4).mul_by_nonresidue();
             g0 = g0.add(FieldUtils::one());
 
@@ -97,7 +100,7 @@ impl Fq12Squaring of Fq12SquaringTrait {
             let S1 = g1.sqr();
             let T_g3g4 = g3.mul(g4);
             let T_g2g5 = g2.mul(g5);
-            let Tmp = (S1 - T_g3g4).scale(2);
+            let Tmp = (S1 - T_g3g4).scale(TWO);
             let mut g0 = (Tmp + T_g2g5 - T_g3g4).mul_by_nonresidue();
             g0 = g0.add(FieldUtils::one());
             Fq12 { c0: Fq6 { c0: g0, c1: g4, c2: g3 }, c1: Fq6 { c0: g2, c1: g1, c2: g5 } }
@@ -119,16 +122,16 @@ impl Fq12Squaring of Fq12SquaringTrait {
         let S2_3 = (g2 + g3).sqr();
 
         let Tmp = S3 + mul_by_xi_nz_as_circuit(S2);
-        let h1 = Tmp.sub(g1).scale(2) + Tmp;
+        let h1 = Tmp.sub(g1).scale(TWO) + Tmp;
 
         let Tmp = mul_by_xi_nz_as_circuit(S5) + S1;
-        let h2 = Tmp.sub(g2).scale(2) + Tmp;
+        let h2 = Tmp.sub(g2).scale(TWO) + Tmp;
 
         let Tmp = mul_by_xi_nz_as_circuit(S1_5 - S1 - S5);
-        let h3 = Tmp.add(g3).scale(2) + Tmp;
+        let h3 = Tmp.add(g3).scale(TWO) + Tmp;
 
         let Tmp = S2_3 - S2 - S3;
-        let h5 = Tmp.add(g5).scale(2) + Tmp;
+        let h5 = Tmp.add(g5).scale(TWO) + Tmp;
 
         let _0 = FieldUtils::zero();
 
@@ -151,16 +154,16 @@ impl Fq12Squaring of Fq12SquaringTrait {
         let S2_3 = g2.add(g3).sqr();
 
         let Tmp = mul_by_xi_nz_as_circuit(S4_5.sub(S4.add(S5)));
-        let h2 = Tmp.add(g2).scale(2).add(Tmp);
+        let h2 = Tmp.add(g2).scale(TWO).add(Tmp);
 
         let Tmp = S4.add(mul_by_xi_nz_as_circuit(S5));
-        let h3 = Tmp.sub(g3).scale(2).add(Tmp);
+        let h3 = Tmp.sub(g3).scale(TWO).add(Tmp);
 
         let Tmp = S2.add(mul_by_xi_nz_as_circuit(S3));
-        let h4 = Tmp.sub(g4).scale(2).add(Tmp);
+        let h4 = Tmp.sub(g4).scale(TWO).add(Tmp);
 
         let Tmp = S2_3.sub(S2).sub(S3);
-        let h5 = Tmp.add(g5).scale(2).add(Tmp);
+        let h5 = Tmp.add(g5).scale(TWO).add(Tmp);
 
         Krbn2345 { g2: h2, g3: h3, g4: h4, g5: h5, }
     }

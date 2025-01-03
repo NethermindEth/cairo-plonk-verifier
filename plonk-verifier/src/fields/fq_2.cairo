@@ -45,7 +45,7 @@ impl Fq2Frobenius of Fq2FrobeniusTrait {
     }
 }
 
-impl Fq2Utils of FieldUtils<Fq2, u256> {
+impl Fq2Utils of FieldUtils<Fq2, u384> {
     #[inline(always)]
     fn one() -> Fq2 {
         fq2(one_384, zero_384)
@@ -57,7 +57,7 @@ impl Fq2Utils of FieldUtils<Fq2, u256> {
     }
 
     #[inline(always)]
-    fn scale(self: Fq2, by: u256) -> Fq2 {
+    fn scale(self: Fq2, by: u384) -> Fq2 {
         let a_c0 = CircuitElement::<CircuitInput<0>> {};
         let a_c1 = CircuitElement::<CircuitInput<1>> {};
         let scalar = CircuitElement::<CircuitInput<2>> {};
@@ -69,7 +69,7 @@ impl Fq2Utils of FieldUtils<Fq2, u256> {
 
         let a0 = self.c0.c0;
         let a1 = self.c1.c0;
-        let scalar = from_u256(by);
+        let scalar = by;
 
         let outputs =
             match (a_c0_scale, a_c1_scale,)

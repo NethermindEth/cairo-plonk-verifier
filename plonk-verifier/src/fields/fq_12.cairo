@@ -64,7 +64,7 @@ impl Fq12Frobenius of Fq12FrobeniusTrait {
         let Fq12 { c0, c1 } = self;
         Fq12 {
             c0: c0.frob1(),
-            c1: c1.frob1().scale(fq2(from_u256(frob::Q_1_C0), from_u256(frob::Q_1_C1))),
+            c1: c1.frob1().scale(fq2(frob::Q_1_C0, frob::Q_1_C1)),
         }
     }
 
@@ -85,7 +85,7 @@ impl Fq12Frobenius of Fq12FrobeniusTrait {
         let Fq12 { c0, c1 } = self;
         Fq12 {
             c0: c0.frob3(),
-            c1: c1.frob3().scale(fq2(from_u256(frob::Q_3_C0), from_u256(frob::Q_3_C1))),
+            c1: c1.frob3().scale(fq2(frob::Q_3_C0, frob::Q_3_C1)),
         }
     }
 
@@ -93,7 +93,7 @@ impl Fq12Frobenius of Fq12FrobeniusTrait {
         let Fq12 { c0, c1 } = self;
         Fq12 {
             c0: c0.frob4(),
-            c1: c1.frob4().scale(fq2(from_u256(frob::Q_4_C0), from_u256(frob::Q_4_C1))),
+            c1: c1.frob4().scale(fq2(frob::Q_4_C0, frob::Q_4_C1)),
         }
     }
 
@@ -101,7 +101,7 @@ impl Fq12Frobenius of Fq12FrobeniusTrait {
         let Fq12 { c0, c1 } = self;
         Fq12 {
             c0: c0.frob5(),
-            c1: c1.frob5().scale(fq2(from_u256(frob::Q_5_C0), from_u256(frob::Q_5_C1))),
+            c1: c1.frob5().scale(fq2(frob::Q_5_C0, frob::Q_5_C1)),
         }
     }
 
@@ -109,7 +109,7 @@ impl Fq12Frobenius of Fq12FrobeniusTrait {
         let Fq12 { c0, c1 } = self;
         Fq12 {
             c0: c0.frob0(),
-            c1: c1.frob0().scale(fq2(from_u256(frob::Q_6_C0), from_u256(frob::Q_6_C1))),
+            c1: c1.frob0().scale(fq2(frob::Q_6_C0, frob::Q_6_C1)),
         }
     }
 
@@ -117,7 +117,7 @@ impl Fq12Frobenius of Fq12FrobeniusTrait {
         let Fq12 { c0, c1 } = self;
         Fq12 {
             c0: c0.frob1(),
-            c1: c1.frob1().scale(fq2(from_u256(frob::Q_7_C0), from_u256(frob::Q_7_C1))),
+            c1: c1.frob1().scale(fq2(frob::Q_7_C0, frob::Q_7_C1)),
         }
     }
 
@@ -125,7 +125,7 @@ impl Fq12Frobenius of Fq12FrobeniusTrait {
         let Fq12 { c0, c1 } = self;
         Fq12 {
             c0: c0.frob2(),
-            c1: c1.frob2().scale(fq2(from_u256(frob::Q_8_C0), from_u256(frob::Q_8_C1))),
+            c1: c1.frob2().scale(fq2(frob::Q_8_C0, frob::Q_8_C1)),
         }
     }
 
@@ -133,7 +133,7 @@ impl Fq12Frobenius of Fq12FrobeniusTrait {
         let Fq12 { c0, c1 } = self;
         Fq12 {
             c0: c0.frob3(),
-            c1: c1.frob3().scale(fq2(from_u256(frob::Q_9_C0), from_u256(frob::Q_9_C1))),
+            c1: c1.frob3().scale(fq2(frob::Q_9_C0, frob::Q_9_C1)),
         }
     }
 
@@ -141,7 +141,7 @@ impl Fq12Frobenius of Fq12FrobeniusTrait {
         let Fq12 { c0, c1 } = self;
         Fq12 {
             c0: c0.frob4(),
-            c1: c1.frob4().scale(fq2(from_u256(frob::Q_10_C0), from_u256(frob::Q_10_C1))),
+            c1: c1.frob4().scale(fq2(frob::Q_10_C0, frob::Q_10_C1)),
         }
     }
 
@@ -150,7 +150,7 @@ impl Fq12Frobenius of Fq12FrobeniusTrait {
         let Fq12 { c0, c1 } = self;
         Fq12 {
             c0: c0.frob5(),
-            c1: c1.frob5().scale(fq2(from_u256(frob::Q_11_C0), from_u256(frob::Q_11_C1))),
+            c1: c1.frob5().scale(fq2(frob::Q_11_C0, frob::Q_11_C1)),
         }
     }
 }
