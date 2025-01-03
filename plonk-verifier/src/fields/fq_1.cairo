@@ -17,9 +17,8 @@ use plonk_verifier::curve::{FIELD, get_field_nz}; //, add, sub_field, mul, scl, 
 // use plonk_verifier::curve::{
 //     add_u, sub_u, mul_u, sqr_u, scl_u, u512_reduce, u512_add_u256, u512_sub_u256
 // };
-use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
+//use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 use plonk_verifier::traits::{FieldUtils, FieldOps};
-
 
 #[derive(Copy, Drop, Debug)]
 struct Fq {
@@ -30,18 +29,6 @@ struct Fq {
 fn fq(c0: u384) -> Fq {
     Fq { c0 }
 }
-
-// impl FqShort of FieldShortcuts<Fq> {
-//     #[inline(always)]
-//     fn u_add(self: Fq, rhs: Fq) -> Fq {
-//         Fq { c0: add_c(self.c0, rhs.c0) }
-//     }
-
-//     #[inline(always)]
-//     fn u_sub(self: Fq, rhs: Fq) -> Fq {
-//         Fq { c0: sub_c(self.c0, rhs.c0), }
-//     }
-// }
 
 impl FqUtils of FieldUtils<Fq, u128> {
     #[inline(always)]
@@ -65,7 +52,7 @@ impl FqUtils of FieldUtils<Fq, u128> {
         if self.c0.is_zero() {
             self
         } else {
-            -self
+            self.neg()
         }
     }
 
@@ -82,10 +69,10 @@ impl FqUtils of FieldUtils<Fq, u128> {
     }
 }
 
-impl FqOps of FieldOps<Fq> {
+impl FqOps of FieldOps<Fq, CircuitModulus> {
     #[inline(always)]
-    fn add(self: Fq, rhs: Fq) -> Fq {
-        fq(add_c(self.c0, rhs.c0))
+    fn add(self: Fq, rhs: Fq, m: CircuitModulus) -> Fq {
+        fq(add_c(self.c0, rhs.c0, m))
     }
 
     #[inline(always)]

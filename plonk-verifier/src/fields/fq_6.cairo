@@ -8,7 +8,7 @@ use plonk_verifier::curve::{mul_by_xi_nz_as_circuit};
 use plonk_verifier::fields::{Fq, Fq2, Fq2Ops, Fq2Utils, fq, fq2, Fq2Frobenius};
 use plonk_verifier::traits::{FieldUtils, FieldOps};
 use plonk_verifier::fields::frobenius::fp6 as frob;
-use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
+//use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 use plonk_verifier::curve::constants::FIELD_U384;
 use plonk_verifier::circuit_mod::{
     add_c, sub_c, neg_c, div_c, inv_c, mul_c, sqr_c, one_384, zero_384
@@ -55,8 +55,8 @@ impl Fq6Frobenius of Fq6FrobeniusTrait {
         let Fq6 { c0, c1, c2 } = self;
         Fq6 {
             c0: c0.frob1(),
-            c1: c1.frob1() * fq2(frob::Q_1_C0, frob::Q_1_C1),
-            c2: c2.frob1() * fq2(frob::Q2_1_C0, frob::Q2_1_C1),
+            c1: c1.frob1().mul(fq2(frob::Q_1_C0, frob::Q_1_C1)),
+            c2: c2.frob1().mul(fq2(frob::Q2_1_C0, frob::Q2_1_C1)),
         }
     }
 
@@ -71,8 +71,8 @@ impl Fq6Frobenius of Fq6FrobeniusTrait {
         let Fq6 { c0, c1, c2 } = self;
         Fq6 {
             c0: c0.frob1(),
-            c1: c1.frob1() * fq2(frob::Q_3_C0, frob::Q_3_C1),
-            c2: c2.frob1() * fq2(frob::Q2_3_C0, frob::Q2_3_C1),
+            c1: c1.frob1().mul(fq2(frob::Q_3_C0, frob::Q_3_C1)),
+            c2: c2.frob1().mul(fq2(frob::Q2_3_C0, frob::Q2_3_C1)),
         }
     }
 
@@ -81,8 +81,8 @@ impl Fq6Frobenius of Fq6FrobeniusTrait {
         let Fq6 { c0, c1, c2 } = self;
         Fq6 {
             c0: c0.frob0(),
-            c1: c1.frob0() * fq2(frob::Q_4_C0, frob::Q_4_C1),
-            c2: c2.frob0() * fq2(frob::Q2_4_C0, frob::Q2_4_C1),
+            c1: c1.frob0().mul(fq2(frob::Q_4_C0, frob::Q_4_C1)),
+            c2: c2.frob0().mul(fq2(frob::Q2_4_C0, frob::Q2_4_C1)),
         }
     }
 
@@ -91,8 +91,8 @@ impl Fq6Frobenius of Fq6FrobeniusTrait {
         let Fq6 { c0, c1, c2 } = self;
         Fq6 {
             c0: c0.frob1(),
-            c1: c1.frob1() * fq2(frob::Q_5_C0, frob::Q_5_C1),
-            c2: c2.frob1() * fq2(frob::Q2_5_C0, frob::Q2_5_C1),
+            c1: c1.frob1().mul(fq2(frob::Q_5_C0, frob::Q_5_C1)),
+            c2: c2.frob1().mul(fq2(frob::Q2_5_C0, frob::Q2_5_C1)),
         }
     }
 }
@@ -110,7 +110,7 @@ impl Fq6Utils of FieldUtils<Fq6, Fq2> {
 
     #[inline(always)]
     fn scale(self: Fq6, by: Fq2) -> Fq6 {
-        Fq6 { c0: self.c0 * by, c1: self.c1 * by, c2: self.c2 * by, }
+        Fq6 { c0: self.c0.mul(by), c1: self.c1.mul(by), c2: self.c2.mul(by) }
     }
 
     #[inline(always)]
@@ -171,15 +171,15 @@ impl Fq6Utils of FieldUtils<Fq6, Fq2> {
 //     u512 { limb0: 1, limb1: 0, limb2: 0, limb3: 0, }
 // }
 
-impl Fq6Ops of FieldOps<Fq6> {
+impl Fq6Ops of FieldOps<Fq6, CircuitModulus> {
     #[inline(always)]
-    fn add(self: Fq6, rhs: Fq6) -> Fq6 {
-        Fq6 { c0: self.c0 + rhs.c0, c1: self.c1 + rhs.c1, c2: self.c2 + rhs.c2, }
+    fn add(self: Fq6, rhs: Fq6, m: CircuitModulus) -> Fq6 {
+        Fq6 { c0: self.c0.add(rhs.c0, m), c1: self.c1.add(rhs.c1, m), c2: self.c2.add(rhs.c2, m), }
     }
 
     #[inline(always)]
     fn sub(self: Fq6, rhs: Fq6) -> Fq6 {
-        Fq6 { c0: self.c0 - rhs.c0, c1: self.c1 - rhs.c1, c2: self.c2 - rhs.c2, }
+        Fq6 { c0: self.c0.sub(rhs.c0), c1: self.c1.sub(rhs.c1), c2: self.c2.sub(rhs.c2), }
     }
 
     #[inline(always)]
@@ -266,12 +266,12 @@ impl Fq6Ops of FieldOps<Fq6> {
 
     #[inline(always)]
     fn neg(self: Fq6) -> Fq6 {
-        Fq6 { c0: -self.c0, c1: -self.c1, c2: -self.c2, }
+        Fq6 { c0: self.c0.neg(), c1: self.c1.neg(), c2: self.c2.neg() }
     }
 
     #[inline(always)]
     fn eq(lhs: @Fq6, rhs: @Fq6) -> bool {
-        lhs.c0 == rhs.c0 && lhs.c1 == rhs.c1 && lhs.c2 == rhs.c2
+        Fq2Ops::eq(lhs.c0, rhs.c0) && Fq2Ops::eq(lhs.c1, rhs.c1) && Fq2Ops::eq(lhs.c2, rhs.c2)
     }
 
     #[inline(always)]
@@ -329,16 +329,18 @@ impl Fq6Ops of FieldOps<Fq6> {
         //     .inv(field_nz);
 
         // Fq6 { c0: t * v0, c1: t * v1, c2: t * v2, }
+
+        let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let Fq6 { c0, c1, c2 } = self;
         let c1_mul_c2 = Fq2Ops::mul(c1, c2);
-        let v0 = Fq2Ops::sqr(c0) - mul_by_xi_nz_as_circuit(c1_mul_c2);
+        let v0 = Fq2Ops::sqr(c0).sub(mul_by_xi_nz_as_circuit(c1_mul_c2));
         let c2_sqr = Fq2Ops::sqr(c2);
         let v1 = Fq2Ops::sub(mul_by_xi_nz_as_circuit(c2_sqr), Fq2Ops::mul(c0, c1));
         let v2 = Fq2Ops::sub(Fq2Ops::sqr(c1), Fq2Ops::mul(c0, c2));
         let c2_mul_v1 = Fq2Ops::mul(c2, v1);
         let c1_mul_v2 = Fq2Ops::mul(c1, v2);
-        let c2_mul_v1_add_c1_mul_v2 = Fq2Ops::add(c2_mul_v1, c1_mul_v2);
-        let t = mul_by_xi_nz_as_circuit(c2_mul_v1_add_c1_mul_v2) + Fq2Ops::mul(c0, v0);
+        let c2_mul_v1_add_c1_mul_v2 = Fq2Ops::add(c2_mul_v1, c1_mul_v2, m);
+        let t = mul_by_xi_nz_as_circuit(c2_mul_v1_add_c1_mul_v2).add(Fq2Ops::mul(c0, v0), m);
         let t_inv = t.inv(); 
         let c0 = Fq2Ops::mul(v0, t_inv);
         let c1 = Fq2Ops::mul(v1, t_inv);
@@ -349,16 +351,17 @@ impl Fq6Ops of FieldOps<Fq6> {
 
 fn fq6_karatsuba_sqr(a: Fq6, rhs: Fq6) -> (Fq2, Fq2, Fq2) {
     core::internal::revoke_ap_tracking();
+    let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
     let Fq6 { c0: a0, c1: a1, c2: a2 } = a;
     // Karatsuba squaring
     // v0 = a0a0, v1 = a1a1, v2 = a2a2
     let (V0, V1, V2,) = (a0.sqr(), a1.sqr(), a2.sqr(),);
 
     // c0 = v0 + ξ((a1 + a2)(a1 + a2) - v1 - v2)
-    let C0 = V0 + mul_by_xi_nz_as_circuit((a1 + a2).sqr() - V1 - V2);
+    let C0 = V0.add(mul_by_xi_nz_as_circuit(a1.add(a2, m)).sqr().sub(V1).sub(V2), m);
     // c1 =(a0 + a1)(a0 + a1) - v0 - v1 + ξv2
-    let C1 = (a0 + a1).sqr() - V0 - V1 + mul_by_xi_nz_as_circuit(V2);
+    let C1 = (a0.add(a1, m)).sqr().sub(V0).sub(V1).add(mul_by_xi_nz_as_circuit(V2), m);
     // c2 = (a0 + a2)(a0 + a2) - v0 + v1 - v2,
-    let C2 = (a0 + a2).sqr() - V0 + V1 - V2;
+    let C2 = (a0.add(a2, m)).sqr().sub(V0).add(V1, m).sub(V2);
     (C0, C1, C2)
 }

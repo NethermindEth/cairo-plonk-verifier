@@ -11,12 +11,10 @@ const zero_384: u384 = u384 { limb0: 0, limb1: 0, limb2: 0, limb3: 0 };
 const one_384: u384 = u384 { limb0: 1, limb1: 0, limb2: 0, limb3: 0 };
 
 #[inline(always)]
-fn add_c(mut a: u384, mut b: u384) -> u384 {
+fn add_c(mut a: u384, mut b: u384, modulus: CircuitModulus) -> u384 {
     let l = CircuitElement::<CircuitInput<0>> {};
     let r = CircuitElement::<CircuitInput<1>> {};
     let add = circuit_add(l, r);
-
-    let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
 
     let outputs = match (add,).new_inputs().next(a).next(b).done().eval(modulus) {
         Result::Ok(outputs) => { outputs },

@@ -27,15 +27,16 @@ struct Krbn2345 {
     g5: Fq2,
 }
 
+// Todo: Refactor as Circuits
 #[inline(always)]
 fn x2(a: Fq2) -> Fq2 {
-    a.add(a)
+    a.add(a, TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap())
 }
 
 #[inline(always)]
 fn x4(a: Fq2) -> Fq2 {
     let a_twice = x2(a);
-    a_twice.add(a_twice)
+    a_twice.add(a_twice, TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap())
 }
 
 const TWO: u384 = u384 { limb0: 2, limb1: 0, limb2: 0, limb3: 0 };
@@ -69,11 +70,11 @@ impl Fq12Squaring of Fq12SquaringTrait {
     }
 
     // Karabina decompress a2, a3, a4, a5 to Fq12 a0, a1, a2, a3, a4, a5
-    fn krbn_decompress(self: Krbn2345, field_nz: NonZero<u256>) -> Fq12 {
+    fn krbn_decompress(self: Krbn2345, field_nz: NonZero<u256>, m: CircuitModulus) -> Fq12 {
         core::internal::revoke_ap_tracking();
         let Krbn2345 { g2, g3, g4, g5 } = self;
         // Si = gi^2
-        if g2.c0 == FieldUtils::zero() && g2.c1 == FieldUtils::zero() {
+        if FieldOps::eq(@g2.c0, @FieldUtils::zero()) && FieldOps::eq(@g2.c1, @FieldUtils::zero()) {
             // g1 = 2g4g5/g3
             let tg24g5 = x2(g4.mul(g5));
             let g1 = tg24g5.mul(g3.inv());
@@ -81,9 +82,9 @@ impl Fq12Squaring of Fq12SquaringTrait {
             // g0 = (2S1 - 3g3g4)ξ + 1
             let S1 = g1.sqr();
             let T_g3g4 = g3.mul(g4);
-            let Tmp = (S1 - T_g3g4).scale(TWO);
-            let mut g0 = (Tmp - T_g3g4).mul_by_nonresidue();
-            g0 = g0.add(FieldUtils::one());
+            let Tmp = (S1.sub(T_g3g4)).scale(TWO);
+            let mut g0 = (Tmp.sub(T_g3g4)).mul_by_nonresidue();
+            g0 = g0.add(FieldUtils::one(), m);
 
             Fq12 { c0: Fq6 { c0: g0, c1: g4, c2: g3 }, c1: Fq6 { c0: g2, c1: g1, c2: g5 } }
         } else {
@@ -91,23 +92,24 @@ impl Fq12Squaring of Fq12SquaringTrait {
             let S5xi = mul_by_xi_nz_as_circuit(g5.sqr());
             let S4 = g4.sqr();
             let Tmp = S4.sub(g3);
-            let g1 = (S5xi + S4.add(Tmp.add(Tmp)));
+            let g1 = S5xi.add(S4.add(Tmp.add(Tmp, m), m), m);
             let g1 = g1.mul(x4(g2).inv());
 
             // // g0 = (2S1 + g2g5 - 3g3g4)ξ + 1
             let S1 = g1.sqr();
             let T_g3g4 = g3.mul(g4);
             let T_g2g5 = g2.mul(g5);
-            let Tmp = (S1 - T_g3g4).scale(TWO);
-            let mut g0 = (Tmp + T_g2g5 - T_g3g4).mul_by_nonresidue();
-            g0 = g0.add(FieldUtils::one());
+            let Tmp = (S1.sub(T_g3g4)).scale(TWO);
+            let mut g0 = (Tmp.add(T_g2g5.sub(T_g3g4), m)).mul_by_nonresidue();
+            g0 = g0.add(FieldUtils::one(), m);
             Fq12 { c0: Fq6 { c0: g0, c1: g4, c2: g3 }, c1: Fq6 { c0: g2, c1: g1, c2: g5 } }
         }
     }
 
     // This Karabina implementation is adjusted for the quadratic over cubic representation
     // https://github.com/Consensys/gnark-crypto/blob/v0.12.1/ecc/bn254/internal/fptower/e12.go#L143
-    fn sqr_krbn_1235(self: Fq12, field_nz: NonZero<u256>) -> Fq12 {
+    fn sqr_krbn_1235(self: Fq12, field_nz: NonZero<u256>, m: CircuitModulus) -> Fq12 {
+        let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         core::internal::revoke_ap_tracking();
         let Fq12 { c0: Fq6 { c0: _g0, c1: g1, c2: g2 }, c1: Fq6 { c0: g3, c1: _g4, c2: g5 } } =
             self;
@@ -116,20 +118,20 @@ impl Fq12Squaring of Fq12SquaringTrait {
         let S2 = g2.sqr();
         let S3 = g3.sqr();
         let S5 = g5.sqr();
-        let S1_5 = (g1 + g5).sqr();
-        let S2_3 = (g2 + g3).sqr();
+        let S1_5 = (g1.add(g5, m)).sqr();
+        let S2_3 = (g2.add(g3, m)).sqr();
 
-        let Tmp = S3 + mul_by_xi_nz_as_circuit(S2);
-        let h1 = Tmp.sub(g1).scale(TWO) + Tmp;
+        let Tmp = S3.add(mul_by_xi_nz_as_circuit(S2), m);
+        let h1 = Tmp.sub(g1).scale(TWO).add(Tmp, m);
 
-        let Tmp = mul_by_xi_nz_as_circuit(S5) + S1;
-        let h2 = Tmp.sub(g2).scale(TWO) + Tmp;
+        let Tmp = mul_by_xi_nz_as_circuit(S5).add(S1, m);
+        let h2 = Tmp.sub(g2).scale(TWO).add(Tmp, m);
 
-        let Tmp = mul_by_xi_nz_as_circuit(S1_5 - S1 - S5);
-        let h3 = Tmp.add(g3).scale(TWO) + Tmp;
+        let Tmp = mul_by_xi_nz_as_circuit(S1_5.sub(S1).sub(S5));
+        let h3 = Tmp.add(g3, m).scale(TWO).add(Tmp, m);
 
-        let Tmp = S2_3 - S2 - S3;
-        let h5 = Tmp.add(g5).scale(TWO) + Tmp;
+        let Tmp = S2_3.sub(S2).sub(S3);
+        let h5 = Tmp.add(g5, m).scale(TWO).add(Tmp, m);
 
         let _0 = FieldUtils::zero();
 
@@ -138,7 +140,7 @@ impl Fq12Squaring of Fq12SquaringTrait {
 
     // https://eprint.iacr.org/2010/542.pdf
     // Compressed Karabina 2345 square
-    fn sqr_krbn(self: Krbn2345, field_nz: NonZero<u256>) -> Krbn2345 {
+    fn sqr_krbn(self: Krbn2345, field_nz: NonZero<u256>, m: CircuitModulus) -> Krbn2345 {
         core::internal::revoke_ap_tracking();
         // Input: self = (a2 +a3s)t+(a4 +a5s)t2 ∈ Gφ6(Fp2)
         // Output: self^2 = (c2 +c3s)t+(c4 +c5s)t2 ∈ Gφ6 (Fp2 ).
@@ -148,76 +150,76 @@ impl Fq12Squaring of Fq12SquaringTrait {
         let S3 = g3.sqr();
         let S4 = g4.sqr();
         let S5 = g5.sqr();
-        let S4_5 = g4.add(g5).sqr();
-        let S2_3 = g2.add(g3).sqr();
+        let S4_5 = g4.add(g5, m).sqr();
+        let S2_3 = g2.add(g3, m).sqr();
 
-        let Tmp = mul_by_xi_nz_as_circuit(S4_5.sub(S4.add(S5)));
-        let h2 = Tmp.add(g2).scale(TWO).add(Tmp);
+        let Tmp = mul_by_xi_nz_as_circuit(S4_5.sub(S4.add(S5, m)));
+        let h2 = Tmp.add(g2, m).scale(TWO).add(Tmp, m);
 
-        let Tmp = S4.add(mul_by_xi_nz_as_circuit(S5));
-        let h3 = Tmp.sub(g3).scale(TWO).add(Tmp);
+        let Tmp = S4.add(mul_by_xi_nz_as_circuit(S5), m);
+        let h3 = Tmp.sub(g3).scale(TWO).add(Tmp, m);
 
-        let Tmp = S2.add(mul_by_xi_nz_as_circuit(S3));
-        let h4 = Tmp.sub(g4).scale(TWO).add(Tmp);
+        let Tmp = S2.add(mul_by_xi_nz_as_circuit(S3), m);
+        let h4 = Tmp.sub(g4).scale(TWO).add(Tmp, m);
 
         let Tmp = S2_3.sub(S2).sub(S3);
-        let h5 = Tmp.add(g5).scale(TWO).add(Tmp);
+        let h5 = Tmp.add(g5, m).scale(TWO).add(Tmp, m);
 
         Krbn2345 { g2: h2, g3: h3, g4: h4, g5: h5, }
     }
 
     #[inline(always)]
-    fn krbn_sqr_4x(self: Krbn2345, field_nz: NonZero<u256>) -> Krbn2345 {
-        self.sqr_krbn(field_nz).sqr_krbn(field_nz).sqr_krbn(field_nz).sqr_krbn(field_nz)
+    fn krbn_sqr_4x(self: Krbn2345, field_nz: NonZero<u256>, m: CircuitModulus) -> Krbn2345 {
+        self.sqr_krbn(field_nz, m).sqr_krbn(field_nz, m).sqr_krbn(field_nz, m).sqr_krbn(field_nz, m)
     }
 
-    fn sqr_6_times(self: Fq12, field_nz: NonZero<u256>) -> Fq12 {
+    fn sqr_6_times(self: Fq12, field_nz: NonZero<u256>, m: CircuitModulus) -> Fq12 {
         core::internal::revoke_ap_tracking();
         self
             .krbn_compress_2345()
-            .krbn_sqr_4x(field_nz) // ^2^4
-            .sqr_krbn(field_nz) // ^2^5
-            .sqr_krbn(field_nz) // ^2^6
-            .krbn_decompress(field_nz)
-    }
-
-    // Called only once hence inlined
-    #[inline(always)]
-    fn sqr_7_times(self: Fq12, field_nz: NonZero<u256>) -> Fq12 {
-        core::internal::revoke_ap_tracking();
-        self
-            .krbn_compress_2345()
-            .krbn_sqr_4x(field_nz) // ^2^4
-            .sqr_krbn(field_nz) // ^2^5
-            .sqr_krbn(field_nz) // ^2^6
-            .sqr_krbn(field_nz) // ^2^7
-            .krbn_decompress(field_nz)
-    }
-
-    fn sqr_8_times(self: Fq12, field_nz: NonZero<u256>) -> Fq12 {
-        core::internal::revoke_ap_tracking();
-        self
-            .krbn_compress_2345()
-            .krbn_sqr_4x(field_nz)
-            .krbn_sqr_4x(field_nz)
-            .krbn_decompress(field_nz)
+            .krbn_sqr_4x(field_nz, m) // ^2^4
+            .sqr_krbn(field_nz, m) // ^2^5
+            .sqr_krbn(field_nz, m) // ^2^6
+            .krbn_decompress(field_nz, m)
     }
 
     // Called only once hence inlined
     #[inline(always)]
-    fn sqr_10_times(self: Fq12, field_nz: NonZero<u256>) -> Fq12 {
+    fn sqr_7_times(self: Fq12, field_nz: NonZero<u256>, m: CircuitModulus) -> Fq12 {
         core::internal::revoke_ap_tracking();
         self
             .krbn_compress_2345()
-            .krbn_sqr_4x(field_nz) // ^2^4
-            .krbn_sqr_4x(field_nz) // ^2^8
-            .sqr_krbn(field_nz) // ^2^9
-            .sqr_krbn(field_nz) // ^2^10
-            .krbn_decompress(field_nz)
+            .krbn_sqr_4x(field_nz, m) // ^2^4
+            .sqr_krbn(field_nz, m) // ^2^5
+            .sqr_krbn(field_nz, m) // ^2^6
+            .sqr_krbn(field_nz, m) // ^2^7
+            .krbn_decompress(field_nz, m)
+    }
+
+    fn sqr_8_times(self: Fq12, field_nz: NonZero<u256>, m: CircuitModulus) -> Fq12 {
+        core::internal::revoke_ap_tracking();
+        self
+            .krbn_compress_2345()
+            .krbn_sqr_4x(field_nz, m)
+            .krbn_sqr_4x(field_nz, m)
+            .krbn_decompress(field_nz, m)
+    }
+
+    // Called only once hence inlined
+    #[inline(always)]
+    fn sqr_10_times(self: Fq12, field_nz: NonZero<u256>, m: CircuitModulus) -> Fq12 {
+        core::internal::revoke_ap_tracking();
+        self
+            .krbn_compress_2345()
+            .krbn_sqr_4x(field_nz, m) // ^2^4
+            .krbn_sqr_4x(field_nz, m) // ^2^8
+            .sqr_krbn(field_nz, m) // ^2^9
+            .sqr_krbn(field_nz, m) // ^2^10
+            .krbn_decompress(field_nz, m)
     }
 
     // Cyclotomic squaring
-    fn cyclotomic_sqr(self: Fq12, field_nz: NonZero<u256>) -> Fq12 {
+    fn cyclotomic_sqr(self: Fq12, field_nz: NonZero<u256>, m: CircuitModulus) -> Fq12 {
         core::internal::revoke_ap_tracking();
 
         let z0 = self.c0.c0;
@@ -281,51 +283,51 @@ impl Fq12Squaring of Fq12SquaringTrait {
 
         let tmp = z0.mul(z1);
         let T0 = z0
-            .add(z1)
-            .mul(z1.mul_by_nonresidue().add(z0))
+            .add(z1, m)
+            .mul(z1.mul_by_nonresidue().add(z0, m))
             .sub(tmp)
             .sub(mul_by_xi_nz_as_circuit(tmp));
 
-        let T1 = tmp.add(tmp);
+        let T1 = tmp.add(tmp, m);
 
         let tmp = z2.mul(z3);
 
-        let T2 = z2.add(z3).mul(z3.mul_by_nonresidue().add(z2))
-            - tmp
-            - mul_by_xi_nz_as_circuit(tmp);
-        let T3 = tmp.add(tmp);
+        let T2 = z2.add(z3, m).mul(z3.mul_by_nonresidue().add(z2, m))
+           .sub(tmp)
+           .sub(mul_by_xi_nz_as_circuit(tmp));
+        let T3 = tmp.add(tmp, m);
 
         let tmp = z4.mul(z5);
-        let T4 = z4.add(z5).mul(z5.mul_by_nonresidue().add(z4))
-            - tmp
-            - mul_by_xi_nz_as_circuit(tmp);
-        let T5 = tmp.add(tmp);
+        let T4 = z4.add(z5, m).mul(z5.mul_by_nonresidue().add(z4, m))
+           .sub(tmp)
+           .sub(mul_by_xi_nz_as_circuit(tmp));
+        let T5 = tmp.add(tmp, m);
 
         let Z0 = T0.sub(z0);
-        let Z0 = Z0 + Z0;
-        let Z0 = Z0 + T0;
+        let Z0 = Z0.add(Z0, m);
+        let Z0 = Z0.add(T0, m);
 
-        let Z1 = T1.add(z1);
-        let Z1 = Z1 + Z1;
-        let Z1 = Z1 + T1;
+        let Z1 = T1.add(z1, m);
+        let Z1 = Z1.add(Z1, m);
+        let Z1 = Z1.add(T1, m);
 
         let tmp = mul_by_xi_nz_as_circuit(T5);
 
-        let Z2 = tmp.add(z2);
-        let Z2 = Z2 + Z2;
-        let Z2 = Z2 + tmp;
+        let Z2 = tmp.add(z2, m);
+        let Z2 = Z2.add(Z2, m);
+        let Z2 = Z2.add(tmp, m);
 
         let Z3 = T4.sub(z3);
-        let Z3 = Z3 + Z3;
-        let Z3 = Z3 + T4;
+        let Z3 = Z3.add(Z3, m);
+        let Z3 = Z3.add(T4, m);
 
         let Z4 = T2.sub(z4);
-        let Z4 = Z4 + Z4;
-        let Z4 = Z4 + T2;
+        let Z4 = Z4.add(Z4, m);
+        let Z4 = Z4.add(T2, m);
 
-        let Z5 = T3.add(z5);
-        let Z5 = Z5 + Z5;
-        let Z5 = Z5 + T3;
+        let Z5 = T3.add(z5, m);
+        let Z5 = Z5.add(Z5, m);
+        let Z5 = Z5.add(T3, m);
 
         Fq12 { c0: Fq6 { c0: Z0, c1: Z4, c2: Z3 }, c1: Fq6 { c0: Z2, c1: Z1, c2: Z5 }, }
     }

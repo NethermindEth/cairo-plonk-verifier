@@ -1,5 +1,5 @@
 use plonk_verifier::traits::{FieldUtils, FieldOps};
-use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
+//use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 use plonk_verifier::fields::{fq, fq2, Fq, Fq2, Fq2Ops, Fq6, fq6, Fq6Utils, Fq6Frobenius, Fq6Ops};
 use plonk_verifier::fields::frobenius::fp12 as frob;
 // use plonk_verifier::fields::print::{Fq6Display};
@@ -171,7 +171,7 @@ impl Fq12Utils of FieldUtils<Fq12, Fq6> {
     }
 
     fn conjugate(self: Fq12) -> Fq12 {
-        Fq12 { c0: self.c0, c1: -self.c1, }
+        Fq12 { c0: self.c0, c1: self.c1.neg(), }
     }
 
     fn mul_by_nonresidue(self: Fq12,) -> Fq12 {
@@ -211,10 +211,8 @@ impl Fq12Utils of FieldUtils<Fq12, Fq6> {
 
 // type Fq6U512 = ((u512, u512), (u512, u512), (u512, u512));
 
-impl Fq12Ops of FieldOps<Fq12> {
-    fn add(self: Fq12, rhs: Fq12) -> Fq12 {
-        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-
+impl Fq12Ops of FieldOps<Fq12, CircuitModulus> {
+    fn add(self: Fq12, rhs: Fq12, m: CircuitModulus) -> Fq12 {
         let (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = add_circuit(); 
 
         let outputs = match (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11).new_inputs()
@@ -242,7 +240,7 @@ impl Fq12Ops of FieldOps<Fq12> {
             .next(rhs.c1.c1.c1.c0)
             .next(rhs.c1.c2.c0.c0)
             .next(rhs.c1.c2.c1.c0)
-            .done().eval(modulus) {
+            .done().eval(m) {
                 Result::Ok(outputs) => { outputs },
                 Result::Err(_) => { panic!("Expected success") }
         };
@@ -349,7 +347,7 @@ impl Fq12Ops of FieldOps<Fq12> {
     }
 
     fn eq(lhs: @Fq12, rhs: @Fq12) -> bool {
-        lhs.c0 == rhs.c0 && lhs.c1 == rhs.c1
+        Fq6Ops::eq(lhs.c0, rhs.c0) && Fq6Ops::eq(lhs.c1, rhs.c1)
     }
 
     fn mul(self: Fq12, rhs: Fq12) -> Fq12 {
@@ -462,12 +460,13 @@ impl Fq12Ops of FieldOps<Fq12> {
 
     fn inv(self: Fq12) -> Fq12 {
         core::internal::revoke_ap_tracking();
-        let t = (self.c0.sqr() - mul_by_v_nz_as_circuit(self.c1.sqr())).inv();
+        let t = (self.c0.sqr().sub(mul_by_v_nz_as_circuit(self.c1.sqr()))).inv();
 
-        Fq12 { c0: self.c0 * t, c1: -(self.c1 * t), }
+        Fq12 { c0: self.c0.mul(t), c1: (self.c1.mul(t)).neg() }
     }
 }
 fn fq12_karatsuba_sqr(a: Fq12) -> Fq12 {
+    let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
     core::internal::revoke_ap_tracking();
     let Fq12 { c0: a0, c1: a1 } = a;
     // Karatsuba squaring
@@ -476,8 +475,8 @@ fn fq12_karatsuba_sqr(a: Fq12) -> Fq12 {
     let V1 = a1.sqr();
 
     // c0 = v0 + βv1
-    let C0 = V0 + mul_by_v_nz_as_circuit(V1);
+    let C0 = Fq6Ops::add(V0, mul_by_v_nz_as_circuit(V1), m);
     // c1 = (a0 +a1)² - v0 - v1,
-    let C1 = (a0 + a1).sqr() - V0 - V1;
+    let C1 = Fq6Ops::add(a0, a1, m).sqr().sub(V0).sub(V1);
     Fq12 { c0: C0, c1: C1 }
 }

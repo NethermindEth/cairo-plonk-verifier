@@ -120,7 +120,7 @@ mod line_fn {
         let s = acc;
         // s + q
         let slope1 = s.chord_as_circuit(q);
-        let x1 = s.x_on_slope(slope1, q.x);
+        let x1 = s.x_on_slope_as_circuit(slope1, q.x);
         let line1 = line_fn(slope1, s);
 
         // we skip y1 calculation and sub slope1 directly in second slope calculation

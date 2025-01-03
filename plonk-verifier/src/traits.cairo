@@ -7,8 +7,8 @@ trait FieldUtils<TFq, TFqChildren> {
     fn frobenius_map(self: TFq, power: usize) -> TFq;
 }
 
-trait FieldOps<TFq> {
-    fn add(self: TFq, rhs: TFq) -> TFq;
+pub trait FieldOps<TFq, M> {
+    fn add(self: TFq, rhs: TFq, m: M) -> TFq;
     fn sub(self: TFq, rhs: TFq) -> TFq;
     fn mul(self: TFq, rhs: TFq) -> TFq;
     fn div(self: TFq, rhs: TFq) -> TFq;
