@@ -27,7 +27,7 @@ use plonk_verifier::{
         transcript::{Keccak256Transcript, Transcript, TranscriptElement},
         types::{PlonkChallenge, PlonkProof, PlonkVerificationKey},
     },
-    traits::{FieldMulShortcuts, FieldOps, FieldShortcuts, FieldUtils},
+    traits::{FieldOps, FieldShortcuts, FieldUtils},
 };
 
 

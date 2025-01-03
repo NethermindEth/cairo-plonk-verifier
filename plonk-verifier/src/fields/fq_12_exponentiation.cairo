@@ -2,7 +2,6 @@ use core::circuit::conversions::from_u256;
 use core::starknet::secp256_trait::Secp256PointTrait;
 use core::traits::TryInto;
 use plonk_verifier::traits::FieldShortcuts;
-use plonk_verifier::traits::FieldMulShortcuts;
 use core::array::ArrayTrait;
 use plonk_verifier::curve::{get_field_nz, FIELD_X2};
 // use plonk_verifier::curve::{u512, mul_by_v, U512BnAdd, U512BnSub, Tuple2Add, Tuple2Sub,};

@@ -6,7 +6,7 @@ use plonk_verifier::curve::{FIELD, get_field_nz};
 use plonk_verifier::curve::{mul_by_xi_nz_as_circuit};
 // use plonk_verifier::fields::print::{FqPrintImpl, Fq2PrintImpl, Fq6PrintImpl, Fq12PrintImpl};
 use plonk_verifier::fields::{Fq, Fq2, Fq2Ops, Fq2Short, Fq2Utils, fq, fq2, Fq2Frobenius};
-use plonk_verifier::traits::{FieldUtils, FieldOps, FieldShortcuts, FieldMulShortcuts};
+use plonk_verifier::traits::{FieldUtils, FieldOps, FieldShortcuts};
 use plonk_verifier::fields::frobenius::fp6 as frob;
 use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 use plonk_verifier::curve::constants::FIELD_U384;

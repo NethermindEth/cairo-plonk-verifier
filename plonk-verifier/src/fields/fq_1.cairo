@@ -18,7 +18,7 @@ use plonk_verifier::curve::{FIELD, get_field_nz}; //, add, sub_field, mul, scl, 
 //     add_u, sub_u, mul_u, sqr_u, scl_u, u512_reduce, u512_add_u256, u512_sub_u256
 // };
 use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
-use plonk_verifier::traits::{FieldUtils, FieldOps, FieldShortcuts, FieldMulShortcuts};
+use plonk_verifier::traits::{FieldUtils, FieldOps, FieldShortcuts};
 
 
 #[derive(Copy, Drop, Debug)]
@@ -43,18 +43,18 @@ impl FqShort of FieldShortcuts<Fq> {
     }
 }
 
-impl FqMulShort of FieldMulShortcuts<Fq, u384> {
-    #[inline(always)]
-    fn u_mul(self: Fq, rhs: Fq) -> u384 {
-        core::internal::revoke_ap_tracking();
-        mul_c(self.c0, rhs.c0)
-    }
+// impl FqMulShort of FieldMulShortcuts<Fq, u384> {
+//     #[inline(always)]
+//     fn u_mul(self: Fq, rhs: Fq) -> u384 {
+//         core::internal::revoke_ap_tracking();
+//         mul_c(self.c0, rhs.c0)
+//     }
 
-    #[inline(always)]
-    fn u_sqr(self: Fq) -> u384 {
-        sqr_c(self.c0)
-    }
-}
+//     #[inline(always)]
+//     fn u_sqr(self: Fq) -> u384 {
+//         sqr_c(self.c0)
+//     }
+// }
 
 impl FqUtils of FieldUtils<Fq, u128> {
     #[inline(always)]
