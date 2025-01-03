@@ -244,4 +244,3 @@ fn ufq2_inv(self: Fq2, field_nz: NonZero<u256>) -> Fq2 {
 
     Fq2 { c0: c0.mul(t), c1: c1.mul(-t) }
 }
-

@@ -144,20 +144,18 @@ impl FqOps of FieldOps<Fq> {
     #[inline(always)]
     fn sqr(self: Fq) -> Fq {
         let a0 = CircuitElement::<CircuitInput<0>> {};
-        let a1 = CircuitElement::<CircuitInput<1>> {};
-        let sqr = circuit_mul(a0, a1);
+        let sqr = circuit_mul(a0, a0);
 
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
 
         let a = self.c0;
 
-        let outputs = match (sqr,).new_inputs().next(a).next(a).done().eval(modulus) {
+        let outputs = match (sqr,).new_inputs().next(a).done().eval(modulus) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
 
-        let fq_c0 = Fq { c0: outputs.get_output(sqr).try_into().unwrap() };
-        fq_c0
+        Fq { c0: outputs.get_output(sqr) }
     }
 
     #[inline(always)]
