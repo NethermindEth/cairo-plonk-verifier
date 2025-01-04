@@ -557,5 +557,3 @@ fn test_valid_pairing() {
 //     let dec_3 = ascii_to_dec(test_3);
 //     assert_eq!(dec_3, 15);
 // }
-
-

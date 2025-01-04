@@ -12,7 +12,7 @@ use core::circuit::conversions::from_u256;
 
 use plonk_verifier::{
     curve::{
-        groups::{g1, g2, AffineG1, AffineG2, AffineG2Impl, ECOperations, ECOperationsCircuitFq},
+        groups::{g1, g2, AffineG1, AffineG2, AffineG2Impl, ECOperationsCircuitFq},
         constants::{FIELD_U384, ORDER, ORDER_384, ORDER_NZ, ORDER_U384, get_field_nz},
     },
         //neg_o, sqr_nz, mul, mul_u, mul_nz, div_nz, add_nz, sub_u, sub, u512,
@@ -289,10 +289,10 @@ impl PlonkVerifier of PVerifier {
         proof: PlonkProof, challenges: PlonkChallenge, vk: PlonkVerificationKey, l1: Fq
     ) -> AffineG1 {
         let mut d1 = vk.Qm.multiply_as_circuit((mul_co(proof.eval_a.c0, proof.eval_b.c0)));
-        d1 = d1.add(vk.Ql.multiply_as_circuit(proof.eval_a.c0));
-        d1 = d1.add(vk.Qr.multiply_as_circuit(proof.eval_b.c0));
-        d1 = d1.add(vk.Qo.multiply_as_circuit(proof.eval_c.c0));
-        d1 = d1.add(vk.Qc);
+        d1 = d1.add_as_circuit(vk.Ql.multiply_as_circuit(proof.eval_a.c0));
+        d1 = d1.add_as_circuit(vk.Qr.multiply_as_circuit(proof.eval_b.c0));
+        d1 = d1.add_as_circuit(vk.Qo.multiply_as_circuit(proof.eval_c.c0));
+        d1 = d1.add_as_circuit(vk.Qc);
 
         let betaxi = mul_co(challenges.beta.c0, challenges.xi.c0);
         let mut d2a1 = add_co(proof.eval_a.c0, betaxi);
@@ -335,7 +335,7 @@ impl PlonkVerifier of PVerifier {
 
         let mut d = d1.add_as_circuit(d2);
         d = d.add_as_circuit(d3.neg());
-        d = d.add(d4.neg());
+        d = d.add_as_circuit(d4.neg());
 
         d
     }

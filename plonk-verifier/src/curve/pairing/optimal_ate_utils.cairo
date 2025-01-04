@@ -3,8 +3,8 @@ use plonk_verifier::fields::fq_sparse::FqSparseTrait;
 use plonk_verifier::traits::{FieldUtils};
 //use plonk_verifier::curve::groups::ECOperationsCircuitFq2;
 use plonk_verifier::curve::groups::{g1, g2, ECGroup};
-use plonk_verifier::curve::groups::{Affine, AffineG1 as PtG1, AffineG2 as PtG2, AffineOps};
-use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
+use plonk_verifier::curve::groups::{Affine, AffineG1 as PtG1, AffineG2 as PtG2};
+// use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 use plonk_verifier::fields::{
     Fq, fq, Fq2, fq2, Fq6, Fq12, Fq12Utils, Fq12Ops, FqOps, Fq2Utils, Fq2Ops, Fq12Exponentiation,
 };
@@ -44,7 +44,7 @@ struct PPrecompute {
 
 fn p_precompute(p: PtG1, field_nz: NonZero<u256>) -> PPrecompute {
     let y_inv = (p.y).inv();
-    PPrecompute { neg_x_over_y: -p.x * y_inv, y_inv }
+    PPrecompute { neg_x_over_y: p.x.neg().mul(y_inv), y_inv }
 }
 
 type PPre = PPrecompute;
@@ -65,10 +65,10 @@ mod line_fn {
     use plonk_verifier::traits::{FieldUtils};
     use plonk_verifier::curve::groups::ECOperationsCircuitFq2;
     use plonk_verifier::curve::groups::{g1, g2, ECGroup};
-    use plonk_verifier::curve::groups::{Affine, AffineG1 as PtG1, AffineG2 as PtG2, AffineOps};
-    use plonk_verifier::fields::fq_generics::{
-        TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,
-    };
+    use plonk_verifier::curve::groups::{Affine, AffineG1 as PtG1, AffineG2 as PtG2};
+    // use plonk_verifier::fields::fq_generics::{
+    //     TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,
+    // };
     use plonk_verifier::fields::{
         Fq, fq, Fq2, fq2, Fq6, Fq12, Fq12Utils, Fq12Ops, FqOps, Fq2Utils, Fq2Ops,
         Fq12Exponentiation,
@@ -77,17 +77,19 @@ mod line_fn {
     // use plonk_verifier::fields::print::{Fq2Display, Fq12Display, FqDisplay};
     use plonk_verifier::fields::frobenius::pi;
     use super::{LineFn, PPre, NZNum, F034};
-
+    use plonk_verifier::curve::constants::FIELD_U384;
+    use core::circuit::CircuitModulus;
+    
     #[inline(always)]
     fn line_fn(slope: Fq2, s: PtG2) -> LineFn {
-        LineFn { slope, c: slope * s.x - s.y, }
+        LineFn { slope, c: slope.mul(s.x).sub(s.y) }
     }
 
     // For πₚ frobeneus map
     // Multiply by Fp2::NONRESIDUE^(2((q^1) - 1)/6)
     #[inline(always)]
     fn fq2_mul_nr_1p_2(a: Fq2) -> Fq2 {
-        a * fq2(pi::Q1X2_C0, pi::Q1X2_C1)
+        a.mul(fq2(pi::Q1X2_C0, pi::Q1X2_C1))
     }
 
 
@@ -95,7 +97,7 @@ mod line_fn {
     // Multiply by Fp2::NONRESIDUE^(3((q^1) - 1)/6)
     #[inline(always)]
     fn fq2_mul_nr_1p_3(a: Fq2) -> Fq2 {
-        a * fq2(pi::Q1X3_C0, pi::Q1X3_C1)
+        a.mul(fq2(pi::Q1X3_C0, pi::Q1X3_C1))
     }
 
     // For πₚ² frobeneus map
@@ -117,10 +119,12 @@ mod line_fn {
     // returns product of line evaluations to multiply with f
     // #[inline(always)]
     fn step_dbl_add(ref acc: PtG2, q: PtG2, field_nz: NZNum) -> (LineFn, LineFn) {
+        let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+
         let s = acc;
         // s + q
         let slope1 = s.chord_as_circuit(q);
-        let x1 = s.x_on_slope_as_circuit(slope1, q.x);
+        let x1 = s.x_on_slope(slope1, q.x);
         let line1 = line_fn(slope1, s);
 
         // we skip y1 calculation and sub slope1 directly in second slope calculation
@@ -128,8 +132,8 @@ mod line_fn {
         // s + (s + q)
         // λ2 = (y2-y1)/(x2-x1), subbing y2 = λ(x2-x1)+y1
         // λ2 = -λ1-2y1/(x3-x1)
-        let slope2 = -slope1 - (s.y.add(s.y)) / (x1 - s.x);
-        acc = s.pt_on_slope(slope2, x1);
+        let slope2 = slope1.neg().sub((s.y.add(s.y, m)).div(x1.sub(s.x)));
+        acc = s.pt_on_slope_as_circuit(slope2, x1);
         let line2 = line_fn(slope2, s);
 
         // line functions
@@ -145,7 +149,7 @@ mod line_fn {
         // λ = 3x²/2y
         let slope = s.tangent_as_circuit();
         // p = (λ²-2x, λ(x-xr)-y)
-        acc = s.pt_on_slope(slope, acc.x);
+        acc = s.pt_on_slope_as_circuit(slope, acc.x);
         line_fn(slope, s)
     }
     // https://eprint.iacr.org/2022/1162 (Section 6.1)
@@ -157,7 +161,7 @@ mod line_fn {
         // λ = (yS−yQ)/(xS−xQ)
         let slope = s.chord_as_circuit(q);
         // p = (λ²-2x, λ(x-xr)-y)
-        acc = s.pt_on_slope(slope, q.x);
+        acc = s.pt_on_slope_as_circuit(slope, q.x);
         line_fn(slope, s)
     }
 
@@ -209,7 +213,7 @@ fn line_fn_at_p(line: LineFn, p_pre: @PPre) -> F034 {
 fn line_evaluation_at_p(slope: Fq2, p_pre: @PPre, s: PtG2) -> F034 {
     F034 {
         c3: slope.scale((*p_pre.neg_x_over_y.c0).try_into().unwrap()),
-        c4: (slope * s.x - s.y).scale((*p_pre.y_inv.c0).try_into().unwrap()),
+        c4: (slope.mul(s.x).sub(s.y)).scale((*p_pre.y_inv.c0).try_into().unwrap()),
     }
 }
 

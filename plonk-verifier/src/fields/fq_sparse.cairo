@@ -13,7 +13,7 @@ use plonk_verifier::fields::{
     FieldUtils, FieldOps, fq, Fq, Fq2, Fq6, Fq2Ops, fq6, Fq12, fq12, Fq12Frobenius, Fq12Squaring
 };
 // use plonk_verifier::fields::SixU512;
-use plonk_verifier::fields::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
+//use plonk_verifier::fields::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 // use plonk_verifier::fields::print::{Fq2Display, FqDisplay, u512Display};
 use plonk_verifier::circuit_mod::{
     add_c, sub_c, neg_c, div_c, inv_c, mul_c, sqr_c, one_384, zero_384

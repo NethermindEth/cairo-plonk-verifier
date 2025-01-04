@@ -10,8 +10,9 @@ mod plonk {
 mod traits;
 use traits::{FieldOps, FieldUtils};
 
-mod curve;
+mod curve; 
 use curve::{groups as g, pairing};
+
 
 // Todo: Refactor as individual mods. 
 mod circuits {
@@ -63,7 +64,7 @@ mod fields {
 // mod utils;
     }
 
-    use fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
+    //use fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
     use fq_1::{Fq, FqOps, FqUtils, fq, FqIntoU256};
     use fq_2::{Fq2, Fq2Ops, Fq2Utils, fq2, Fq2Frobenius};
     use fq_6::{Fq6, Fq6Ops, Fq6Utils, fq6, Fq6Frobenius}; //, SixU512};

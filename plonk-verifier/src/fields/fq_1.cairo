@@ -156,3 +156,10 @@ impl Felt252IntoFq of Into<felt252, Fq> {
         fq(self.into())
     }
 }
+
+impl PartialEqFq of PartialEq<Fq> {
+    #[inline(always)]
+    fn eq(lhs: @Fq, rhs: @Fq) -> bool {
+        FieldOps::eq(lhs, rhs)
+    }
+}

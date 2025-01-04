@@ -1,5 +1,5 @@
 use plonk_verifier::traits::{FieldOps as FOps};
-use plonk_verifier::fields::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg};
+//use plonk_verifier::fields::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg};
 // use plonk_verifier::fields::print::{FqPrintImpl, Fq2PrintImpl};
 use plonk_verifier::fields::{fq, Fq, fq2, Fq2};
 use plonk_verifier::curve::constants::FIELD_U384;
@@ -67,11 +67,11 @@ trait ECOperationsCircuitFq {
     // fn tangent(self: @Affine<Fq>) -> Fq;
     fn double_as_circuit(self: @Affine<Fq>) -> Affine<Fq>;
     fn multiply_as_circuit(self: @Affine<Fq>, multiplier: u384) -> Affine<Fq>;
-    // fn neg(self: @Affine<Fq>) -> Affine<Fq>;
+    fn neg(self: @Affine<Fq>) -> Affine<Fq>;
 }
 
 trait ECOperationsCircuitFq2 {
-    // fn x_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x2: Fq2) -> Fq2;
+    fn x_on_slope(self: @Affine<Fq2>, slope: Fq2, x2: Fq2) -> Fq2;
     fn y_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x: Fq2) -> Fq2;
     fn pt_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x2: Fq2) -> Affine<Fq2>;
     fn chord_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>) -> Fq2;
@@ -79,7 +79,7 @@ trait ECOperationsCircuitFq2 {
     fn tangent_as_circuit(self: @Affine<Fq2>) -> Fq2;
     fn double_as_circuit(self: @Affine<Fq2>) -> Affine<Fq2>;
     // fn multiply_as_circuit(self: @Affine<Fq2>, multiplier: u384) -> Affine<Fq2>;
-    // fn neg_as_circuit(self: @Affine<Fq2>) -> Affine<Fq2>;
+    fn neg(self: @Affine<Fq2>) -> Affine<Fq2>;
 }
 
 impl AffinePartialEq<T, +PartialEq<T>> of PartialEq<Affine<T>> {
@@ -325,9 +325,18 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
         };
         Fq { c0: outputs.get_output(mul) }
     }
+
+    fn neg(self: @Affine<Fq>) -> Affine<Fq> {
+        Affine { x: *self.x, y: FOps::neg(*self.y) }
+    }
 }
 
 impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
+    fn x_on_slope(self: @Affine<Fq2>, slope: Fq2, x2: Fq2) -> Fq2 {
+        // x = λ^2 - x1 - x2
+        slope.sqr().sub(*self.x).sub(x2)
+    }
+
     fn y_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x: Fq2) -> Fq2 {
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
 
@@ -462,6 +471,10 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
         };
 
         affine_fq2(out.get_output(c0), out.get_output(c1), out.get_output(c2), out.get_output(c3))
+    }
+
+    fn neg(self: @Affine<Fq2>) -> Affine<Fq2> {
+        Affine { x: *self.x, y: FOps::neg(*self.y) }
     }
 }
 

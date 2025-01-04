@@ -365,3 +365,10 @@ fn fq6_karatsuba_sqr(a: Fq6, rhs: Fq6) -> (Fq2, Fq2, Fq2) {
     let C2 = (a0.add(a2, m)).sqr().sub(V0).add(V1, m).sub(V2);
     (C0, C1, C2)
 }
+
+impl PartialEqFq of PartialEq<Fq6> {
+    #[inline(always)]
+    fn eq(lhs: @Fq6, rhs: @Fq6) -> bool {
+        FieldOps::eq(lhs, rhs)
+    }
+}

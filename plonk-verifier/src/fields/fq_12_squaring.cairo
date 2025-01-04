@@ -9,7 +9,7 @@ use plonk_verifier::curve::{mul_by_xi_nz_as_circuit};
 use plonk_verifier::fields::{
     FieldUtils, FieldOps, fq, Fq, Fq2, Fq6, Fq12, fq12, Fq12Frobenius
 };
-use plonk_verifier::fields::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
+//use plonk_verifier::fields::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 // use plonk_verifier::fields::print::{Fq2Display, FqDisplay, u512Display};
 use core::circuit::{
     CircuitElement, CircuitInput, circuit_add, circuit_sub, circuit_mul, circuit_inverse,

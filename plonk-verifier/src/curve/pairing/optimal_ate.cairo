@@ -3,11 +3,12 @@ use plonk_verifier::traits::{MillerPrecompute, MillerSteps};
 use plonk_verifier::fields::{Fq12, Fq12Utils, Fq12Exponentiation};
 use plonk_verifier::curve::{groups, pairing::optimal_ate_impls};
 use groups::{g1, g2, ECGroup};
-use groups::{Affine, AffineG1, AffineG2, AffineOps};
+use groups::{Affine, AffineG1, AffineG2};
 use plonk_verifier::curve::{get_field_nz};
 use plonk_verifier::fields::{print, FieldUtils, FieldOps, fq, Fq, Fq2, Fq6};
 use optimal_ate_impls::{SingleMillerPrecompute, SingleMillerSteps};
-
+use plonk_verifier::curve::constants::FIELD_U384;
+use core::circuit::CircuitModulus;
 fn ate_miller_loop<
     TG1,
     TG2,
@@ -212,23 +213,9 @@ fn ate_miller_loop_steps_second_half<
     precompute
 }
 
-fn ate_pairing<
-    TG1,
-    TG2,
-    TPreC,
-    +MillerPrecompute<TG1, TG2, TPreC>,
-    +MillerSteps<TPreC, TG2, Fq12>,
-    +Drop<TG1>,
-    +Drop<TG2>,
-    +Drop<TPreC>,
->(
-    p: TG1, q: TG2
-) -> Fq12 {
-    ate_miller_loop(p, q).final_exponentiation()
-}
-
 fn single_ate_pairing(p: AffineG1, q: AffineG2) -> Fq12 {
-    ate_miller_loop(p, q).final_exponentiation()
+    let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+    ate_miller_loop(p, q).final_exponentiation(m)
 }
 
 // fn test_single_ate_loop(p: AffineG1, q: AffineG2) {

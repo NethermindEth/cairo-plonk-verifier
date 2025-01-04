@@ -14,7 +14,7 @@ use plonk_verifier::traits::{FieldUtils, FieldOps};
 // use plonk_verifier::fast_mod::{u512_high_add};
 // use plonk_verifier::curve::{u512, U512BnAdd, U512BnSub, u512_reduce, u512_add, u512_sub};
 //use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
-use plonk_verifier::curve::{FIELD, get_field_nz, scale_9, circuit_scale_9};
+use plonk_verifier::curve::{FIELD, get_field_nz, circuit_scale_9};
 use plonk_verifier::fields::{Fq, fq, FqOps};
 // use plonk_verifier::fields::print::u512Display;
 use plonk_verifier::curve::constants::FIELD_U384;
@@ -235,5 +235,12 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
         let Fq2 { c0, c1 } = self;
         let t = c0.sqr().add(c1.sqr(), m).inv();
         Fq2 { c0: c0.mul(t), c1: c1.mul(t.neg()) }
+    }
+}
+
+impl PartialEqFq of PartialEq<Fq2> {
+    #[inline(always)]
+    fn eq(lhs: @Fq2, rhs: @Fq2) -> bool {
+        FieldOps::eq(lhs, rhs)
     }
 }
