@@ -10,7 +10,7 @@ use debug::PrintTrait;
 use plonk_verifier::circuit_mod::{
     add_c, sub_c, neg_c, div_c, inv_c, mul_c, sqr_c, one_384, zero_384
 };
-use plonk_verifier::traits::{FieldUtils, FieldOps};
+use plonk_verifier::traits::{FieldUtils, FieldOps, FieldEqs};
 // use plonk_verifier::fast_mod::{u512_high_add};
 // use plonk_verifier::curve::{u512, U512BnAdd, U512BnSub, u512_reduce, u512_add, u512_sub};
 //use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
@@ -19,6 +19,7 @@ use plonk_verifier::fields::{Fq, fq, FqOps};
 // use plonk_verifier::fields::print::u512Display;
 use plonk_verifier::curve::constants::FIELD_U384;
 // use plonk_verifier::fields::utils::conversions::into_u512;
+use plonk_verifier::fields::fq_generics::TFqPartialEq;
 
 #[derive(Copy, Drop, Debug)]
 struct Fq2 {
@@ -198,11 +199,6 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
     }
 
     #[inline(always)]
-    fn eq(lhs: @Fq2, rhs: @Fq2) -> bool {
-        FqOps::eq(lhs.c0, rhs.c0) && FqOps::eq(lhs.c1, rhs.c1)
-    }
-
-    #[inline(always)]
     fn sqr(self: Fq2) -> Fq2 {
         // // Aranha sqr_u + 2r
         let a0 = CircuitElement::<CircuitInput<0>> {};
@@ -238,9 +234,17 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
     }
 }
 
-impl PartialEqFq of PartialEq<Fq2> {
+// impl PartialEqFq of PartialEq<Fq2> {
+//     #[inline(always)]
+//     fn eq(lhs: @Fq2, rhs: @Fq2) -> bool {
+//         FieldOps::eq(lhs, rhs)
+//     }
+// }
+
+impl FqEqs of FieldEqs<Fq2> {
     #[inline(always)]
     fn eq(lhs: @Fq2, rhs: @Fq2) -> bool {
-        FieldOps::eq(lhs, rhs)
+        lhs.c0 == rhs.c0 && lhs.c1 == rhs.c1
     }
 }
+

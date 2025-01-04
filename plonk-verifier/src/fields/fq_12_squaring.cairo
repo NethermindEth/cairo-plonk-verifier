@@ -9,6 +9,7 @@ use plonk_verifier::curve::{mul_by_xi_nz_as_circuit};
 use plonk_verifier::fields::{
     FieldUtils, FieldOps, fq, Fq, Fq2, Fq6, Fq12, fq12, Fq12Frobenius
 };
+use plonk_verifier::fields::fq_generics::TFqPartialEq;
 //use plonk_verifier::fields::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 // use plonk_verifier::fields::print::{Fq2Display, FqDisplay, u512Display};
 use core::circuit::{
@@ -74,7 +75,7 @@ impl Fq12Squaring of Fq12SquaringTrait {
         core::internal::revoke_ap_tracking();
         let Krbn2345 { g2, g3, g4, g5 } = self;
         // Si = gi^2
-        if FieldOps::eq(@g2.c0, @FieldUtils::zero()) && FieldOps::eq(@g2.c1, @FieldUtils::zero()) {
+        if g2.c0 == FieldUtils::zero() && g2.c1 == FieldUtils::zero() {
             // g1 = 2g4g5/g3
             let tg24g5 = x2(g4.mul(g5));
             let g1 = tg24g5.mul(g3.inv());

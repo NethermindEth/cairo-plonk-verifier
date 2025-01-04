@@ -18,7 +18,7 @@ use plonk_verifier::curve::{FIELD, get_field_nz}; //, add, sub_field, mul, scl, 
 //     add_u, sub_u, mul_u, sqr_u, scl_u, u512_reduce, u512_add_u256, u512_sub_u256
 // };
 //use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
-use plonk_verifier::traits::{FieldUtils, FieldOps};
+use plonk_verifier::traits::{FieldUtils, FieldOps, FieldEqs};
 
 #[derive(Copy, Drop, Debug)]
 struct Fq {
@@ -110,10 +110,6 @@ impl FqOps of FieldOps<Fq, CircuitModulus> {
         fq(neg_c(self.c0))
     }
 
-    #[inline(always)]
-    fn eq(lhs: @Fq, rhs: @Fq) -> bool {
-        *lhs.c0 == *rhs.c0
-    }
 
     #[inline(always)]
     fn sqr(self: Fq) -> Fq {
@@ -138,6 +134,13 @@ impl FqOps of FieldOps<Fq, CircuitModulus> {
     }
 }
 
+impl FqEqs of FieldEqs<Fq> {
+    #[inline(always)]
+    fn eq(lhs: @Fq, rhs: @Fq) -> bool {
+        *lhs.c0 == *rhs.c0
+    }
+}
+
 impl FqIntoU256 of Into<Fq, u384> {
     #[inline(always)]
     fn into(self: Fq) -> u384 {
@@ -154,12 +157,5 @@ impl Felt252IntoFq of Into<felt252, Fq> {
     #[inline(always)]
     fn into(self: felt252) -> Fq {
         fq(self.into())
-    }
-}
-
-impl PartialEqFq of PartialEq<Fq> {
-    #[inline(always)]
-    fn eq(lhs: @Fq, rhs: @Fq) -> bool {
-        FieldOps::eq(lhs, rhs)
     }
 }

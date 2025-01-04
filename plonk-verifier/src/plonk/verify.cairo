@@ -9,6 +9,7 @@ use core::circuit::{
     circuit_add, circuit_inverse, circuit_mul, circuit_sub,
 };
 use core::circuit::conversions::from_u256;
+use plonk_verifier::fields::fq_generics::TFqPartialEq;
 
 use plonk_verifier::{
     curve::{

@@ -12,6 +12,8 @@ use plonk_verifier::curve::{mul_by_xi_nz_as_circuit, mul_by_v_nz_as_circuit};
 use plonk_verifier::fields::{
     FieldUtils, FieldOps, fq, Fq, Fq2, Fq6, Fq2Ops, fq6, Fq12, fq12, Fq12Frobenius, Fq12Squaring
 };
+use plonk_verifier::fields::fq_generics::TFqPartialEq;
+
 // use plonk_verifier::fields::SixU512;
 //use plonk_verifier::fields::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 // use plonk_verifier::fields::print::{Fq2Display, FqDisplay, u512Display};
@@ -58,7 +60,7 @@ struct Fq12Sparse01234 {
 impl Fq12Sparse034PartialEq of PartialEq<Fq12Sparse034> {
     #[inline(always)]
     fn eq(lhs: @Fq12Sparse034, rhs: @Fq12Sparse034) -> bool {
-        FieldOps::eq(lhs.c3, rhs.c3) && FieldOps::eq(lhs.c4, rhs.c4)
+        lhs.c3 == rhs.c3 && lhs.c4 == rhs.c4
     }
 
     #[inline(always)]
@@ -70,7 +72,7 @@ impl Fq12Sparse034PartialEq of PartialEq<Fq12Sparse034> {
 impl Fq12Sparse01234PartialEq of PartialEq<Fq12Sparse01234> {
     #[inline(always)]
     fn eq(lhs: @Fq12Sparse01234, rhs: @Fq12Sparse01234) -> bool {
-        FieldOps::eq(lhs.c0, rhs.c0) && FieldOps::eq(lhs.c1.c0, rhs.c1.c0) && FieldOps::eq(lhs.c1.c1, rhs.c1.c1)
+        lhs.c0 == rhs.c0 && lhs.c1.c0 == rhs.c1.c0 && lhs.c1.c1 == rhs.c1.c1
     }
 
     #[inline(always)]

@@ -8,7 +8,7 @@ mod plonk {
 // mod plonk_tests;
 }
 mod traits;
-use traits::{FieldOps, FieldUtils};
+use traits::{FieldOps, FieldUtils, FieldEqs};
 
 mod curve; 
 use curve::{groups as g, pairing};

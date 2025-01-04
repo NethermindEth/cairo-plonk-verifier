@@ -7,15 +7,18 @@ trait FieldUtils<TFq, TFqChildren> {
     fn frobenius_map(self: TFq, power: usize) -> TFq;
 }
 
-pub trait FieldOps<TFq, M> {
+trait FieldOps<TFq, M> {
     fn add(self: TFq, rhs: TFq, m: M) -> TFq;
     fn sub(self: TFq, rhs: TFq) -> TFq;
     fn mul(self: TFq, rhs: TFq) -> TFq;
     fn div(self: TFq, rhs: TFq) -> TFq;
     fn sqr(self: TFq) -> TFq;
     fn neg(self: TFq) -> TFq;
-    fn eq(lhs: @TFq, rhs: @TFq) -> bool;
     fn inv(self: TFq) -> TFq;
+}
+
+trait FieldEqs<TFq> {
+    fn eq(lhs: @TFq, rhs: @TFq) -> bool;
 }
 
 trait MillerPrecompute<TG1, TG2, TPreComp> {

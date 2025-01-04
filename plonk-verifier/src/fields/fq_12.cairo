@@ -1,4 +1,4 @@
-use plonk_verifier::traits::{FieldUtils, FieldOps};
+use plonk_verifier::traits::{FieldUtils, FieldOps, FieldEqs};
 //use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 use plonk_verifier::fields::{fq, fq2, Fq, Fq2, Fq2Ops, Fq6, fq6, Fq6Utils, Fq6Frobenius, Fq6Ops};
 use plonk_verifier::fields::frobenius::fp12 as frob;
@@ -346,10 +346,6 @@ impl Fq12Ops of FieldOps<Fq12, CircuitModulus> {
         } 
     }
 
-    fn eq(lhs: @Fq12, rhs: @Fq12) -> bool {
-        Fq6Ops::eq(lhs.c0, rhs.c0) && Fq6Ops::eq(lhs.c1, rhs.c1)
-    }
-
     fn mul(self: Fq12, rhs: Fq12) -> Fq12 {
         core::internal::revoke_ap_tracking();
 
@@ -480,3 +476,12 @@ fn fq12_karatsuba_sqr(a: Fq12) -> Fq12 {
     let C1 = Fq6Ops::add(a0, a1, m).sqr().sub(V0).sub(V1);
     Fq12 { c0: C0, c1: C1 }
 }
+
+impl FqEqs of FieldEqs<Fq12> {
+    #[inline(always)]
+    fn eq(lhs: @Fq12, rhs: @Fq12) -> bool {
+        lhs.c0 == rhs.c0 && lhs.c1 == rhs.c1
+    }
+}
+
+

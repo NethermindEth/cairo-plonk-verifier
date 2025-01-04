@@ -9,6 +9,8 @@ use core::traits::Into;
 use plonk_verifier::curve::groups::{g1, g2, AffineG1, AffineG2, Fq, Fq2};
 use plonk_verifier::curve::constants::{ORDER};
 use plonk_verifier::fields::{Fq6, fq, fq6};
+use plonk_verifier::fields::fq_generics::TFqPartialEq;
+
 #[test]
 fn test_plonk_verify() {
     // verification PlonkVerificationKey

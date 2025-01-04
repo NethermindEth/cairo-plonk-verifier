@@ -6,7 +6,7 @@ use plonk_verifier::curve::{FIELD, get_field_nz};
 use plonk_verifier::curve::{mul_by_xi_nz_as_circuit};
 // use plonk_verifier::fields::print::{FqPrintImpl, Fq2PrintImpl, Fq6PrintImpl, Fq12PrintImpl};
 use plonk_verifier::fields::{Fq, Fq2, Fq2Ops, Fq2Utils, fq, fq2, Fq2Frobenius};
-use plonk_verifier::traits::{FieldUtils, FieldOps};
+use plonk_verifier::traits::{FieldUtils, FieldOps, FieldEqs};
 use plonk_verifier::fields::frobenius::fp6 as frob;
 //use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 use plonk_verifier::curve::constants::FIELD_U384;
@@ -20,6 +20,7 @@ use core::circuit::{
     EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus, AddInputResultTrait, CircuitInputs,
     EvalCircuitResult,
 };
+use plonk_verifier::fields::fq_generics::TFqPartialEq;
 
 use debug::PrintTrait;
 use core::circuit::{
@@ -270,11 +271,6 @@ impl Fq6Ops of FieldOps<Fq6, CircuitModulus> {
     }
 
     #[inline(always)]
-    fn eq(lhs: @Fq6, rhs: @Fq6) -> bool {
-        Fq2Ops::eq(lhs.c0, rhs.c0) && Fq2Ops::eq(lhs.c1, rhs.c1) && Fq2Ops::eq(lhs.c2, rhs.c2)
-    }
-
-    #[inline(always)]
     fn sqr(self: Fq6) -> Fq6 {
         // let s0 = Fq2Ops::sqr(self.c0);
         // let ab = Fq2Ops::mul(self.c0, self.c1);
@@ -366,9 +362,11 @@ fn fq6_karatsuba_sqr(a: Fq6, rhs: Fq6) -> (Fq2, Fq2, Fq2) {
     (C0, C1, C2)
 }
 
-impl PartialEqFq of PartialEq<Fq6> {
+impl FqEqs of FieldEqs<Fq6> {
     #[inline(always)]
     fn eq(lhs: @Fq6, rhs: @Fq6) -> bool {
-        FieldOps::eq(lhs, rhs)
+        lhs.c0 == rhs.c0 && lhs.c1 == rhs.c1 && lhs.c2 == rhs.c2
     }
 }
+
+

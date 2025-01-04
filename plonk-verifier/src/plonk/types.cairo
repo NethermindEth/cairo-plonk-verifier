@@ -4,6 +4,7 @@ use plonk_verifier::curve::groups::{AffineG1, AffineG2};
 use plonk_verifier::fields::{Fq};
 use core::fmt::{Display, Formatter, Error};
 use core::circuit::u384;
+use plonk_verifier::fields::fq_generics::TFqPartialEq;
 #[derive(Copy, Drop)]
 struct PlonkProof {
     A: AffineG1,
