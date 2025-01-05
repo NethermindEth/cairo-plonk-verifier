@@ -22,19 +22,10 @@ mod circuits {
         mod add_sub_neg;
     }
     mod affine_circuits;
+    mod fq_circuits;
     mod fq_6_circuits;
     mod fq_12_circuits;
 }
-
-mod math {
-    mod circuit_mod;
-    // mod i257;
-    // mod fast_mod;
-    // #[cfg(test)]
-// mod fast_mod_tests;
-}
-use math::circuit_mod;
-// use math::fast_mod;
 
 // Fix imports with proper libs
 mod fields {

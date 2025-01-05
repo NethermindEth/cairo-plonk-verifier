@@ -5,11 +5,7 @@ use core::circuit::{
 };
 use core::traits::TryInto;
 
-use debug::PrintTrait;
-
-use plonk_verifier::circuit_mod::{
-    add_c, div_c, inv_c, mul_c, neg_c, one_384, sqr_c, sub_c, zero_384,
-};
+use plonk_verifier::circuits::fq_circuits::{one_384, zero_384};
 use plonk_verifier::curve::{circuit_scale_9};
 use plonk_verifier::curve::constants::FIELD_U384;
 use plonk_verifier::fields::{fq, Fq, FqOps};
@@ -105,31 +101,10 @@ impl Fq2Utils of FieldUtils<Fq2, u384, CircuitModulus> {
         if power % 2 == 0 {
             self
         } else {
-            // Fq2 { c0: self.c0, c1: self.c1.mul_by_nonresidue(), }
             self.conjugate(m)
         }
     }
 }
-
-// impl Fq2Short of FieldShortcuts<Fq2> {
-//     #[inline(always)]
-//     fn u_add(self: Fq2, rhs: Fq2) -> Fq2 {
-//         // Operation without modding can only be done like 4 times
-//         Fq2 { //
-//          c0: self.c0.u_add(rhs.c0), //
-//          c1: self.c1.u_add(rhs.c1), //
-//          }
-//     }
-
-//     #[inline(always)]
-//     fn u_sub(self: Fq2, rhs: Fq2) -> Fq2 {
-//         // Operation without modding can only be done like 4 times
-//         Fq2 { //
-//          c0: self.c0.u_sub(rhs.c0), //
-//          c1: self.c1.u_sub(rhs.c1), //
-//          }
-//     }
-// }
 
 impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
     #[inline(always)]
@@ -221,13 +196,6 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
         Fq2 { c0: c0.mul(t, m), c1: c1.mul(t.neg(m), m) }
     }
 }
-
-// impl PartialEqFq of PartialEq<Fq2> {
-//     #[inline(always)]
-//     fn eq(lhs: @Fq2, rhs: @Fq2) -> bool {
-//         FieldOps::eq(lhs, rhs)
-//     }
-// }
 
 impl FqEqs of FieldEqs<Fq2> {
     #[inline(always)]
