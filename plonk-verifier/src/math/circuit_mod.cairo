@@ -11,12 +11,12 @@ const zero_384: u384 = u384 { limb0: 0, limb1: 0, limb2: 0, limb3: 0 };
 const one_384: u384 = u384 { limb0: 1, limb1: 0, limb2: 0, limb3: 0 };
 
 #[inline(always)]
-fn add_c(mut a: u384, mut b: u384, modulus: CircuitModulus) -> u384 {
+fn add_c(mut a: u384, mut b: u384, m: CircuitModulus) -> u384 {
     let l = CircuitElement::<CircuitInput<0>> {};
     let r = CircuitElement::<CircuitInput<1>> {};
     let add = circuit_add(l, r);
 
-    let outputs = match (add,).new_inputs().next(a).next(b).done().eval(modulus) {
+    let outputs = match (add,).new_inputs().next(a).next(b).done().eval(m) {
         Result::Ok(outputs) => { outputs },
         Result::Err(_) => { panic!("Expected success") }
     };
@@ -43,14 +43,12 @@ fn add_co(mut a: u384, mut b: u384) -> u384 {
 }
 
 #[inline(always)]
-fn sub_c(mut a: u384, mut b: u384) -> u384 {
+fn sub_c(mut a: u384, mut b: u384, m: CircuitModulus) -> u384 {
     let l = CircuitElement::<CircuitInput<0>> {};
     let r = CircuitElement::<CircuitInput<1>> {};
     let sub = circuit_sub(l, r);
 
-    let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-
-    let outputs = match (sub,).new_inputs().next(a).next(b).done().eval(modulus) {
+    let outputs = match (sub,).new_inputs().next(a).next(b).done().eval(m) {
         Result::Ok(outputs) => { outputs },
         Result::Err(_) => { panic!("Expected success") }
     };
@@ -76,16 +74,14 @@ fn sub_co(mut a: u384, mut b: u384) -> u384 {
     o
 }
 
-fn neg_c(mut a: u384) -> u384 {
+fn neg_c(mut a: u384, m: CircuitModulus) -> u384 {
     let l = CircuitElement::<CircuitInput<0>> {};
     let r = CircuitElement::<CircuitInput<1>> {};
     let sub = circuit_sub(l, r);
 
-    let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-
     let zero = u384 { limb0: 0, limb1: 0, limb2: 0, limb3: 0 };
 
-    let outputs = match (sub,).new_inputs().next(zero).next(a).done().eval(modulus) {
+    let outputs = match (sub,).new_inputs().next(zero).next(a).done().eval(m) {
         Result::Ok(outputs) => { outputs },
         Result::Err(_) => { panic!("Expected success") }
     };
@@ -113,13 +109,11 @@ fn neg_co(mut a: u384) -> u384 {
     o
 }
 
-fn inv_c(b: u384) -> u384 {
+fn inv_c(b: u384, m: CircuitModulus) -> u384 {
     let r = CircuitElement::<CircuitInput<0>> {};
     let r_inv = circuit_inverse(r);
 
-    let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-
-    let outputs = match (r_inv,).new_inputs().next(b).done().eval(modulus) {
+    let outputs = match (r_inv,).new_inputs().next(b).done().eval(m) {
         Result::Ok(outputs) => { outputs },
         Result::Err(_) => { panic!("Expected success") }
     };
@@ -128,15 +122,13 @@ fn inv_c(b: u384) -> u384 {
     o
 }
 
-fn div_c(a: u384, b: u384) -> u384 {
+fn div_c(a: u384, b: u384, m: CircuitModulus) -> u384 {
     let l = CircuitElement::<CircuitInput<0>> {};
     let r = CircuitElement::<CircuitInput<1>> {};
     let r_inv = circuit_inverse(r);
     let div = circuit_mul(l, r_inv);
 
-    let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-
-    let outputs = match (div,).new_inputs().next(a).next(b).done().eval(modulus) {
+    let outputs = match (div,).new_inputs().next(a).next(b).done().eval(m) {
         Result::Ok(outputs) => { outputs },
         Result::Err(_) => { panic!("Expected success") }
     };
@@ -162,14 +154,12 @@ fn div_co(a: u384, b: u384) -> u384 {
     o
 }
 
-fn mul_c(a: u384, b: u384) -> u384 {
+fn mul_c(a: u384, b: u384, m: CircuitModulus) -> u384 {
     let l = CircuitElement::<CircuitInput<0>> {};
     let r = CircuitElement::<CircuitInput<1>> {};
     let mul = circuit_mul(l, r);
 
-    let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-
-    let outputs = match (mul,).new_inputs().next(a).next(b).done().eval(modulus) {
+    let outputs = match (mul,).new_inputs().next(a).next(b).done().eval(m) {
         Result::Ok(outputs) => { outputs },
         Result::Err(_) => { panic!("Expected success") }
     };
@@ -194,16 +184,14 @@ fn mul_co(a: u384, b: u384) -> u384 {
     o
 }
 
-fn scl_c(a: u384, b: u128) -> u384 {
+fn scl_c(a: u384, b: u128, m: CircuitModulus) -> u384 {
     let l = CircuitElement::<CircuitInput<0>> {};
     let r = CircuitElement::<CircuitInput<1>> {};
     let mul = circuit_mul(l, r);
 
-    let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-
     let scalar = from_u128(b);
 
-    let outputs = match (mul,).new_inputs().next(a).next(scalar).done().eval(modulus) {
+    let outputs = match (mul,).new_inputs().next(a).next(scalar).done().eval(m) {
         Result::Ok(outputs) => { outputs },
         Result::Err(_) => { panic!("Expected success") }
     };
@@ -213,13 +201,11 @@ fn scl_c(a: u384, b: u128) -> u384 {
 }
 
 
-fn sqr_c(a: u384) -> u384 {
+fn sqr_c(a: u384, m: CircuitModulus) -> u384 {
     let l = CircuitElement::<CircuitInput<0>> {};
     let mul = circuit_mul(l, l);
 
-    let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-
-    let outputs = match (mul,).new_inputs().next(a).done().eval(modulus) {
+    let outputs = match (mul,).new_inputs().next(a).done().eval(m) {
         Result::Ok(outputs) => { outputs },
         Result::Err(_) => { panic!("Expected success") }
     };

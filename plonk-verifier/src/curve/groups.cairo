@@ -61,25 +61,25 @@ trait ECGroup<TCoord> {
 trait ECOperationsCircuitFq {
     // fn x_on_slope(self: @Affine<Fq>, slope: Fq, x2: Fq) -> Fq;
     // fn y_on_slope(self: @Affine<Fq>, slope: Fq, x: Fq) -> Fq;
-    fn pt_on_slope(self: @Affine<Fq>, slope: Fq, x2: Fq) -> Affine<Fq>;
-    fn chord(self: @Affine<Fq>, rhs: Affine<Fq>) -> Fq;
-    fn add_as_circuit(self: @Affine<Fq>, rhs: Affine<Fq>) -> Affine<Fq>;
+    fn pt_on_slope(self: @Affine<Fq>, slope: Fq, x2: Fq, m: CircuitModulus) -> Affine<Fq>;
+    fn chord(self: @Affine<Fq>, rhs: Affine<Fq>, m: CircuitModulus) -> Fq;
+    fn add_as_circuit(self: @Affine<Fq>, rhs: Affine<Fq>, m: CircuitModulus) -> Affine<Fq>;
     // fn tangent(self: @Affine<Fq>) -> Fq;
-    fn double_as_circuit(self: @Affine<Fq>) -> Affine<Fq>;
-    fn multiply_as_circuit(self: @Affine<Fq>, multiplier: u384) -> Affine<Fq>;
-    fn neg(self: @Affine<Fq>) -> Affine<Fq>;
+    fn double_as_circuit(self: @Affine<Fq>, m: CircuitModulus) -> Affine<Fq>;
+    fn multiply_as_circuit(self: @Affine<Fq>, multiplier: u384, m: CircuitModulus) -> Affine<Fq>;
+    fn neg(self: @Affine<Fq>, m: CircuitModulus) -> Affine<Fq>;
 }
 
 trait ECOperationsCircuitFq2 {
-    fn x_on_slope(self: @Affine<Fq2>, slope: Fq2, x2: Fq2) -> Fq2;
-    fn y_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x: Fq2) -> Fq2;
-    fn pt_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x2: Fq2) -> Affine<Fq2>;
-    fn chord_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>) -> Fq2;
-    fn add_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>) -> Affine<Fq2>;
-    fn tangent_as_circuit(self: @Affine<Fq2>) -> Fq2;
-    fn double_as_circuit(self: @Affine<Fq2>) -> Affine<Fq2>;
+    fn x_on_slope(self: @Affine<Fq2>, slope: Fq2, x2: Fq2, m: CircuitModulus) -> Fq2;
+    fn y_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x: Fq2, m: CircuitModulus) -> Fq2;
+    fn pt_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x2: Fq2, m: CircuitModulus) -> Affine<Fq2>;
+    fn chord_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>, m: CircuitModulus) -> Fq2;
+    fn add_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>, m: CircuitModulus) -> Affine<Fq2>;
+    fn tangent_as_circuit(self: @Affine<Fq2>, m: CircuitModulus) -> Fq2;
+    fn double_as_circuit(self: @Affine<Fq2>, m: CircuitModulus) -> Affine<Fq2>;
     // fn multiply_as_circuit(self: @Affine<Fq2>, multiplier: u384) -> Affine<Fq2>;
-    fn neg(self: @Affine<Fq2>) -> Affine<Fq2>;
+    fn neg(self: @Affine<Fq2>, m: CircuitModulus) -> Affine<Fq2>;
 }
 
 impl AffinePartialEq<T, +PartialEq<T>> of PartialEq<Affine<T>> {
@@ -93,7 +93,7 @@ impl AffinePartialEq<T, +PartialEq<T>> of PartialEq<Affine<T>> {
 
 // Use only the highest level circuit when implementing (less steps)
 impl AffineOpsFqCircuit of ECOperationsCircuitFq {
-    fn double_as_circuit(self: @Affine<Fq>) -> Affine<Fq> {
+    fn double_as_circuit(self: @Affine<Fq>, m: CircuitModulus) -> Affine<Fq> {
         // λ = (3x^2 + a) / 2y
         // But BN curve has a == 0 so that's one less addition
         // λ = 3x^2 / 2y
@@ -144,7 +144,7 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
         Affine { x, y }
     }
 
-    fn add_as_circuit(self: @Affine<Fq>, rhs: Affine<Fq>) -> Affine<Fq> {
+    fn add_as_circuit(self: @Affine<Fq>, rhs: Affine<Fq>, m: CircuitModulus) -> Affine<Fq> {
         let x1 = CircuitElement::<CircuitInput<0>> {};
         let y1 = CircuitElement::<CircuitInput<1>> {};
         let x2 = CircuitElement::<CircuitInput<2>> {};
@@ -192,7 +192,7 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
         Affine { x, y }
     }
 
-    fn multiply_as_circuit(self: @Affine<Fq>, mut multiplier: u384) -> Affine<Fq> {
+    fn multiply_as_circuit(self: @Affine<Fq>, mut multiplier: u384, m: CircuitModulus) -> Affine<Fq> {
         let nz2: NonZero<u256> = 2_u256.try_into().unwrap();
         let mut dbl_step = *self;
         let mut result = g1(1, 2);
@@ -210,13 +210,13 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
                         // self is zero, return rhs
                         dbl_step
                     } else {
-                        result.add_as_circuit(dbl_step)
+                        result.add_as_circuit(dbl_step, m)
                     }
             }
             if q == 0 {
                 break;
             }
-            dbl_step = dbl_step.double_as_circuit();
+            dbl_step = dbl_step.double_as_circuit(m);
             multiplier = q;
         };
         result
@@ -249,7 +249,7 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
     //     };
     //     result
     // }
-    fn pt_on_slope(self: @Affine<Fq>, slope: Fq, x2: Fq) -> Affine<Fq> {
+    fn pt_on_slope(self: @Affine<Fq>, slope: Fq, x2: Fq, m: CircuitModulus) -> Affine<Fq> {
         let x_2 = x2;
         // x = λ^2 - x1 - x2
         // slope.sqr() - *self.x - x2
@@ -301,7 +301,7 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
     }
 
     #[inline(always)]
-    fn chord(self: @Affine<Fq>, rhs: Affine<Fq>) -> Fq {
+    fn chord(self: @Affine<Fq>, rhs: Affine<Fq>, m: CircuitModulus) -> Fq {
         let x1 = CircuitElement::<CircuitInput<0>> {};
         let y1 = CircuitElement::<CircuitInput<1>> {};
         let x2 = CircuitElement::<CircuitInput<2>> {};
@@ -326,18 +326,18 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
         Fq { c0: outputs.get_output(mul) }
     }
 
-    fn neg(self: @Affine<Fq>) -> Affine<Fq> {
-        Affine { x: *self.x, y: FOps::neg(*self.y) }
+    fn neg(self: @Affine<Fq>, m: CircuitModulus) -> Affine<Fq> {
+        Affine { x: *self.x, y: FOps::neg(*self.y, m) }
     }
 }
 
 impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
-    fn x_on_slope(self: @Affine<Fq2>, slope: Fq2, x2: Fq2) -> Fq2 {
+    fn x_on_slope(self: @Affine<Fq2>, slope: Fq2, x2: Fq2, m: CircuitModulus) -> Fq2 {
         // x = λ^2 - x1 - x2
-        slope.sqr().sub(*self.x).sub(x2)
+        slope.sqr(m).sub(*self.x, m).sub(x2, m)
     }
 
-    fn y_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x: Fq2) -> Fq2 {
+    fn y_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x: Fq2, m: CircuitModulus) -> Fq2 {
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
 
         let (c0, c1) = fq2_y_on_slope_circuit();
@@ -361,7 +361,7 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
         fq2(out.get_output(c0), out.get_output(c1))
     }
 
-    fn pt_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x2: Fq2) -> Affine<Fq2> {
+    fn pt_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x2: Fq2, m: CircuitModulus) -> Affine<Fq2> {
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
 
         let (c0, c1, c2, c3) = fq2_pt_on_slope_circuit();
@@ -385,7 +385,7 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
         affine_fq2(out.get_output(c0), out.get_output(c1), out.get_output(c2), out.get_output(c3))
     }
 
-    fn chord_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>) -> Fq2 {
+    fn chord_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>, m: CircuitModulus) -> Fq2 {
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         
         let (c0, c1) = fq2_chord_circuit();
@@ -409,7 +409,7 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
         fq2(out.get_output(c0), out.get_output(c1))
     }
 
-    fn add_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>) -> Affine<Fq2> {
+    fn add_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>, m: CircuitModulus) -> Affine<Fq2> {
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
 
         let (c0, c1, c2, c3) = fq2_add_circuit();
@@ -433,7 +433,7 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
         affine_fq2(out.get_output(c0), out.get_output(c1), out.get_output(c2), out.get_output(c3))
     }
 
-    fn tangent_as_circuit(self: @Affine<Fq2>) -> Fq2 {
+    fn tangent_as_circuit(self: @Affine<Fq2>, m: CircuitModulus) -> Fq2 {
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         
         let (c0, c1) = fq2_tangent_circuit();
@@ -453,7 +453,7 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
         fq2(out.get_output(c0), out.get_output(c1))
     }
 
-    fn double_as_circuit(self: @Affine<Fq2>) -> Affine<Fq2> {
+    fn double_as_circuit(self: @Affine<Fq2>, m: CircuitModulus) -> Affine<Fq2> {
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
 
         let (c0, c1, c2, c3) = fq2_double_circuit();
@@ -473,8 +473,8 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
         affine_fq2(out.get_output(c0), out.get_output(c1), out.get_output(c2), out.get_output(c3))
     }
 
-    fn neg(self: @Affine<Fq2>) -> Affine<Fq2> {
-        Affine { x: *self.x, y: FOps::neg(*self.y) }
+    fn neg(self: @Affine<Fq2>, m: CircuitModulus) -> Affine<Fq2> {
+        Affine { x: *self.x, y: FOps::neg(*self.y, m) }
     }
 }
 

@@ -4,7 +4,6 @@ use plonk_verifier::fields::{fq, fq2, Fq, Fq2, Fq2Ops, Fq6, fq6, Fq6Utils, Fq6Fr
 use plonk_verifier::fields::frobenius::fp12 as frob;
 // use plonk_verifier::fields::print::{Fq6Display};
 use plonk_verifier::curve::constants::FIELD_U384;
-use plonk_verifier::curve::{FIELD, get_field_nz};
 // use plonk_verifier::curve::{
 //     u512, U512BnAdd, Tuple2Add, Tuple3Add, U512BnSub, Tuple2Sub, Tuple3Sub, u512_reduce,
 //     mul_by_v_nz, mul_by_v_nz_as_circuit, U512Fq6Ops
@@ -58,102 +57,102 @@ impl Fq12Frobenius of Fq12FrobeniusTrait {
         self
     }
 
-    fn frob1(self: Fq12) -> Fq12 {
+    fn frob1(self: Fq12, m: CircuitModulus) -> Fq12 {
         let Fq12 { c0, c1 } = self;
         Fq12 {
-            c0: c0.frob1(),
-            c1: c1.frob1().scale(fq2(frob::Q_1_C0, frob::Q_1_C1)),
+            c0: c0.frob1(m),
+            c1: c1.frob1(m).scale(fq2(frob::Q_1_C0, frob::Q_1_C1), m),
         }
     }
 
-    fn frob2(self: Fq12) -> Fq12 {
+    fn frob2(self: Fq12, m: CircuitModulus) -> Fq12 {
         let Fq12 { c0, c1 } = self;
-        let Fq6 { c0: c10, c1: c11, c2: c12 } = c1.frob2();
+        let Fq6 { c0: c10, c1: c11, c2: c12 } = c1.frob2(m);
         Fq12 {
-            c0: c0.frob2(),
+            c0: c0.frob2(m),
             c1: Fq6 {
-                c0: c10.scale(frob::Q_2_C0),
-                c1: c11.scale(frob::Q_2_C0),
-                c2: c12.scale(frob::Q_2_C0),
+                c0: c10.scale(frob::Q_2_C0, m),
+                c1: c11.scale(frob::Q_2_C0, m),
+                c2: c12.scale(frob::Q_2_C0, m),
             },
         }
     }
 
-    fn frob3(self: Fq12) -> Fq12 {
+    fn frob3(self: Fq12, m: CircuitModulus) -> Fq12 {
         let Fq12 { c0, c1 } = self;
         Fq12 {
-            c0: c0.frob3(),
-            c1: c1.frob3().scale(fq2(frob::Q_3_C0, frob::Q_3_C1)),
+            c0: c0.frob3(m),
+            c1: c1.frob3(m).scale(fq2(frob::Q_3_C0, frob::Q_3_C1), m),
         }
     }
 
-    fn frob4(self: Fq12) -> Fq12 {
+    fn frob4(self: Fq12, m: CircuitModulus) -> Fq12 {
         let Fq12 { c0, c1 } = self;
         Fq12 {
-            c0: c0.frob4(),
-            c1: c1.frob4().scale(fq2(frob::Q_4_C0, frob::Q_4_C1)),
+            c0: c0.frob4(m),
+            c1: c1.frob4(m).scale(fq2(frob::Q_4_C0, frob::Q_4_C1), m),
         }
     }
 
-    fn frob5(self: Fq12) -> Fq12 {
+    fn frob5(self: Fq12, m: CircuitModulus) -> Fq12 {
         let Fq12 { c0, c1 } = self;
         Fq12 {
-            c0: c0.frob5(),
-            c1: c1.frob5().scale(fq2(frob::Q_5_C0, frob::Q_5_C1)),
+            c0: c0.frob5(m),
+            c1: c1.frob5(m).scale(fq2(frob::Q_5_C0, frob::Q_5_C1), m),
         }
     }
 
-    fn frob6(self: Fq12) -> Fq12 {
+    fn frob6(self: Fq12, m: CircuitModulus) -> Fq12 {
         let Fq12 { c0, c1 } = self;
         Fq12 {
             c0: c0.frob0(),
-            c1: c1.frob0().scale(fq2(frob::Q_6_C0, frob::Q_6_C1)),
+            c1: c1.frob0().scale(fq2(frob::Q_6_C0, frob::Q_6_C1), m),
         }
     }
 
-    fn frob7(self: Fq12) -> Fq12 {
+    fn frob7(self: Fq12, m: CircuitModulus) -> Fq12 {
         let Fq12 { c0, c1 } = self;
         Fq12 {
-            c0: c0.frob1(),
-            c1: c1.frob1().scale(fq2(frob::Q_7_C0, frob::Q_7_C1)),
+            c0: c0.frob1(m),
+            c1: c1.frob1(m).scale(fq2(frob::Q_7_C0, frob::Q_7_C1), m),
         }
     }
 
-    fn frob8(self: Fq12) -> Fq12 {
+    fn frob8(self: Fq12, m: CircuitModulus) -> Fq12 {
         let Fq12 { c0, c1 } = self;
         Fq12 {
-            c0: c0.frob2(),
-            c1: c1.frob2().scale(fq2(frob::Q_8_C0, frob::Q_8_C1)),
+            c0: c0.frob2(m),
+            c1: c1.frob2(m).scale(fq2(frob::Q_8_C0, frob::Q_8_C1), m),
         }
     }
 
-    fn frob9(self: Fq12) -> Fq12 {
+    fn frob9(self: Fq12, m: CircuitModulus) -> Fq12 {
         let Fq12 { c0, c1 } = self;
         Fq12 {
-            c0: c0.frob3(),
-            c1: c1.frob3().scale(fq2(frob::Q_9_C0, frob::Q_9_C1)),
+            c0: c0.frob3(m),
+            c1: c1.frob3(m).scale(fq2(frob::Q_9_C0, frob::Q_9_C1), m),
         }
     }
 
-    fn frob10(self: Fq12) -> Fq12 {
+    fn frob10(self: Fq12, m: CircuitModulus) -> Fq12 {
         let Fq12 { c0, c1 } = self;
         Fq12 {
-            c0: c0.frob4(),
-            c1: c1.frob4().scale(fq2(frob::Q_10_C0, frob::Q_10_C1)),
+            c0: c0.frob4(m),
+            c1: c1.frob4(m).scale(fq2(frob::Q_10_C0, frob::Q_10_C1), m),
         }
     }
 
 
-    fn frob11(self: Fq12) -> Fq12 {
+    fn frob11(self: Fq12, m: CircuitModulus) -> Fq12 {
         let Fq12 { c0, c1 } = self;
         Fq12 {
-            c0: c0.frob5(),
-            c1: c1.frob5().scale(fq2(frob::Q_11_C0, frob::Q_11_C1)),
+            c0: c0.frob5(m),
+            c1: c1.frob5(m).scale(fq2(frob::Q_11_C0, frob::Q_11_C1), m),
         }
     }
 }
 
-impl Fq12Utils of FieldUtils<Fq12, Fq6> {
+impl Fq12Utils of FieldUtils<Fq12, Fq6, CircuitModulus> {
     #[inline(always)]
     fn one() -> Fq12 {
         Fq12 { c0: FieldUtils::one(), c1: FieldUtils::zero(), }
@@ -165,44 +164,44 @@ impl Fq12Utils of FieldUtils<Fq12, Fq6> {
     }
 
     #[inline(always)]
-    fn scale(self: Fq12, by: Fq6) -> Fq12 {
+    fn scale(self: Fq12, by: Fq6, m: CircuitModulus) -> Fq12 {
         assert(false, 'no_impl: fq12 scale');
         Self::one()
     }
 
-    fn conjugate(self: Fq12) -> Fq12 {
-        Fq12 { c0: self.c0, c1: self.c1.neg(), }
+    fn conjugate(self: Fq12, m: CircuitModulus) -> Fq12 {
+        Fq12 { c0: self.c0, c1: self.c1.neg(m), }
     }
 
-    fn mul_by_nonresidue(self: Fq12,) -> Fq12 {
+    fn mul_by_nonresidue(self: Fq12, m: CircuitModulus) -> Fq12 {
         assert(false, 'no_impl: fq12 non residue');
         Self::one()
     }
 
-    fn frobenius_map(self: Fq12, power: usize) -> Fq12 {
+    fn frobenius_map(self: Fq12, power: usize, m: CircuitModulus) -> Fq12 {
         let rem = power % 12;
         if rem == 1 {
-            self.frob1()
+            self.frob1(m)
         } else if rem == 2 {
-            self.frob2()
+            self.frob2(m)
         } else if rem == 3 {
-            self.frob3()
+            self.frob3(m)
         } else if rem == 4 {
-            self.frob4()
+            self.frob4(m)
         } else if rem == 5 {
-            self.frob5()
+            self.frob5(m)
         } else if rem == 6 {
-            self.frob6()
+            self.frob6(m)
         } else if rem == 7 {
-            self.frob7()
+            self.frob7(m)
         } else if rem == 8 {
-            self.frob8()
+            self.frob8(m)
         } else if rem == 9 {
-            self.frob9()
+            self.frob9(m)
         } else if rem == 10 {
-            self.frob10()
+            self.frob10(m)
         } else if rem == 11 {
-            self.frob11()
+            self.frob11(m)
         } else {
             self.frob0()
         }
@@ -258,7 +257,7 @@ impl Fq12Ops of FieldOps<Fq12, CircuitModulus> {
         } 
     }
 
-    fn sub(self: Fq12, rhs: Fq12) -> Fq12 {
+    fn sub(self: Fq12, rhs: Fq12, m: CircuitModulus) -> Fq12 {
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
 
         let (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = sub_circuit(); 
@@ -306,11 +305,11 @@ impl Fq12Ops of FieldOps<Fq12, CircuitModulus> {
         } 
     }
 
-    fn div(self: Fq12, rhs: Fq12) -> Fq12 {
-        self.mul(rhs.inv())
+    fn div(self: Fq12, rhs: Fq12, m: CircuitModulus) -> Fq12 {
+        self.mul(rhs.inv(m), m)
     }
 
-    fn neg(self: Fq12) -> Fq12 {
+    fn neg(self: Fq12, m: CircuitModulus) -> Fq12 {
         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
 
         let (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = neg_circuit(); 
@@ -346,7 +345,7 @@ impl Fq12Ops of FieldOps<Fq12, CircuitModulus> {
         } 
     }
 
-    fn mul(self: Fq12, rhs: Fq12) -> Fq12 {
+    fn mul(self: Fq12, rhs: Fq12, m: CircuitModulus) -> Fq12 {
         core::internal::revoke_ap_tracking();
 
         // let Fq12 { c0: a0, c1: a1 } = self;
@@ -405,7 +404,7 @@ impl Fq12Ops of FieldOps<Fq12, CircuitModulus> {
         } 
     }
 
-    fn sqr(self: Fq12) -> Fq12 {
+    fn sqr(self: Fq12, m: CircuitModulus) -> Fq12 {
         core::internal::revoke_ap_tracking();
         // let Fq12 { c0: a0, c1: a1 } = self;
         // let V = Fq6Ops::mul(a0, a1);
@@ -454,26 +453,25 @@ impl Fq12Ops of FieldOps<Fq12, CircuitModulus> {
         } 
     }
 
-    fn inv(self: Fq12) -> Fq12 {
+    fn inv(self: Fq12, m: CircuitModulus) -> Fq12 {
         core::internal::revoke_ap_tracking();
-        let t = (self.c0.sqr().sub(mul_by_v_nz_as_circuit(self.c1.sqr()))).inv();
+        let t = (self.c0.sqr(m).sub(mul_by_v_nz_as_circuit(self.c1.sqr(m), m), m)).inv(m);
 
-        Fq12 { c0: self.c0.mul(t), c1: (self.c1.mul(t)).neg() }
+        Fq12 { c0: self.c0.mul(t, m), c1: (self.c1.mul(t, m)).neg(m) }
     }
 }
-fn fq12_karatsuba_sqr(a: Fq12) -> Fq12 {
-    let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+fn fq12_karatsuba_sqr(a: Fq12, m: CircuitModulus) -> Fq12 {
     core::internal::revoke_ap_tracking();
     let Fq12 { c0: a0, c1: a1 } = a;
     // Karatsuba squaring
     // v0 = a0² , v1 = a1²
-    let V0 = a0.sqr();
-    let V1 = a1.sqr();
+    let V0 = a0.sqr(m);
+    let V1 = a1.sqr(m);
 
     // c0 = v0 + βv1
-    let C0 = Fq6Ops::add(V0, mul_by_v_nz_as_circuit(V1), m);
+    let C0 = Fq6Ops::add(V0, mul_by_v_nz_as_circuit(V1, m), m);
     // c1 = (a0 +a1)² - v0 - v1,
-    let C1 = Fq6Ops::add(a0, a1, m).sqr().sub(V0).sub(V1);
+    let C1 = Fq6Ops::add(a0, a1, m).sqr(m).sub(V0, m).sub(V1, m);
     Fq12 { c0: C0, c1: C1 }
 }
 

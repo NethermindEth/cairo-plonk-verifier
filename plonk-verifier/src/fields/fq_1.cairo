@@ -13,7 +13,7 @@ use plonk_verifier::curve::constants::FIELD_U384;
 use plonk_verifier::circuit_mod::{
     add_c, sub_c, neg_c, div_c, inv_c, mul_c, sqr_c, scl_c, one_384, zero_384
 };
-use plonk_verifier::curve::{FIELD, get_field_nz}; //, add, sub_field, mul, scl, sqr, div, neg, inv};
+// use plonk_verifier::curve::{FIELD}; //, add, sub_field, mul, scl, sqr, div, neg, inv};
 // use plonk_verifier::curve::{
 //     add_u, sub_u, mul_u, sqr_u, scl_u, u512_reduce, u512_add_u256, u512_sub_u256
 // };
@@ -30,7 +30,7 @@ fn fq(c0: u384) -> Fq {
     Fq { c0 }
 }
 
-impl FqUtils of FieldUtils<Fq, u128> {
+impl FqUtils of FieldUtils<Fq, u128, CircuitModulus> {
     #[inline(always)]
     fn one() -> Fq {
         fq(one_384)
@@ -42,28 +42,28 @@ impl FqUtils of FieldUtils<Fq, u128> {
     }
 
     #[inline(always)]
-    fn scale(self: Fq, by: u128) -> Fq {
-        Fq { c0: scl_c(self.c0, by) }
+    fn scale(self: Fq, by: u128, m: CircuitModulus) -> Fq {
+        Fq { c0: scl_c(self.c0, by, m) }
     }
 
 
     #[inline(always)]
-    fn mul_by_nonresidue(self: Fq,) -> Fq {
+    fn mul_by_nonresidue(self: Fq, m: CircuitModulus) -> Fq {
         if self.c0.is_zero() {
             self
         } else {
-            self.neg()
+            self.neg(m)
         }
     }
 
     #[inline(always)]
-    fn conjugate(self: Fq) -> Fq {
+    fn conjugate(self: Fq, m: CircuitModulus) -> Fq {
         assert(false, 'no_impl: fq conjugate');
         FieldUtils::zero()
     }
 
     #[inline(always)]
-    fn frobenius_map(self: Fq, power: usize) -> Fq {
+    fn frobenius_map(self: Fq, power: usize, m: CircuitModulus) -> Fq {
         assert(false, 'no_impl: fq frobenius_map');
         FieldUtils::zero()
     }
@@ -76,22 +76,20 @@ impl FqOps of FieldOps<Fq, CircuitModulus> {
     }
 
     #[inline(always)]
-    fn sub(self: Fq, rhs: Fq) -> Fq {
-        fq(sub_c(self.c0, rhs.c0))
+    fn sub(self: Fq, rhs: Fq, m: CircuitModulus) -> Fq {
+        fq(sub_c(self.c0, rhs.c0, m))
     }
 
     #[inline(always)]
-    fn mul(self: Fq, rhs: Fq) -> Fq {
+    fn mul(self: Fq, rhs: Fq, m: CircuitModulus) -> Fq {
         let a = CircuitElement::<CircuitInput<0>> {};
         let b = CircuitElement::<CircuitInput<1>> {};
         let mul = circuit_mul(a, b);
 
-        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-
         let a = self.c0;
         let b = rhs.c0;
 
-        let outputs = match (mul,).new_inputs().next(a).next(b).done().eval(modulus) {
+        let outputs = match (mul,).new_inputs().next(a).next(b).done().eval(m) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
@@ -101,26 +99,24 @@ impl FqOps of FieldOps<Fq, CircuitModulus> {
     }
 
     #[inline(always)]
-    fn div(self: Fq, rhs: Fq) -> Fq {
-        fq(div_c(self.c0, rhs.c0))
+    fn div(self: Fq, rhs: Fq, m: CircuitModulus) -> Fq {
+        fq(div_c(self.c0, rhs.c0, m))
     }
 
     #[inline(always)]
-    fn neg(self: Fq) -> Fq {
-        fq(neg_c(self.c0))
+    fn neg(self: Fq, m: CircuitModulus) -> Fq {
+        fq(neg_c(self.c0, m))
     }
 
 
     #[inline(always)]
-    fn sqr(self: Fq) -> Fq {
+    fn sqr(self: Fq, m: CircuitModulus) -> Fq {
         let a0 = CircuitElement::<CircuitInput<0>> {};
         let sqr = circuit_mul(a0, a0);
 
-        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-
         let a = self.c0;
 
-        let outputs = match (sqr,).new_inputs().next(a).done().eval(modulus) {
+        let outputs = match (sqr,).new_inputs().next(a).done().eval(m) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
@@ -129,8 +125,8 @@ impl FqOps of FieldOps<Fq, CircuitModulus> {
     }
 
     #[inline(always)]
-    fn inv(self: Fq) -> Fq {
-        fq(inv_c(self.c0))
+    fn inv(self: Fq, m: CircuitModulus) -> Fq {
+        fq(inv_c(self.c0, m))
     }
 }
 
@@ -147,12 +143,14 @@ impl FqIntoU256 of Into<Fq, u384> {
         self.c0
     }
 }
+
 impl U256IntoFq of Into<u384, Fq> {
     #[inline(always)]
     fn into(self: u384) -> Fq {
         fq(self)
     }
 }
+
 impl Felt252IntoFq of Into<felt252, Fq> {
     #[inline(always)]
     fn into(self: felt252) -> Fq {

@@ -11,10 +11,6 @@ use core::circuit::conversions::{from_u128, from_u256};
 mod constants;
 mod groups;
 
-use constants::{
-    T, ORDER, ORDER_NZ, get_order_nz, FIELD, FIELD_NZ, get_field_nz, FIELD_X2, FIELDSQLOW,
-    FIELDSQHIGH, U256_MOD_FIELD, U256_MOD_FIELD_INV, B
-};
 // use plonk_verifier::fields::print::u512Display;
 use groups::{AffineG1, AffineG2};
 
@@ -52,7 +48,7 @@ use plonk_verifier::fields as f;
 //     a4 + a4 + a
 // }
 #[inline(always)]
-fn circuit_scale_9(a: f::Fq) -> f::Fq {
+fn circuit_scale_9(a: f::Fq, m: CircuitModulus) -> f::Fq {
     // addchain for a to 9a
     let a_in = CircuitElement::<CircuitInput<0>> {};
 
@@ -61,8 +57,7 @@ fn circuit_scale_9(a: f::Fq) -> f::Fq {
     let a8 = circuit_add(a4, a4);
     let a9 = circuit_add(a8, a_in);
     let a_in = a.c0;
-    let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-    let outputs = match (a9,).new_inputs().next(a_in).done().eval(modulus) {
+    let outputs = match (a9,).new_inputs().next(a_in).done().eval(m) {
         Result::Ok(outputs) => { outputs },
         Result::Err(_) => { panic!("Expected success") }
     };
@@ -237,7 +232,7 @@ fn circuit_scale_9(a: f::Fq) -> f::Fq {
 //      t0 + u512_scl_9(t1, field_nz))
 // }
 
-fn mul_by_xi_nz_as_circuit(t: f::Fq2) -> f::Fq2 {
+fn mul_by_xi_nz_as_circuit(t: f::Fq2, m: CircuitModulus) -> f::Fq2 {
     let t0 = CircuitElement::<CircuitInput<0>> {};
     let t1 = CircuitElement::<CircuitInput<1>> {};
     let scl = CircuitElement::<CircuitInput<2>> {};
@@ -251,8 +246,6 @@ fn mul_by_xi_nz_as_circuit(t: f::Fq2) -> f::Fq2 {
     let t1 = t.c1.c0;
     let scl = [9, 0, 0, 0];
 
-    let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-
     let outputs =
         match (t0_mul_9_sub_t1, t0_add_t1_mul_9,)
             .new_inputs()
@@ -260,7 +253,7 @@ fn mul_by_xi_nz_as_circuit(t: f::Fq2) -> f::Fq2 {
             .next(t1)
             .next(scl)
             .done()
-            .eval(modulus) {
+            .eval(m) {
         Result::Ok(outputs) => { outputs },
         Result::Err(_) => { panic!("Expected success") }
     };
@@ -290,12 +283,12 @@ fn mul_by_xi_nz_as_circuit(t: f::Fq2) -> f::Fq2 {
 
 
 #[inline(always)]
-fn mul_by_v_nz_as_circuit(t: f::Fq6) -> f::Fq6 {
+fn mul_by_v_nz_as_circuit(t: f::Fq6, m: CircuitModulus) -> f::Fq6 {
     let t0 = t.c0;
     let t1 = t.c1;
     let t2 = t.c2;
 
-    f::Fq6 { c0: mul_by_xi_nz_as_circuit(t2), c1: t0, c2: t1 }
+    f::Fq6 { c0: mul_by_xi_nz_as_circuit(t2, m), c1: t0, c2: t1 }
 }
 
 // #[inline(always)]

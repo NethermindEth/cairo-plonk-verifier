@@ -14,7 +14,7 @@ use plonk_verifier::traits::{FieldUtils, FieldOps, FieldEqs};
 // use plonk_verifier::fast_mod::{u512_high_add};
 // use plonk_verifier::curve::{u512, U512BnAdd, U512BnSub, u512_reduce, u512_add, u512_sub};
 //use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
-use plonk_verifier::curve::{FIELD, get_field_nz, circuit_scale_9};
+use plonk_verifier::curve::{circuit_scale_9};
 use plonk_verifier::fields::{Fq, fq, FqOps};
 // use plonk_verifier::fields::print::u512Display;
 use plonk_verifier::curve::constants::FIELD_U384;
@@ -41,12 +41,12 @@ impl Fq2Frobenius of Fq2FrobeniusTrait {
     }
 
     #[inline(always)]
-    fn frob1(self: Fq2) -> Fq2 {
-        self.conjugate()
+    fn frob1(self: Fq2, m: CircuitModulus) -> Fq2 {
+        self.conjugate(m)
     }
 }
 
-impl Fq2Utils of FieldUtils<Fq2, u384> {
+impl Fq2Utils of FieldUtils<Fq2, u384, CircuitModulus> {
     #[inline(always)]
     fn one() -> Fq2 {
         fq2(one_384, zero_384)
@@ -58,7 +58,7 @@ impl Fq2Utils of FieldUtils<Fq2, u384> {
     }
 
     #[inline(always)]
-    fn scale(self: Fq2, by: u384) -> Fq2 {
+    fn scale(self: Fq2, by: u384, m: CircuitModulus) -> Fq2 {
         let a_c0 = CircuitElement::<CircuitInput<0>> {};
         let a_c1 = CircuitElement::<CircuitInput<1>> {};
         let scalar = CircuitElement::<CircuitInput<2>> {};
@@ -92,29 +92,28 @@ impl Fq2Utils of FieldUtils<Fq2, u384> {
     }
 
     #[inline(always)]
-    fn conjugate(self: Fq2) -> Fq2 {
-        Fq2 { c0: self.c0, c1: self.c1.neg(), }
+    fn conjugate(self: Fq2, m: CircuitModulus) -> Fq2 {
+        Fq2 { c0: self.c0, c1: self.c1.neg(m), }
     }
     
     #[inline(always)]
-    fn mul_by_nonresidue(self: Fq2) -> Fq2 {
-        let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+    fn mul_by_nonresidue(self: Fq2, m: CircuitModulus) -> Fq2 {
         let Fq2 { c0: a0, c1: a1 } = self;
         // fq2(9, 1)
         Fq2 { //  a0 * b0 + a1 * βb1,
-            c0: circuit_scale_9(a0).sub(a1), //  
+            c0: circuit_scale_9(a0, m).sub(a1, m), //  
              // c1: a0 * b1 + a1 * b0,
-            c1: a0.add(circuit_scale_9(a1), m), //
+            c1: a0.add(circuit_scale_9(a1, m), m), //
         }
     }
 
     #[inline(always)]
-    fn frobenius_map(self: Fq2, power: usize) -> Fq2 {
+    fn frobenius_map(self: Fq2, power: usize, m: CircuitModulus) -> Fq2 {
         if power % 2 == 0 {
             self
         } else {
             // Fq2 { c0: self.c0, c1: self.c1.mul_by_nonresidue(), }
-            self.conjugate()
+            self.conjugate(m)
         }
     }
 }
@@ -146,12 +145,12 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
     }
 
     #[inline(always)]
-    fn sub(self: Fq2, rhs: Fq2) -> Fq2 {
-        Fq2 { c0: self.c0.sub(rhs.c0), c1: self.c1.sub(rhs.c1), }
+    fn sub(self: Fq2, rhs: Fq2, m: CircuitModulus) -> Fq2 {
+        Fq2 { c0: self.c0.sub(rhs.c0, m), c1: self.c1.sub(rhs.c1, m), }
     }
 
     #[inline(always)]
-    fn mul(self: Fq2, rhs: Fq2) -> Fq2 {
+    fn mul(self: Fq2, rhs: Fq2, m: CircuitModulus) -> Fq2 {
         let a0 = CircuitElement::<CircuitInput<0>> {};
         let a1 = CircuitElement::<CircuitInput<1>> {};
         let b0 = CircuitElement::<CircuitInput<2>> {};
@@ -187,19 +186,19 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
     }
 
     #[inline(always)]
-    fn div(self: Fq2, rhs: Fq2) -> Fq2 {
-        let inv_rhs = rhs.inv();
-        let res = Self::mul(self, inv_rhs);
+    fn div(self: Fq2, rhs: Fq2, m: CircuitModulus) -> Fq2 {
+        let inv_rhs = rhs.inv(m);
+        let res = Self::mul(self, inv_rhs, m);
         res
     }
 
     #[inline(always)]
-    fn neg(self: Fq2) -> Fq2 {
-        Fq2 { c0: self.c0.neg(), c1: self.c1.neg(), }
+    fn neg(self: Fq2, m: CircuitModulus) -> Fq2 {
+        Fq2 { c0: self.c0.neg(m), c1: self.c1.neg(m), }
     }
 
     #[inline(always)]
-    fn sqr(self: Fq2) -> Fq2 {
+    fn sqr(self: Fq2, m: CircuitModulus) -> Fq2 {
         // // Aranha sqr_u + 2r
         let a0 = CircuitElement::<CircuitInput<0>> {};
         let a1 = CircuitElement::<CircuitInput<1>> {};
@@ -226,11 +225,10 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
 
 
     #[inline(always)]
-    fn inv(self: Fq2) -> Fq2 {
-        let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+    fn inv(self: Fq2, m: CircuitModulus) -> Fq2 {
         let Fq2 { c0, c1 } = self;
-        let t = c0.sqr().add(c1.sqr(), m).inv();
-        Fq2 { c0: c0.mul(t), c1: c1.mul(t.neg()) }
+        let t = c0.sqr(m).add(c1.sqr(m), m).inv(m);
+        Fq2 { c0: c0.mul(t, m), c1: c1.mul(t.neg(m), m) }
     }
 }
 

@@ -10,6 +10,8 @@ use plonk_verifier::curve::groups::{g1, g2, AffineG1, AffineG2, Fq, Fq2};
 use plonk_verifier::curve::constants::{ORDER};
 use plonk_verifier::fields::{Fq6, fq, fq6};
 use plonk_verifier::fields::fq_generics::TFqPartialEq;
+use plonk_verifier::curve::constants::FIELD_U384;
+use core::circuit::CircuitModulus;
 
 #[test]
 fn test_plonk_verify() {
@@ -35,6 +37,7 @@ fn test_plonk_verify() {
 }
 #[test]
 fn test_is_on_curve() {
+    let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
     let pt_on_curve = g1(
         4693417943536520268746058560989260808135478372449023987176805259899316401080,
         8186764010206899711756657704517859444555824539207093839904632766037261603989
@@ -43,8 +46,8 @@ fn test_is_on_curve() {
         4693417943536520268746058560989260808135478372449023987176805259899316401080,
         8186764010206899711756657704517859444555824539207093839904632766037261603987
     );
-    assert_eq!(PlonkVerifier::is_on_curve(pt_on_curve), true);
-    assert_eq!(PlonkVerifier::is_on_curve(pt_not_on_curve), false);
+    assert_eq!(PlonkVerifier::is_on_curve(pt_on_curve, m), true);
+    assert_eq!(PlonkVerifier::is_on_curve(pt_not_on_curve, m), false);
 }
 
 #[test]
@@ -136,6 +139,7 @@ fn test_compute_lagrange_evaluations() {
     let verification_key = PlonkVerificationKey {
         n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
     };
+    let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
     let mut challenges: PlonkChallenge = PlonkChallenge {
         beta: fq(
             from_u256(14498736666711970908375456476345180774162405747758964362513385423508335735322)
@@ -170,7 +174,7 @@ fn test_compute_lagrange_evaluations() {
             from_u256(6089190548497707896050173528768502095987431640910795526240399704164855396906)
         )
     };
-    let (L, challenges) = PlonkVerifier::compute_lagrange_evaluations(verification_key, challenges);
+    let (L, challenges) = PlonkVerifier::compute_lagrange_evaluations(verification_key, challenges, m);
     let correct_L = array![
         fq(from_u256(0)),
         fq(from_u256(2620616904154172175670395853552055689556084771717235903725482226645091308782)),
@@ -243,6 +247,7 @@ fn test_compute_R0() {
 }
 #[test]
 fn test_compute_D() {
+    let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
     let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw) =
         constants::proof();
     let proof = PlonkProof {
@@ -294,7 +299,7 @@ fn test_compute_D() {
     let L1 = fq(
         from_u256(2620616904154172175670395853552055689556084771717235903725482226645091308782)
     );
-    let D = PlonkVerifier::compute_D(proof, challenges, verification_key, L1);
+    let D = PlonkVerifier::compute_D(proof, challenges, verification_key, L1, m);
     let corret_D = g1(
         4333398450220542935061332802082369181528242679087535767638817155055555907729,
         3001452470579370622125939372942669046487921723785465821088780020440992474494
@@ -304,6 +309,7 @@ fn test_compute_D() {
 }
 #[test]
 fn test_compute_F() {
+    let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
     let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw) =
         constants::proof();
     let proof = PlonkProof {
@@ -356,7 +362,7 @@ fn test_compute_F() {
         4333398450220542935061332802082369181528242679087535767638817155055555907729,
         3001452470579370622125939372942669046487921723785465821088780020440992474494
     );
-    let F = PlonkVerifier::compute_F(proof, challenges, verification_key, D);
+    let F = PlonkVerifier::compute_F(proof, challenges, verification_key, D, m);
     let correct_F = g1(
         2447957664398607938229566909991195557288608349864545209476580844025113917745,
         16981442144394521581137981015380711983763128730701172250766417640481995742343
@@ -366,6 +372,7 @@ fn test_compute_F() {
 }
 #[test]
 fn test_compute_E() {
+    let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
     let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw) =
         constants::proof();
     let proof = PlonkProof {
@@ -411,7 +418,7 @@ fn test_compute_E() {
     };
 
     let R0: u256 = 8252012205077960742641393316361079931166529015625841574934366119104137152715;
-    let E = PlonkVerifier::compute_E(proof, challenges, fq(from_u256(R0)));
+    let E = PlonkVerifier::compute_E(proof, challenges, fq(from_u256(R0)), m);
     let correct_E = g1(
         2484568790068257088204458404505761583129899393337173775535121851653226285099,
         6454403560011284872933736696278881925473069516668053066370404348177163484123
@@ -421,6 +428,7 @@ fn test_compute_E() {
 }
 #[test]
 fn test_valid_pairing() {
+    let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
     let (A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw) =
         constants::proof();
     let proof = PlonkProof {
@@ -477,7 +485,7 @@ fn test_valid_pairing() {
         2447957664398607938229566909991195557288608349864545209476580844025113917745,
         16981442144394521581137981015380711983763128730701172250766417640481995742343
     );
-    let valid = PlonkVerifier::valid_pairing(proof, challenges, verification_key, E, F);
+    let valid = PlonkVerifier::valid_pairing(proof, challenges, verification_key, E, F, m);
     assert_eq!(valid, true);
 }
 // corelib keccak hash test
