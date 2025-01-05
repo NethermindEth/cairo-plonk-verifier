@@ -23,7 +23,6 @@ fn fq2(c0: u384, c1: u384) -> Fq2 {
     Fq2 { c0: fq(c0), c1: fq(c1), }
 }
 
-
 #[generate_trait]
 impl Fq2Frobenius of Fq2FrobeniusTrait {
     #[inline(always)]
@@ -187,7 +186,6 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
         let fq_t = Fq2 { c0: fq_t0, c1: fq_t1 };
         fq_t
     }
-
 
     #[inline(always)]
     fn inv(self: Fq2, m: CircuitModulus) -> Fq2 {

@@ -21,7 +21,7 @@ fn add_c(mut a: u384, mut b: u384, m: CircuitModulus) -> u384 {
         Result::Err(_) => { panic!("Expected success") }
     };
 
-    let o = outputs.get_output(add).try_into().unwrap();
+    let o = outputs.get_output(add);
     o
 }
 
@@ -36,7 +36,7 @@ fn add_co(mut a: u384, mut b: u384, m_o: CircuitModulus) -> u384 {
         Result::Err(_) => { panic!("Expected success") }
     };
 
-    let o = outputs.get_output(add).try_into().unwrap();
+    let o = outputs.get_output(add);
     o
 }
 
@@ -51,7 +51,7 @@ fn sub_c(mut a: u384, mut b: u384, m: CircuitModulus) -> u384 {
         Result::Err(_) => { panic!("Expected success") }
     };
 
-    let o = outputs.get_output(sub).try_into().unwrap();
+    let o = outputs.get_output(sub);
     o
 }
 
@@ -66,7 +66,7 @@ fn sub_co(mut a: u384, mut b: u384, m_o: CircuitModulus) -> u384 {
         Result::Err(_) => { panic!("Expected success") }
     };
 
-    let o = outputs.get_output(sub).try_into().unwrap();
+    let o = outputs.get_output(sub);
     o
 }
 
@@ -83,7 +83,7 @@ fn neg_c(mut a: u384, m: CircuitModulus) -> u384 {
         Result::Err(_) => { panic!("Expected success") }
     };
 
-    let o = outputs.get_output(sub).try_into().unwrap();
+    let o = outputs.get_output(sub);
     o
 }
 
@@ -100,7 +100,7 @@ fn neg_co(mut a: u384, m_o: CircuitModulus) -> u384 {
         Result::Err(_) => { panic!("Expected success") }
     };
 
-    let o = outputs.get_output(sub).try_into().unwrap();
+    let o = outputs.get_output(sub);
     o
 }
 
@@ -114,7 +114,7 @@ fn inv_c(b: u384, m: CircuitModulus) -> u384 {
         Result::Err(_) => { panic!("Expected success") }
     };
 
-    let o = outputs.get_output(r_inv).try_into().unwrap();
+    let o = outputs.get_output(r_inv);
     o
 }
 
@@ -130,7 +130,7 @@ fn div_c(a: u384, b: u384, m: CircuitModulus) -> u384 {
         Result::Err(_) => { panic!("Expected success") }
     };
 
-    let o = outputs.get_output(div).try_into().unwrap();
+    let o = outputs.get_output(div);
     o
 }
 
@@ -146,7 +146,7 @@ fn div_co(a: u384, b: u384, m_o: CircuitModulus) -> u384 {
         Result::Err(_) => { panic!("Expected success") }
     };
 
-    let o = outputs.get_output(div).try_into().unwrap();
+    let o = outputs.get_output(div);
     o
 }
 
@@ -161,7 +161,7 @@ fn mul_c(a: u384, b: u384, m: CircuitModulus) -> u384 {
         Result::Err(_) => { panic!("Expected success") }
     };
 
-    let o = outputs.get_output(mul).try_into().unwrap();
+    let o = outputs.get_output(mul);
     o
 }
 
@@ -176,7 +176,7 @@ fn mul_co(a: u384, b: u384, m_o: CircuitModulus) -> u384 {
         Result::Err(_) => { panic!("Expected success") }
     };
 
-    let o = outputs.get_output(mul).try_into().unwrap();
+    let o = outputs.get_output(mul);
     o
 }
 
@@ -193,7 +193,7 @@ fn scl_c(a: u384, b: u128, m: CircuitModulus) -> u384 {
         Result::Err(_) => { panic!("Expected success") }
     };
 
-    let o = outputs.get_output(mul).try_into().unwrap();
+    let o = outputs.get_output(mul);
     o
 }
 
@@ -207,7 +207,7 @@ fn sqr_c(a: u384, m: CircuitModulus) -> u384 {
         Result::Err(_) => { panic!("Expected success") }
     };
 
-    let o = outputs.get_output(mul).try_into().unwrap();
+    let o = outputs.get_output(mul);
     o
 }
 
@@ -221,6 +221,6 @@ fn sqr_co(a: u384, m_o: CircuitModulus) -> u384 {
         Result::Err(_) => { panic!("Expected success") }
     };
 
-    let o = outputs.get_output(mul).try_into().unwrap();
+    let o = outputs.get_output(mul);
     o
 }
