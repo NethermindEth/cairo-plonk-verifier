@@ -1,25 +1,21 @@
-use plonk_verifier::traits::{FieldOps as FOps};
-use plonk_verifier::fields::{fq, Fq, fq2, Fq2};
-use plonk_verifier::curve::constants::FIELD_U384;
 use core::circuit::{
-    RangeCheck96, AddMod, MulMod, u96, CircuitElement, CircuitInput, circuit_add, circuit_sub,
-    circuit_mul, circuit_inverse, EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus,
-    AddInputResultTrait, CircuitInputs, EvalCircuitResult,
+    AddInputResultTrait, AddMod, CircuitElement, CircuitInput, CircuitInputs, CircuitModulus,
+    CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, MulMod, RangeCheck96, u96, u384,
+    circuit_add, circuit_inverse, circuit_mul, circuit_sub,
 };
 use core::circuit::conversions::from_u256;
-use core::fmt::{Display, Formatter, Error};
 use core::circuit::{
-	AddModGate as A,
-	SubModGate as S,
-	MulModGate as M,
-	InverseGate as I,
-	CircuitInput as CI,
-	CircuitElement as CE,
+    AddModGate as A, CircuitElement as CE, CircuitInput as CI, InverseGate as I, MulModGate as M,
+    SubModGate as S,
 };
-use debug::PrintTrait as Print;
+
 use plonk_verifier::circuits::affine_circuits::{
-    fq2_y_on_slope_circuit, fq2_pt_on_slope_circuit, fq2_chord_circuit, 
-    fq2_add_circuit, fq2_tangent_circuit, fq2_double_circuit};
+    fq2_add_circuit, fq2_chord_circuit, fq2_double_circuit, fq2_pt_on_slope_circuit,
+    fq2_tangent_circuit, fq2_y_on_slope_circuit,
+};
+use plonk_verifier::curve::constants::FIELD_U384;
+use plonk_verifier::fields::{fq, fq2, Fq, Fq2};
+use plonk_verifier::traits::{FieldOps as FOps};
 
 type AffineG1 = Affine<Fq>;
 type AffineG2 = Affine<Fq2>;
@@ -109,7 +105,6 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
             y_slope_mul_lambda_x1_x, y1
         ); // slope * (*self.x - x) - *self.y
 
-        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let x1 = *self.x.c0;
         let y1 = *self.y.c0;
 
@@ -119,7 +114,7 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
                 .next(x1)
                 .next(y1)
                 .done()
-                .eval(modulus) {
+                .eval(m) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
@@ -153,7 +148,6 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
             y_slope_mul_lambda_x1_x, y1
         ); // slope * (*self.x - x) - *self.y
 
-        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let x1 = *self.x.c0;
         let y1 = *self.y.c0;
         let x2 = rhs.x.c0;
@@ -167,7 +161,7 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
                 .next(x2)
                 .next(y2)
                 .done()
-                .eval(modulus) {
+                .eval(m) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
@@ -261,7 +255,6 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
             y_slope_mul_lambda_x1_x, y1
         ); // slope * (*self.x - x) - *self.y
 
-        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let lambda = slope.c0;
         let x1 = *self.x.c0;
         let y1 = *self.y.c0;
@@ -275,7 +268,7 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
                 .next(y1)
                 .next(x2)
                 .done()
-                .eval(modulus) {
+                .eval(m) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
@@ -298,14 +291,13 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
         let x2_x1_inv = circuit_inverse(x2_x1);
         let mul = circuit_mul(y2_y1, x2_x1_inv);
 
-        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let x1 = *self.x.c0;
         let y1 = *self.y.c0;
         let x2 = rhs.x.c0;
         let y2 = rhs.y.c0;
 
         let outputs =
-            match (mul,).new_inputs().next(x1).next(x2).next(y1).next(y2).done().eval(modulus) {
+            match (mul,).new_inputs().next(x1).next(x2).next(y1).next(y2).done().eval(m) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
@@ -324,7 +316,6 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
     }
 
     fn y_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x: Fq2, m: CircuitModulus) -> Fq2 {
-        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
 
         let (c0, c1) = fq2_y_on_slope_circuit();
 
@@ -339,7 +330,7 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
             .next(x.c0.c0)
             .next(x.c1.c0)
             .done()
-            .eval(modulus) {
+            .eval(m) {
                 Result::Ok(out) => { out },
                 Result::Err(_) => { panic!("Expected success") }
         };
@@ -348,8 +339,6 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
     }
 
     fn pt_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x2: Fq2, m: CircuitModulus) -> Affine<Fq2> {
-        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-
         let (c0, c1, c2, c3) = fq2_pt_on_slope_circuit();
 
         let out = match (c0, c1, c2, c3)
@@ -363,7 +352,7 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
             .next(x2.c0.c0)
             .next(x2.c1.c0)
             .done()
-            .eval(modulus) {
+            .eval(m) {
                 Result::Ok(outputs) => { outputs },
                 Result::Err(_) => { panic!("Expected success") }
         };
@@ -371,9 +360,7 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
         affine_fq2(out.get_output(c0), out.get_output(c1), out.get_output(c2), out.get_output(c3))
     }
 
-    fn chord_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>, m: CircuitModulus) -> Fq2 {
-        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-        
+    fn chord_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>, m: CircuitModulus) -> Fq2 {        
         let (c0, c1) = fq2_chord_circuit();
 
         let out = match (c0, c1,)
@@ -387,7 +374,7 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
             .next(rhs.y.c0.c0)
             .next(rhs.y.c1.c0)
             .done()
-            .eval(modulus) {
+            .eval(m) {
                 Result::Ok(outputs) => { outputs },
                 Result::Err(_) => { panic!("Expected success") }
         };
@@ -396,8 +383,6 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
     }
 
     fn add_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>, m: CircuitModulus) -> Affine<Fq2> {
-        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-
         let (c0, c1, c2, c3) = fq2_add_circuit();
 
         let out = match (c0, c1, c2, c3)
@@ -411,7 +396,7 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
             .next(rhs.y.c0.c0)
             .next(rhs.y.c1.c0)
             .done()
-            .eval(modulus) {
+            .eval(m) {
                 Result::Ok(outputs) => { outputs },
                 Result::Err(_) => { panic!("Expected success") }
         };
@@ -419,9 +404,7 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
         affine_fq2(out.get_output(c0), out.get_output(c1), out.get_output(c2), out.get_output(c3))
     }
 
-    fn tangent_as_circuit(self: @Affine<Fq2>, m: CircuitModulus) -> Fq2 {
-        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-        
+    fn tangent_as_circuit(self: @Affine<Fq2>, m: CircuitModulus) -> Fq2 {        
         let (c0, c1) = fq2_tangent_circuit();
 
         let out = match (c0, c1,)
@@ -431,7 +414,7 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
             .next(*self.y.c0.c0)
             .next(*self.y.c1.c0)
             .done()
-            .eval(modulus) {
+            .eval(m) {
                 Result::Ok(outputs) => { outputs },
                 Result::Err(_) => { panic!("Expected success") }
         };
@@ -440,8 +423,6 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
     }
 
     fn double_as_circuit(self: @Affine<Fq2>, m: CircuitModulus) -> Affine<Fq2> {
-        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-
         let (c0, c1, c2, c3) = fq2_double_circuit();
 
         let out = match (c0, c1, c2, c3)
@@ -451,7 +432,7 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
             .next(*self.y.c0.c0)
             .next(*self.y.c1.c0)
             .done()
-            .eval(modulus) {
+            .eval(m) {
                 Result::Ok(outputs) => { outputs },
                 Result::Err(_) => { panic!("Expected success") }
         };

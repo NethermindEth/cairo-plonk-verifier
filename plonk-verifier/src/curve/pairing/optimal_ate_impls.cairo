@@ -1,17 +1,19 @@
-use plonk_verifier::fields::fq_sparse::FqSparseTrait;
-use plonk_verifier::traits::{FieldUtils, MillerPrecompute, MillerSteps};
-use plonk_verifier::fields::{
-    Fq, Fq2, fq2, Fq6, Fq12, FqOps, Fq2Utils, Fq2Ops, Fq12Utils, Fq12Ops, Fq12Exponentiation,
-    Fq12Sparse034, Fq12Sparse01234, FqSparse,
-};
+use core::circuit::CircuitModulus;
+
 use plonk_verifier::curve::groups::{
-    g1, g2, ECGroup, ECOperationsCircuitFq2, Affine, AffineG1 as PtG1, AffineG2 as PtG2,
+    Affine, AffineG1 as PtG1, AffineG2 as PtG2, ECGroup, ECOperationsCircuitFq2, g1, g2,
 };
 use plonk_verifier::curve::pairing::optimal_ate_utils::{
-    PPrecompute, p_precompute, step_dbl_add_to_f, step_dbl_add, step_double_to_f, step_double,
-    correction_step_to_f,
+    PPrecompute, correction_step_to_f, p_precompute, step_dbl_add, step_dbl_add_to_f,
+    step_double, step_double_to_f,
 };
-use core::circuit::CircuitModulus; 
+use plonk_verifier::fields::{
+    Fq, Fq2, Fq6, Fq12, FqOps, Fq2Ops, Fq2Utils, Fq12Ops, Fq12Utils, Fq12Exponentiation,
+    Fq12Sparse01234, Fq12Sparse034, FqSparse,
+};
+use plonk_verifier::fields::fq_sparse::FqSparseTrait;
+use plonk_verifier::traits::{FieldUtils, MillerPrecompute, MillerSteps};
+
 
 #[derive(Copy, Drop)]
 struct PreCompute {

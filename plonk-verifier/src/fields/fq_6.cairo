@@ -1,30 +1,28 @@
-use plonk_verifier::curve::{mul_by_xi_nz_as_circuit};
-use plonk_verifier::fields::{Fq, Fq2, Fq2Ops, Fq2Utils, fq, fq2, Fq2Frobenius};
-use plonk_verifier::traits::{FieldUtils, FieldOps, FieldEqs};
-use plonk_verifier::fields::frobenius::fp6 as frob;
-use plonk_verifier::curve::constants::FIELD_U384;
-use plonk_verifier::circuit_mod::{
-    add_c, sub_c, neg_c, div_c, inv_c, mul_c, sqr_c, one_384, zero_384
-};
-use core::traits::TryInto;
-use core::circuit::conversions::from_u256;
 use core::circuit::{
-    CircuitElement, CircuitInput, circuit_add, circuit_sub, circuit_mul, circuit_inverse,
-    EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus, AddInputResultTrait, CircuitInputs,
-    EvalCircuitResult,
+    AddInputResultTrait, AddModGate as A, CircuitElement, CircuitElement as CE, CircuitInput,
+    CircuitInput as CI, CircuitInputs, CircuitModulus, CircuitOutputsTrait, EvalCircuitResult,
+    EvalCircuitTrait, InverseGate as I, MulModGate as M, SubModGate as S, circuit_add,
+    circuit_inverse, circuit_mul, circuit_sub, u384,
 };
-use plonk_verifier::fields::fq_generics::TFqPartialEq;
+use core::circuit::conversions::from_u256;
+use core::traits::TryInto;
 
 use debug::PrintTrait;
-use core::circuit::{
-	AddModGate as A,
-	SubModGate as S,
-	MulModGate as M,
-	InverseGate as I,
-	CircuitInput as CI,
-	CircuitElement as CE,
+
+use plonk_verifier::circuit_mod::{
+    add_c, div_c, inv_c, mul_c, neg_c, one_384, sqr_c, sub_c, zero_384,
 };
-use plonk_verifier::circuits::fq_6_circuits::{add_circuit, mul_circuit, sqr_circuit, neg_circuit, sub_circuit};
+use plonk_verifier::circuits::fq_6_circuits::{
+    add_circuit, mul_circuit, neg_circuit, sqr_circuit, sub_circuit,
+};
+use plonk_verifier::curve::{constants::FIELD_U384, mul_by_xi_nz_as_circuit};
+use plonk_verifier::fields::{
+    fq, fq2, Fq, Fq2, Fq2Frobenius, Fq2Ops, Fq2Utils,
+};
+use plonk_verifier::fields::frobenius::fp6 as frob;
+use plonk_verifier::fields::fq_generics::TFqPartialEq;
+use plonk_verifier::traits::{FieldEqs, FieldOps, FieldUtils};
+
 #[derive(Copy, Drop, Debug)]
 struct Fq6 {
     c0: Fq2,

@@ -13,7 +13,6 @@ use traits::{FieldOps, FieldUtils, FieldEqs};
 mod curve; 
 use curve::{groups as g, pairing};
 
-
 // Todo: Refactor as individual mods. 
 mod circuits {
     mod typedefs {
@@ -49,8 +48,8 @@ mod fields {
     mod fq_12_squaring;
     mod fq_12_exponentiation;
     mod frobenius;
-    mod print;
-    mod utils;
+    // mod print;
+    // mod utils;
     #[cfg(test)]
     mod tests {
         // mod fq12;

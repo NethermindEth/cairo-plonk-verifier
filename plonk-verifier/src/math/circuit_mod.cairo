@@ -1,9 +1,9 @@
 use core::circuit::{
-    CircuitElement, CircuitInput, AddMod, circuit_add, circuit_sub, circuit_mul, circuit_inverse,
-    EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus, AddInputResultTrait, CircuitInputs,
-    EvalCircuitResult
+    AddInputResultTrait, AddMod, CircuitElement, CircuitInput, CircuitInputs, CircuitModulus,
+    CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, circuit_add, circuit_inverse,
+    circuit_mul, circuit_sub, u384,
 };
-use core::circuit::conversions::{from_u128};
+use core::circuit::conversions::from_u128;
 
 use plonk_verifier::curve::constants::{FIELD_U384, ORDER_U384};
 

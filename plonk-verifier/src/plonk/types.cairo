@@ -1,10 +1,16 @@
-use core::array::ArrayTrait;
-use core::traits::Into;
-use plonk_verifier::curve::groups::{AffineG1, AffineG2};
-use plonk_verifier::fields::{Fq};
-use core::fmt::{Display, Formatter, Error};
-use core::circuit::u384;
-use plonk_verifier::fields::fq_generics::TFqPartialEq;
+use core::{
+    array::ArrayTrait,
+    circuit::u384,
+    fmt::{Display, Error, Formatter},
+    traits::Into,
+};
+
+use plonk_verifier::{
+    curve::groups::{AffineG1, AffineG2},
+    fields::{Fq},
+    fields::fq_generics::TFqPartialEq,
+};
+
 #[derive(Copy, Drop)]
 struct PlonkProof {
     A: AffineG1,

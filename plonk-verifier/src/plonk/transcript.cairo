@@ -1,19 +1,25 @@
 use core::{
-    traits::{TryInto, Into, Destruct}, clone::Clone, fmt::{Display, Formatter, Error},
-    byte_array::ByteArrayTrait, to_byte_array::{FormatAsByteArray, AppendFormattedToByteArray},
-    keccak, circuit::conversions::from_u256
+    byte_array::ByteArrayTrait,
+    circuit::conversions::from_u256,
+    clone::Clone,
+    fmt::{Display, Error, Formatter},
+    keccak,
+    to_byte_array::{AppendFormattedToByteArray, FormatAsByteArray},
+    traits::{Destruct, Into, TryInto},
 };
+
 use debug::PrintTrait;
 
 use plonk_verifier::{
-    curve::{groups::{AffineG1, AffineG2, g1, g2}},
+    curve::groups::{AffineG1, AffineG2, g1, g2},
     fields::{fq, Fq, FqIntoU256},
+    math::circuit_mod::{add_co, zero_384},
     plonk::utils::{
         byte_array_to_decimal_without_ascii_without_rev, convert_le_to_be, decimal_to_byte_array,
         hex_to_decimal, reverse_endianness,
     },
-    math::circuit_mod::{add_co, zero_384}
 };
+
 
 #[derive(Drop)]
 pub struct PlonkTranscript {

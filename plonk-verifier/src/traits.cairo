@@ -1,4 +1,3 @@
-
 trait FieldEqs<TFq> {
     fn eq(lhs: @TFq, rhs: @TFq) -> bool;
 }

@@ -1,8 +1,9 @@
-// use plonk_verifier::curve::{add, sub, mul, div, neg};
-use plonk_verifier::traits::{FieldOps, FieldEqs};
-use plonk_verifier::fields::{Fq, Fq2, Fq6, Fq12};
 use core::circuit::CircuitModulus;
+
 use plonk_verifier::curve::constants::FIELD_U384;
+use plonk_verifier::fields::{Fq, Fq2, Fq6, Fq12};
+use plonk_verifier::traits::{FieldEqs, FieldOps};
+
 
 impl TFqPartialEq<TFq, +FieldEqs<TFq>> of PartialEq<TFq> {
     #[inline(always)]

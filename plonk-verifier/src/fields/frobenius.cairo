@@ -1,5 +1,5 @@
-use core::circuit::u384;
-use core::circuit::conversions::from_u256;
+use core::circuit::{u384, conversions::from_u256};
+
 
 mod fp {
     use super::u384;

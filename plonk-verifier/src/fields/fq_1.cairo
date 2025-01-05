@@ -1,19 +1,21 @@
+use core::circuit::{
+    AddInputResultTrait, CircuitElement, CircuitInput, CircuitInputs, CircuitModulus,
+    CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, circuit_add, circuit_inverse,
+    circuit_mul, circuit_sub, u384,
+};
+use core::circuit::conversions::from_u256;
 use core::num::traits::Zero;
 use core::traits::TryInto;
-use core::circuit::conversions::from_u256;
+
 use debug::PrintTrait;
 
 use integer::u512;
-use core::circuit::{
-    CircuitElement, CircuitInput, circuit_add, circuit_sub, circuit_mul, circuit_inverse,
-    EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus, AddInputResultTrait, CircuitInputs,
-    EvalCircuitResult,
+
+use plonk_verifier::circuit_mod::{
+    add_c, div_c, inv_c, mul_c, neg_c, one_384, scl_c, sqr_c, sub_c, zero_384,
 };
 use plonk_verifier::curve::constants::FIELD_U384;
-use plonk_verifier::circuit_mod::{
-    add_c, sub_c, neg_c, div_c, inv_c, mul_c, sqr_c, scl_c, one_384, zero_384
-};
-use plonk_verifier::traits::{FieldUtils, FieldOps, FieldEqs};
+use plonk_verifier::traits::{FieldEqs, FieldOps, FieldUtils};
 
 #[derive(Copy, Drop, Debug)]
 struct Fq {

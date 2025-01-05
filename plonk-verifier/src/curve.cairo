@@ -1,12 +1,15 @@
-use core::option::OptionTrait;
-use core::traits::TryInto;
-use core::circuit::{
-    CircuitElement, CircuitInput, AddMod, circuit_add, circuit_sub, circuit_mul, circuit_inverse,
-    EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus, AddInputResultTrait, CircuitInputs,
-    EvalCircuitResult
+use core::{
+    circuit::{
+        AddInputResultTrait, AddMod, CircuitElement, CircuitInput, CircuitInputs, CircuitModulus,
+        CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, circuit_add, circuit_inverse,
+        circuit_mul, circuit_sub, u384, conversions::{from_u128, from_u256},
+    },
+    option::OptionTrait,
+    traits::TryInto,
 };
+
 use plonk_verifier::curve::constants::{FIELD_U384, ORDER_U384};
-use core::circuit::conversions::{from_u128, from_u256};
+
 mod constants;
 mod groups;
 

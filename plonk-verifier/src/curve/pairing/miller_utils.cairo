@@ -1,10 +1,10 @@
-use core::debug::PrintTrait;
-use core::circuit::u384;
-use plonk_verifier::fields::{Fq12, Fq12Utils};
-use plonk_verifier::curve::groups::{Affine, AffineG1, AffineG2};
-use plonk_verifier::fields::{FieldUtils, FieldOps, fq, Fq, Fq2, Fq6};
+use core::circuit::{CircuitModulus, u384};
+
 use plonk_verifier::curve::constants::FIELD_U384;
-use core::circuit::CircuitModulus;
+use plonk_verifier::curve::groups::{Affine, AffineG1, AffineG2};
+use plonk_verifier::fields::{
+    fq, Fq, Fq2, Fq6, Fq12, Fq12Utils, FieldOps, FieldUtils,
+};
 
 trait LineEvaluationsTrait<P1, P2> {
     /// The sloped line function for doubling a point

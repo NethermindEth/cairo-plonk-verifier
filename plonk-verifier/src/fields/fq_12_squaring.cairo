@@ -1,16 +1,16 @@
 use core::array::ArrayTrait;
-use plonk_verifier::curve::{mul_by_xi_nz_as_circuit};
-use plonk_verifier::fields::{
-    FieldUtils, FieldOps, fq, Fq, Fq2, Fq6, Fq12, fq12, Fq12Frobenius
-};
-use plonk_verifier::fields::fq_generics::TFqPartialEq;
 use core::circuit::{
-    CircuitElement, CircuitInput, circuit_add, circuit_sub, circuit_mul, circuit_inverse,
-    EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus, AddInputResultTrait, CircuitInputs,
-    EvalCircuitResult,
+    AddInputResultTrait, CircuitElement, CircuitInput, CircuitInputs, CircuitModulus,
+    CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, circuit_add, circuit_inverse,
+    circuit_mul, circuit_sub, u384,
 };
 use core::circuit::conversions::from_u256;
-use plonk_verifier::curve::constants::FIELD_U384;
+
+use plonk_verifier::curve::{constants::FIELD_U384, mul_by_xi_nz_as_circuit};
+use plonk_verifier::fields::{
+    fq, fq12, Fq, Fq2, Fq6, Fq12, Fq12Frobenius, FieldOps, FieldUtils,
+};
+use plonk_verifier::fields::fq_generics::TFqPartialEq;
 
 #[derive(Copy, Drop,)]
 struct Krbn2345 {

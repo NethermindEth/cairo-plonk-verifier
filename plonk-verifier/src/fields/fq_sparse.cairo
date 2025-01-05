@@ -1,16 +1,16 @@
+use core::array::ArrayTrait;
+use core::circuit::CircuitModulus;
 use core::starknet::secp256_trait::Secp256PointTrait;
 use core::traits::TryInto;
-use core::array::ArrayTrait;
-use plonk_verifier::curve::{mul_by_xi_nz_as_circuit, mul_by_v_nz_as_circuit};
+
+use plonk_verifier::circuit_mod::{
+    add_c, div_c, inv_c, mul_c, neg_c, one_384, sqr_c, sub_c, zero_384,
+};
+use plonk_verifier::curve::{constants::FIELD_U384, mul_by_v_nz_as_circuit, mul_by_xi_nz_as_circuit};
 use plonk_verifier::fields::{
-    FieldUtils, FieldOps, fq, Fq, Fq2, Fq6, Fq2Ops, fq6, Fq12, fq12, Fq12Frobenius, Fq12Squaring
+    fq, fq6, fq12, Fq, Fq2, Fq2Ops, Fq6, Fq12, Fq12Frobenius, Fq12Squaring, FieldOps, FieldUtils,
 };
 use plonk_verifier::fields::fq_generics::TFqPartialEq;
-use plonk_verifier::circuit_mod::{
-    add_c, sub_c, neg_c, div_c, inv_c, mul_c, sqr_c, one_384, zero_384
-};
-use plonk_verifier::curve::constants::FIELD_U384;
-use core::circuit::CircuitModulus;
 
 // Sparse Fp12 element containing only c3 and c4 Fq2s (c0 is 1)
 // Equivalent to,

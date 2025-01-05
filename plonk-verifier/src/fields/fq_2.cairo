@@ -1,20 +1,20 @@
-use core::traits::TryInto;
 use core::circuit::{
-    CircuitElement, CircuitInput, AddMod, circuit_add, circuit_sub, circuit_mul, circuit_inverse,
-    EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus, AddInputResultTrait, CircuitInputs,
-    EvalCircuitResult
+    AddInputResultTrait, AddMod, CircuitElement, CircuitInput, CircuitInputs, CircuitModulus,
+    CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, circuit_add, circuit_inverse,
+    circuit_mul, circuit_sub, u384,
 };
-use core::circuit::conversions::{from_u128, from_u256};
+use core::traits::TryInto;
+
 use debug::PrintTrait;
 
 use plonk_verifier::circuit_mod::{
-    add_c, sub_c, neg_c, div_c, inv_c, mul_c, sqr_c, one_384, zero_384
+    add_c, div_c, inv_c, mul_c, neg_c, one_384, sqr_c, sub_c, zero_384,
 };
-use plonk_verifier::traits::{FieldUtils, FieldOps, FieldEqs};
 use plonk_verifier::curve::{circuit_scale_9};
-use plonk_verifier::fields::{Fq, fq, FqOps};
 use plonk_verifier::curve::constants::FIELD_U384;
+use plonk_verifier::fields::{fq, Fq, FqOps};
 use plonk_verifier::fields::fq_generics::TFqPartialEq;
+use plonk_verifier::traits::{FieldEqs, FieldOps, FieldUtils};
 
 #[derive(Copy, Drop, Debug)]
 struct Fq2 {
@@ -61,8 +61,6 @@ impl Fq2Utils of FieldUtils<Fq2, u384, CircuitModulus> {
         let a_c0_scale = circuit_mul(a_c0, scalar);
         let a_c1_scale = circuit_mul(a_c1, scalar);
 
-        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-
         let a0 = self.c0.c0;
         let a1 = self.c1.c0;
         let scalar = by;
@@ -74,7 +72,7 @@ impl Fq2Utils of FieldUtils<Fq2, u384, CircuitModulus> {
                 .next(a1)
                 .next(scalar)
                 .done()
-                .eval(modulus) {
+                .eval(m) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
@@ -160,15 +158,13 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
         let t3 = circuit_sub(t2, t3);
         let t4 = circuit_sub(t0, t1);
 
-        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-
         let a0 = self.c0.c0;
         let a1 = self.c1.c0;
         let b0 = rhs.c0.c0;
         let b1 = rhs.c1.c0;
 
         let outputs =
-            match (t3, t4,).new_inputs().next(a0).next(a1).next(b0).next(b1).done().eval(modulus) {
+            match (t3, t4,).new_inputs().next(a0).next(a1).next(b0).next(b1).done().eval(m) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
@@ -202,11 +198,10 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
         let T0 = circuit_mul(t0, t1);
         let t0 = circuit_add(a0, a0);
         let T1 = circuit_mul(t0, a1);
-        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let a0 = self.c0.c0;
         let a1 = self.c1.c0;
 
-        let outputs = match (T0, T1,).new_inputs().next(a0).next(a1).done().eval(modulus) {
+        let outputs = match (T0, T1,).new_inputs().next(a0).next(a1).done().eval(m) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };

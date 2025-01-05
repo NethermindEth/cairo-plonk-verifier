@@ -1,29 +1,32 @@
 use core::{
-    array::ArrayTrait, clone::Clone, cmp::max, debug::{PrintTrait, print_byte_array_as_string},
-    fmt::Display, option::OptionTrait, traits::{Destruct, Into, TryInto},
+    array::ArrayTrait,
+    circuit::{
+        AddInputResultTrait, AddMod, CircuitElement, CircuitInput, CircuitInputs, CircuitModulus,
+        CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, RangeCheck96, U384Zero, u96,
+        u384, circuit_add, circuit_inverse, circuit_mul, circuit_sub,
+        conversions::from_u256,
+    },
+    clone::Clone,
+    cmp::max,
+    debug::{PrintTrait, print_byte_array_as_string},
+    fmt::Display,
+    option::OptionTrait,
+    traits::{Destruct, Into, TryInto},
 };
-
-use core::circuit::{
-    AddInputResultTrait, AddMod, CircuitElement, CircuitInput, CircuitInputs, CircuitModulus,
-    CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, RangeCheck96, U384Zero, u96, u384,
-    circuit_add, circuit_inverse, circuit_mul, circuit_sub,
-};
-use core::circuit::conversions::from_u256;
-use plonk_verifier::fields::fq_generics::TFqPartialEq;
 
 use plonk_verifier::{
     curve::{
-        groups::{g1, g2, AffineG1, AffineG2, AffineG2Impl, ECOperationsCircuitFq},
         constants::{FIELD_U384, ORDER, ORDER_384, ORDER_U384},
+        groups::{AffineG1, AffineG2, AffineG2Impl, ECOperationsCircuitFq, g1, g2},
     },
-        //neg_o, sqr_nz, mul, mul_u, mul_nz, div_nz, add_nz, sub_u, sub, u512,
-    fields::{fq, Fq, Fq12, Fq12Exponentiation, Fq12Utils, FqUtils},
+    fields::{
+        fq, Fq, Fq12, Fq12Exponentiation, Fq12Utils, FqUtils,
+        fq_generics::TFqPartialEq,
+    },
     math::circuit_mod::{
-        mul_c, sqr_c, sqr_co, sub_c, sub_co, add_c, add_co, div_c, div_co, neg_co, mul_co
+        add_c, add_co, div_c, div_co, mul_c, mul_co, neg_co, sqr_c, sqr_co, sub_c, sub_co,
     },
-    pairing::{
-        optimal_ate::{single_ate_pairing, ate_miller_loop}
-    },
+    pairing::optimal_ate::{ate_miller_loop, single_ate_pairing},
     plonk::{
         transcript::{Keccak256Transcript, Transcript, TranscriptElement},
         types::{PlonkChallenge, PlonkProof, PlonkVerificationKey},

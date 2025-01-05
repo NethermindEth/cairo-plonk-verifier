@@ -1,9 +1,9 @@
-use plonk_verifier::curve::{circuit_scale_9};
-use plonk_verifier::fields::{
-    FieldUtils, FieldOps, fq, Fq, Fq2, Fq6, Fq12, fq12, FS01234, FS034, FS01
-};
-use plonk_verifier::curve::constants::FIELD_U384;
 use core::circuit::CircuitModulus;
+
+use plonk_verifier::curve::{circuit_scale_9, constants::FIELD_U384};
+use plonk_verifier::fields::{
+    fq, fq12, Fq, Fq2, Fq6, Fq12, FieldOps, FieldUtils, FS01, FS034, FS01234,
+};
 
 #[inline(always)]
 fn fq12_from_fq(
