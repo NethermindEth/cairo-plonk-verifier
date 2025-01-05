@@ -57,6 +57,33 @@ pub fn generate_fq6_field_ops() -> String {
     builder.build()
 }
 
+pub fn generate_fq2_field_ops() -> String {
+    let mut builder: CairoCodeBuilder = CairoCodeBuilder::new();
+    let idx_0: [usize; 2] = (0..=1).collect::<Vec<usize>>().try_into().unwrap();
+    let idx_1: [usize; 2] = (2..=3).collect::<Vec<usize>>().try_into().unwrap();
+    
+    let lhs = &Fq2::new_input(idx_0);
+    let rhs = &Fq2::new_input(idx_1); 
+    
+    builder
+        .add_line("// Fq2 Add")
+        .add_circuit(Fq2::add(lhs, rhs), None)
+        .add_line("// Fq2 Sub")
+        .add_circuit(Fq2::sub(lhs, rhs), None)
+        .add_line("// Fq2 Mul")
+        .add_circuit(Fq2::mul(lhs, rhs), None)
+        .add_line("// Fq2 Sqr")
+        .add_circuit(Fq2::sqr(lhs), None)
+        .add_line("// Fq2 Div")
+        .add_circuit(Fq2::div(lhs, rhs), None)
+        .add_line("// Fq2 Inv")
+        .add_circuit(Fq2::inv(lhs), None)
+        .add_line("// Fq2 Neg")
+        .add_circuit(Fq2::neg(lhs), None);
+
+    builder.build()
+}
+
 pub fn generate_affine_fq2_ops() -> String {
     let mut builder: CairoCodeBuilder = CairoCodeBuilder::new();
 
