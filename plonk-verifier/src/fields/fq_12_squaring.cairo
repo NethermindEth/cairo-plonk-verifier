@@ -1,16 +1,9 @@
 use core::array::ArrayTrait;
-// use plonk_verifier::curve::{
-//     u512, mul_by_xi_nz, mul_by_v, U512BnAdd, U512BnSub, Tuple2Add, Tuple2Sub,
-//     mul_by_xi_nz_as_circuit
-// };
 use plonk_verifier::curve::{mul_by_xi_nz_as_circuit};
-// use plonk_verifier::curve::{u512_add, u512_sub, u512_high_add, u512_high_sub, U512Fq2Ops};
 use plonk_verifier::fields::{
     FieldUtils, FieldOps, fq, Fq, Fq2, Fq6, Fq12, fq12, Fq12Frobenius
 };
 use plonk_verifier::fields::fq_generics::TFqPartialEq;
-//use plonk_verifier::fields::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
-// use plonk_verifier::fields::print::{Fq2Display, FqDisplay, u512Display};
 use core::circuit::{
     CircuitElement, CircuitInput, circuit_add, circuit_sub, circuit_mul, circuit_inverse,
     EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus, AddInputResultTrait, CircuitInputs,

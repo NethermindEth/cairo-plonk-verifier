@@ -2,14 +2,10 @@ use core::circuit::conversions::from_u256;
 use core::starknet::secp256_trait::Secp256PointTrait;
 use core::traits::TryInto;
 use core::array::ArrayTrait;
-// use plonk_verifier::curve::{u512, mul_by_v, U512BnAdd, U512BnSub, Tuple2Add, Tuple2Sub,};
-// use plonk_verifier::curve::{u512_add, u512_sub, u512_high_add, u512_high_sub, U512Fq2Ops};
 use plonk_verifier::fields::{
     FieldUtils, FieldOps, fq, Fq, Fq2, Fq6, Fq12, fq12, Fq12Frobenius, Fq12Squaring,
     Fq12SquaringCircuit
 };
-//use plonk_verifier::fields::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
-// use plonk_verifier::fields::print::{Fq2Display, FqDisplay, u512Display};
 use plonk_verifier::curve::constants::FIELD_U384;
 use core::circuit::{
     CircuitElement, CircuitInput, circuit_add, circuit_sub, circuit_mul, circuit_inverse,

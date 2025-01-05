@@ -1,15 +1,12 @@
 use plonk_verifier::fields::fq_2::Fq2FrobeniusTrait;
 use plonk_verifier::fields::fq_sparse::FqSparseTrait;
 use plonk_verifier::traits::{FieldUtils};
-//use plonk_verifier::curve::groups::ECOperationsCircuitFq2;
 use plonk_verifier::curve::groups::{g1, g2, ECGroup};
 use plonk_verifier::curve::groups::{Affine, AffineG1 as PtG1, AffineG2 as PtG2};
-// use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 use plonk_verifier::fields::{
     Fq, fq, Fq2, fq2, Fq6, Fq12, Fq12Utils, Fq12Ops, FqOps, Fq2Utils, Fq2Ops, Fq12Exponentiation,
 };
 use plonk_verifier::fields::{Fq12Sparse034, Fq12Sparse01234, FqSparse};
-// use plonk_verifier::fields::print::{Fq2Display, Fq12Display, FqDisplay};
 use plonk_verifier::fields::frobenius::pi;
 use core::circuit::CircuitModulus; 
 

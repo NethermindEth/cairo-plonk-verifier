@@ -1,6 +1,4 @@
 use plonk_verifier::traits::{FieldOps as FOps};
-//use plonk_verifier::fields::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg};
-// use plonk_verifier::fields::print::{FqPrintImpl, Fq2PrintImpl};
 use plonk_verifier::fields::{fq, Fq, fq2, Fq2};
 use plonk_verifier::curve::constants::FIELD_U384;
 use core::circuit::{
@@ -45,18 +43,6 @@ struct Affine<T> {
 trait ECGroup<TCoord> {
     fn one() -> Affine<TCoord>;
 }
-
-// trait ECOperations<TCoord> {
-//     fn x_on_slope(self: @Affine<TCoord>, slope: TCoord, x2: TCoord) -> TCoord;
-//     fn y_on_slope(self: @Affine<TCoord>, slope: TCoord, x: TCoord) -> TCoord;
-//     fn pt_on_slope(self: @Affine<TCoord>, slope: TCoord, x2: TCoord) -> Affine<TCoord>;
-//     fn chord(self: @Affine<TCoord>, rhs: Affine<TCoord>) -> TCoord;
-//     fn add(self: @Affine<TCoord>, rhs: Affine<TCoord>) -> Affine<TCoord>;
-//     fn tangent(self: @Affine<TCoord>) -> TCoord;
-//     fn double(self: @Affine<TCoord>) -> Affine<TCoord>;
-//     fn multiply(self: @Affine<TCoord>, multiplier: u384) -> Affine<TCoord>;
-//     fn neg(self: @Affine<TCoord>) -> Affine<TCoord>;
-// }
 
 trait ECOperationsCircuitFq {
     // fn x_on_slope(self: @Affine<Fq>, slope: Fq, x2: Fq) -> Fq;
@@ -477,6 +463,18 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
         Affine { x: *self.x, y: FOps::neg(*self.y, m) }
     }
 }
+
+// trait ECOperations<TCoord> {
+//     fn x_on_slope(self: @Affine<TCoord>, slope: TCoord, x2: TCoord) -> TCoord;
+//     fn y_on_slope(self: @Affine<TCoord>, slope: TCoord, x: TCoord) -> TCoord;
+//     fn pt_on_slope(self: @Affine<TCoord>, slope: TCoord, x2: TCoord) -> Affine<TCoord>;
+//     fn chord(self: @Affine<TCoord>, rhs: Affine<TCoord>) -> TCoord;
+//     fn add(self: @Affine<TCoord>, rhs: Affine<TCoord>) -> Affine<TCoord>;
+//     fn tangent(self: @Affine<TCoord>) -> TCoord;
+//     fn double(self: @Affine<TCoord>) -> Affine<TCoord>;
+//     fn multiply(self: @Affine<TCoord>, multiplier: u384) -> Affine<TCoord>;
+//     fn neg(self: @Affine<TCoord>) -> Affine<TCoord>;
+// }
 
 // impl AffineOps<
 //     T, +FOps<T>, +Copy<T>, +Drop<T>, impl ECGImpl: ECGroup<T>

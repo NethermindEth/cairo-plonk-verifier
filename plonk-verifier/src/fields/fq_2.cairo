@@ -11,14 +11,9 @@ use plonk_verifier::circuit_mod::{
     add_c, sub_c, neg_c, div_c, inv_c, mul_c, sqr_c, one_384, zero_384
 };
 use plonk_verifier::traits::{FieldUtils, FieldOps, FieldEqs};
-// use plonk_verifier::fast_mod::{u512_high_add};
-// use plonk_verifier::curve::{u512, U512BnAdd, U512BnSub, u512_reduce, u512_add, u512_sub};
-//use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 use plonk_verifier::curve::{circuit_scale_9};
 use plonk_verifier::fields::{Fq, fq, FqOps};
-// use plonk_verifier::fields::print::u512Display;
 use plonk_verifier::curve::constants::FIELD_U384;
-// use plonk_verifier::fields::utils::conversions::into_u512;
 use plonk_verifier::fields::fq_generics::TFqPartialEq;
 
 #[derive(Copy, Drop, Debug)]

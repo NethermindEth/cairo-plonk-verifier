@@ -4,40 +4,6 @@ use plonk_verifier::fields::{Fq, Fq2, Fq6, Fq12};
 use core::circuit::CircuitModulus;
 use plonk_verifier::curve::constants::FIELD_U384;
 
-// impl TFqAdd<TFq, +FieldOps<TFq>> of Add<TFq> {
-
-// impl TFqAdd<TFq> of Add<TFq> {
-//     #[inline(always)]
-//     fn add(lhs: TFq, rhs: TFq) -> TFq {
-//         let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-//         FieldOps::add(lhs, rhs, modulus)
-//     }
-// }
-// impl TFqSub<TFq, +FieldOps<TFq>> of Sub<TFq> {
-//     #[inline(always)]
-//     fn sub(lhs: TFq, rhs: TFq) -> TFq {
-//         FieldOps::sub(lhs, rhs)
-//     }
-// }
-// impl TFqMul<TFq, +FieldOps<TFq>> of Mul<TFq> {
-//     #[inline(always)]
-//     fn mul(lhs: TFq, rhs: TFq) -> TFq {
-//         FieldOps::mul(lhs, rhs)
-//     }
-// }
-// impl TFqDiv<TFq, +FieldOps<TFq>> of Div<TFq> {
-//     #[inline(always)]
-//     fn div(lhs: TFq, rhs: TFq) -> TFq {
-//         FieldOps::div(lhs, rhs)
-//     }
-// }
-// impl TFqNeg<TFq, +FieldOps<TFq>> of Neg<TFq> {
-//     #[inline(always)]
-//     fn neg(a: TFq) -> TFq {
-//         FieldOps::neg(a)
-//     }
-// }
-
 impl TFqPartialEq<TFq, +FieldEqs<TFq>> of PartialEq<TFq> {
     #[inline(always)]
     fn eq(lhs: @TFq, rhs: @TFq) -> bool {

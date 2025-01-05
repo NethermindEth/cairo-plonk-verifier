@@ -1,13 +1,7 @@
 use plonk_verifier::traits::{FieldUtils, FieldOps, FieldEqs};
-//use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 use plonk_verifier::fields::{fq, fq2, Fq, Fq2, Fq2Ops, Fq6, fq6, Fq6Utils, Fq6Frobenius, Fq6Ops};
 use plonk_verifier::fields::frobenius::fp12 as frob;
-// use plonk_verifier::fields::print::{Fq6Display};
 use plonk_verifier::curve::constants::FIELD_U384;
-// use plonk_verifier::curve::{
-//     u512, U512BnAdd, Tuple2Add, Tuple3Add, U512BnSub, Tuple2Sub, Tuple3Sub, u512_reduce,
-//     mul_by_v_nz, mul_by_v_nz_as_circuit, U512Fq6Ops
-// };
 use plonk_verifier::curve::{mul_by_v_nz_as_circuit};
 use core::circuit::conversions::from_u256;
 use core::traits::TryInto;

@@ -4,7 +4,6 @@ use plonk_verifier::fields::{
     Fq, Fq2, fq2, Fq6, Fq12, FqOps, Fq2Utils, Fq2Ops, Fq12Utils, Fq12Ops, Fq12Exponentiation,
     Fq12Sparse034, Fq12Sparse01234, FqSparse,
 };
-//use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 use plonk_verifier::curve::groups::{
     g1, g2, ECGroup, ECOperationsCircuitFq2, Affine, AffineG1 as PtG1, AffineG2 as PtG2,
 };

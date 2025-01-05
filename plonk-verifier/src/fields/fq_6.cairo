@@ -1,13 +1,7 @@
-// use plonk_verifier::curve::{
-//     U512Fq2Ops, u512, U512BnAdd, Tuple2Add, U512BnSub, Tuple2Sub, mul_by_xi, mul_by_xi_nz,
-//     mul_by_xi_nz_as_circuit, u512_reduce, u512_add, u512_sub
-// };
 use plonk_verifier::curve::{mul_by_xi_nz_as_circuit};
-// use plonk_verifier::fields::print::{FqPrintImpl, Fq2PrintImpl, Fq6PrintImpl, Fq12PrintImpl};
 use plonk_verifier::fields::{Fq, Fq2, Fq2Ops, Fq2Utils, fq, fq2, Fq2Frobenius};
 use plonk_verifier::traits::{FieldUtils, FieldOps, FieldEqs};
 use plonk_verifier::fields::frobenius::fp6 as frob;
-//use plonk_verifier::fields::fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
 use plonk_verifier::curve::constants::FIELD_U384;
 use plonk_verifier::circuit_mod::{
     add_c, sub_c, neg_c, div_c, inv_c, mul_c, sqr_c, one_384, zero_384
