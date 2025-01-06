@@ -25,7 +25,7 @@ struct Fq12 {
     c1: Fq6,
 }
 
-#[inline(always)]
+// #[inline(always)]
 fn fq12(
     a0: u384,
     a1: u384,
@@ -145,17 +145,17 @@ impl Fq12Frobenius of Fq12FrobeniusTrait {
 }
 
 impl Fq12Utils of FieldUtils<Fq12, Fq6, CircuitModulus> {
-    #[inline(always)]
+    // #[inline(always)]
     fn one() -> Fq12 {
         Fq12 { c0: FieldUtils::one(), c1: FieldUtils::zero(), }
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn zero() -> Fq12 {
         Fq12 { c0: FieldUtils::zero(), c1: FieldUtils::zero(), }
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn scale(self: Fq12, by: Fq6, m: CircuitModulus) -> Fq12 {
         assert(false, 'no_impl: fq12 scale');
         Self::one()
@@ -459,7 +459,7 @@ fn fq12_karatsuba_sqr(a: Fq12, m: CircuitModulus) -> Fq12 {
 }
 
 impl FqEqs of FieldEqs<Fq12> {
-    #[inline(always)]
+    // #[inline(always)]
     fn eq(lhs: @Fq12, rhs: @Fq12) -> bool {
         lhs.c0 == rhs.c0 && lhs.c1 == rhs.c1
     }

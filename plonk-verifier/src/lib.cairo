@@ -43,8 +43,8 @@ mod fields {
     mod frobenius;
     // mod print;
     // mod utils;
-    #[cfg(test)]
-    mod tests {
+    // #[cfg(test)]
+    // mod tests {
         // mod fq12;
         // mod fq6;
         // mod fq2;
@@ -54,7 +54,7 @@ mod fields {
         // mod u512;
         // mod frobenius;
         // mod utils;
-    }
+    // }
 
     use fq_1::{Fq, FqOps, FqUtils, fq, FqIntoU256};
     use fq_2::{Fq2, Fq2Ops, Fq2Utils, fq2, Fq2Frobenius};

@@ -20,12 +20,12 @@ use plonk_verifier::traits::{FieldOps as FOps};
 type AffineG1 = Affine<Fq>;
 type AffineG2 = Affine<Fq2>;
 
-#[inline(always)]
+// #[inline(always)]
 fn affine_fq1(c0: u384, c1: u384) -> Affine<Fq> {
     Affine { x: fq(c0), y: fq(c1)}
 }
 
-#[inline(always)]
+// #[inline(always)]
 fn affine_fq2(c0: u384, c1: u384, c2: u384, c3: u384) -> Affine<Fq2> {
     Affine { x: fq2(c0, c1), y: fq2(c2, c3)}
 }
@@ -279,7 +279,7 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
         Affine { x, y }
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn chord(self: @Affine<Fq>, rhs: Affine<Fq>, m: CircuitModulus) -> Fq {
         let x1 = CircuitElement::<CircuitInput<0>> {};
         let y1 = CircuitElement::<CircuitInput<1>> {};
@@ -460,26 +460,26 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
 // impl AffineOps<
 //     T, +FOps<T>, +Copy<T>, +Drop<T>, impl ECGImpl: ECGroup<T>
 // > of ECOperations<T> {
-//     #[inline(always)]
+//     // #[inline(always)]
 //     fn x_on_slope(self: @Affine<T>, slope: T, x2: T) -> T {
 //         // x = λ^2 - x1 - x2
 //         slope.sqr().sub(*self.x).sub(x2)
 //     }
 
-//     #[inline(always)]
+//     // #[inline(always)]
 //     fn y_on_slope(self: @Affine<T>, slope: T, x: T) -> T {
 //         // y = λ(x1 - x) - y1
 //         slope * (*self.x - x) - *self.y
 //     }
 
-//     // #[inline(always)]
+//     // // #[inline(always)]
 //     fn pt_on_slope(self: @Affine<T>, slope: T, x2: T) -> Affine<T> {
 //         let x = self.x_on_slope(slope, x2);
 //         let y = self.y_on_slope(slope, x);
 //         Affine { x, y }
 //     }
 
-//     #[inline(always)]
+//     // #[inline(always)]
 //     fn chord(self: @Affine<T>, rhs: Affine<T>) -> T {
 //         let Affine { x: x1, y: y1 } = *self;
 //         let Affine { x: x2, y: y2 } = rhs;
@@ -487,12 +487,12 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
 //         (y2 - y1) / (x2 - x1)
 //     }
 
-//     // #[inline(always)]
+//     // // #[inline(always)]
 //     fn add(self: @Affine<T>, rhs: Affine<T>) -> Affine<T> {
 //         self.pt_on_slope(self.chord(rhs), rhs.x)
 //     }
 
-//     // #[inline(always)]
+//     // // #[inline(always)]
 //     fn tangent(self: @Affine<T>) -> T {
 //         let Affine { x, y } = *self;
 
@@ -503,7 +503,7 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
 //         (x_2 + x_2 + x_2) / y.add(y)
 //     }
 
-//     // #[inline(always)]
+//     // // #[inline(always)]
 //     fn double(self: @Affine<T>) -> Affine<T> {
 //         self.pt_on_slope(self.tangent(), *self.x)
 //     }
@@ -573,25 +573,25 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
 //     }
 // }
 
-#[inline(always)]
+// #[inline(always)]
 fn g1(x: u256, y: u256) -> Affine<Fq> {
     Affine { x: fq(from_u256(x)), y: fq(from_u256(y)) }
 }
 
-#[inline(always)]
+// #[inline(always)]
 fn g2(x1: u256, x2: u256, y1: u256, y2: u256) -> Affine<Fq2> {
     Affine { x: fq2(from_u256(x1), from_u256(x2)), y: fq2(from_u256(y1), from_u256(y2)) }
 }
 
 impl AffineG1Impl of ECGroup<Fq> {
-    #[inline(always)]
+    // #[inline(always)]
     fn one() -> Affine<Fq> {
         g1(1, 2)
     }
 }
 
 impl AffineG2Impl of ECGroup<Fq2> {
-    #[inline(always)]
+    // #[inline(always)]
     fn one() -> AffineG2 {
         g2(
             10857046999023057135944570762232829481370756359578518086990519993285655852781,

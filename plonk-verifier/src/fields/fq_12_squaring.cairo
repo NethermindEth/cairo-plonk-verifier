@@ -21,12 +21,12 @@ struct Krbn2345 {
 }
 
 // Todo: Refactor as Circuits
-#[inline(always)]
+// #[inline(always)]
 fn x2(a: Fq2) -> Fq2 {
     a.add(a, TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap())
 }
 
-#[inline(always)]
+// #[inline(always)]
 fn x4(a: Fq2) -> Fq2 {
     let a_twice = x2(a);
     a_twice.add(a_twice, TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap())
@@ -34,7 +34,7 @@ fn x4(a: Fq2) -> Fq2 {
 
 const TWO: u384 = u384 { limb0: 2, limb1: 0, limb2: 0, limb3: 0 };
 
-// #[inline(always)]
+// // #[inline(always)]
 // fn X2(a: (u512, u512)) -> (u512, u512) {
 //     a + a
 // }
@@ -56,7 +56,7 @@ impl Fq12Squaring of Fq12SquaringTrait {
     //    c3     <=>        g1            <=>            b4
     //    c4     <=>        g3            <=>            b2
     //    c5     <=>        g5            <=>            b5
-    #[inline(always)]
+    // #[inline(always)]
     fn krbn_compress_2345(self: Fq12) -> Krbn2345 {
         let Fq12 { c0: Fq6 { c0: _0, c1: g4, c2: g3 }, c1: Fq6 { c0: g2, c1: _1, c2: g5 } } = self;
         Krbn2345 { g2, g3, g4, g5 }
@@ -160,7 +160,7 @@ impl Fq12Squaring of Fq12SquaringTrait {
         Krbn2345 { g2: h2, g3: h3, g4: h4, g5: h5, }
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn krbn_sqr_4x(self: Krbn2345, m: CircuitModulus) -> Krbn2345 {
         self.sqr_krbn(m).sqr_krbn(m).sqr_krbn(m).sqr_krbn(m)
     }
@@ -176,7 +176,7 @@ impl Fq12Squaring of Fq12SquaringTrait {
     }
 
     // Called only once hence inlined
-    #[inline(always)]
+    // #[inline(always)]
     fn sqr_7_times(self: Fq12, m: CircuitModulus) -> Fq12 {
         // core::internal::revoke_ap_tracking();
         self
@@ -198,7 +198,7 @@ impl Fq12Squaring of Fq12SquaringTrait {
     }
 
     // Called only once hence inlined
-    #[inline(always)]
+    // #[inline(always)]
     fn sqr_10_times(self: Fq12, m: CircuitModulus) -> Fq12 {
         // core::internal::revoke_ap_tracking();
         self

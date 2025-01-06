@@ -224,6 +224,11 @@ fn ate_miller_loop_steps_second_half<
     precompute
 }
 
+use core::circuit::u384;
+use plonk_verifier::fields::fq12;
 fn single_ate_pairing(p: AffineG1, q: AffineG2, m: CircuitModulus) -> Fq12 {
-    ate_miller_loop(p, q, m).final_exponentiation(m)
+    ate_miller_loop(p, q, m).final_exponentiation(m);
+    // let z = u384 {limb0: 1, limb1: 1, limb2: 0, limb3: 0};
+    // let x: Fq12 = fq12(z,z,z,z,z,z,z,z,z,z,z,z).final_exponentiation(m);
+    // x
 }

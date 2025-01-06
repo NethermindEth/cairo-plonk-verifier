@@ -5,7 +5,7 @@ use plonk_verifier::fields::{
     fq, fq12, Fq, Fq2, Fq6, Fq12, FieldOps, FieldUtils, FS01, FS034, FS01234,
 };
 
-#[inline(always)]
+// #[inline(always)]
 fn fq12_from_fq(
     a0: Fq, a1: Fq, a2: Fq, a3: Fq, a4: Fq, a5: Fq, b0: Fq, b1: Fq, b2: Fq, b3: Fq, b4: Fq, b5: Fq
 ) -> Fq12 {
@@ -48,7 +48,7 @@ fn direct_to_tower(x: Fq12, m: CircuitModulus) -> Fq12 {
 type Fq12Direct = (Fq, Fq, Fq, Fq, Fq, Fq, Fq, Fq, Fq, Fq, Fq, Fq);
 
 impl Fq12IntoFq12Direct of Into<Fq12, Fq12Direct> {
-    #[inline(always)]
+    // #[inline(always)]
     fn into(self: Fq12) -> Fq12Direct {
         let Fq12 { c0, c1 } = self;
         let Fq6 { c0: b0, c1: b1, c2: b2 } = c0;
@@ -64,7 +64,7 @@ impl Fq12IntoFq12Direct of Into<Fq12, Fq12Direct> {
 }
 
 impl Fq12DirectIntoFq12 of Into<Fq12Direct, Fq12> {
-    #[inline(always)]
+    // #[inline(always)]
     fn into(self: Fq12Direct) -> Fq12 {
         let (a0, a1, a2, a3, a4, a5, b0, b1, b2, b3, b4, b5) = self;
         fq12_from_fq(a0, a1, a2, a3, a4, a5, b0, b1, b2, b3, b4, b5)

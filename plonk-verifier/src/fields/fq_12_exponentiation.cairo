@@ -15,7 +15,7 @@ use plonk_verifier::fields::{
 };
 
 // Computes FQ12 exponentiated by -t = -4965661367192848881 = 0x44e992b44a6909f1
-#[inline(always)]
+// #[inline(always)]
 fn addchain_exp_by_neg_t(x: Fq12, m: CircuitModulus) -> Fq12 {
     internal::revoke_ap_tracking();
     // Inversion computation is derived from the addition chain:
@@ -76,7 +76,7 @@ fn addchain_exp_by_neg_t(x: Fq12, m: CircuitModulus) -> Fq12 {
 
 #[generate_trait]
 impl Fq12Exponentiation of PairingExponentiationTrait {
-    #[inline(always)]
+    // #[inline(always)]
     fn exp_by_neg_t(self: Fq12, m: CircuitModulus) -> Fq12 {
         addchain_exp_by_neg_t(self, m)
     }
@@ -84,7 +84,7 @@ impl Fq12Exponentiation of PairingExponentiationTrait {
     // Software Implementation of the Optimal Ate Pairing
     // Page 9, 4.2 Final exponentiation
 
-    #[inline(always)]
+    // #[inline(always)]
     fn final_exponentiation_easy_part(self: Fq12, m: CircuitModulus) -> Fq12 {
         // f^(p^6-1) = conjugate(f) · f^(-1)
         // returns cyclotomic Fp12
@@ -103,7 +103,7 @@ impl Fq12Exponentiation of PairingExponentiationTrait {
     // p^4 - p^2 + 1
     // This seems to be the most efficient counting operations performed
     // https://github.com/paritytech/bn/blob/master/src/fields/fq12.rs#L75
-    #[inline(always)]
+    // #[inline(always)]
     fn final_exponentiation_hard_part(self: Fq12, m: CircuitModulus) -> Fq12 {
         internal::revoke_ap_tracking();
         let a = self.exp_by_neg_t(m);

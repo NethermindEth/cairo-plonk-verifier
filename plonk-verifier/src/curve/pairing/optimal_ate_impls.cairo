@@ -35,7 +35,7 @@ impl SingleMillerPrecompute of MillerPrecompute<PtG1, PtG2, PreCompute, CircuitM
 }
 
 impl SingleMillerSteps of MillerSteps<PreCompute, PtG2, Fq12> {
-    #[inline(always)]
+    // #[inline(always)]
     fn sqr_target(self: @PreCompute, i: u32, ref acc: PtG2, ref f: Fq12) {
         f = f.sqr(*self.modulus);
     }

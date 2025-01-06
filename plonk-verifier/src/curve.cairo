@@ -16,19 +16,18 @@ mod groups;
 use groups::{AffineG1, AffineG2};
 
 mod pairing {
-    mod miller_utils;
     mod optimal_ate_utils;
     mod optimal_ate_impls;
     mod optimal_ate;
     // #[cfg(test)]
-// mod ate_tests;
-// #[cfg(test)]
-// mod tests;
+    // mod ate_tests;
+    // #[cfg(test)]
+    // mod tests;
 }
 
 use plonk_verifier::fields as f;
 
-// #[inline(always)]
+// // #[inline(always)]
 // fn scale_9(a: f::Fq) -> f::Fq {
 //     // addchain for a to 9a
 //     let a2 = a + a;
@@ -36,7 +35,7 @@ use plonk_verifier::fields as f;
 //     a4 + a4 + a
 // }
 
-#[inline(always)]
+// #[inline(always)]
 fn circuit_scale_9(a: f::Fq, m: CircuitModulus) -> f::Fq {
     // addchain for a to 9a
     let a_in = CircuitElement::<CircuitInput<0>> {};
@@ -99,7 +98,7 @@ fn mul_by_xi_nz_as_circuit(t: f::Fq2, m: CircuitModulus) -> f::Fq2 {
     res
 }
 
-// #[inline(always)]
+// // #[inline(always)]
 // fn mul_by_v(
 //     t: ((u512, u512), (u512, u512), (u512, u512)),
 // ) -> ((u512, u512), (u512, u512), (u512, u512)) {
@@ -108,7 +107,7 @@ fn mul_by_xi_nz_as_circuit(t: f::Fq2, m: CircuitModulus) -> f::Fq2 {
 //     (mul_by_xi(t2), t0, t1,)
 // }
 
-// #[inline(always)]
+// // #[inline(always)]
 // fn mul_by_v_nz(
 //     t: ((u512, u512), (u512, u512), (u512, u512)), field_nz: NonZero<u256>
 // ) -> ((u512, u512), (u512, u512), (u512, u512)) {
@@ -117,7 +116,7 @@ fn mul_by_xi_nz_as_circuit(t: f::Fq2, m: CircuitModulus) -> f::Fq2 {
 //     (mul_by_xi_nz(t2, field_nz), t0, t1)
 // }
 
-#[inline(always)]
+// #[inline(always)]
 fn mul_by_v_nz_as_circuit(t: f::Fq6, m: CircuitModulus) -> f::Fq6 {
     let t0 = t.c0;
     let t1 = t.c1;
