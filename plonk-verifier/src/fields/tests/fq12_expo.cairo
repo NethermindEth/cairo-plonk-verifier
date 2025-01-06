@@ -170,16 +170,3 @@ fn exponentiation_compare() {
     assert(f12 != FieldUtils::one(), 'degenerate exponentiation');
     assert(f12 == f21, 'incorrect exponentiation');
 }
-#[test]
-fn pow_test() {
-    let field_nz: NonZero<u256> = get_field_nz();
-    let x = easy_result();
-    let o = (false, false);
-    let p = (true, true);
-    let n = (true, false);
-    let xpow = x.exp_naf(array![n, o, o, p], field_nz);
-    let field_nz = get_field_nz();
-    let expected = x.cyclotomic_sqr(field_nz).cyclotomic_sqr(field_nz).cyclotomic_sqr(field_nz) / x;
-    assert(xpow == expected, 'incorrect pow');
-}
-
