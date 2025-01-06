@@ -111,7 +111,6 @@ impl Fq6Utils of FieldUtils<Fq6, Fq2, CircuitModulus> {
 
     #[inline(always)]
     fn mul_by_nonresidue(self: Fq6, m: CircuitModulus) -> Fq6 {
-        // https://github.com/paritytech/bn/blob/master/src/fields/fq6.rs#L110
         Fq6 { c0: self.c2.mul_by_nonresidue(m), c1: self.c0, c2: self.c1, }
     }
 
@@ -208,21 +207,6 @@ impl Fq6Ops of FieldOps<Fq6, CircuitModulus> {
 
     #[inline(always)]
     fn inv(self: Fq6, m: CircuitModulus) -> Fq6 {
-        // let field_nz = FIELD.try_into().unwrap();
-        // let Fq6 { c0, c1, c2 } = self;
-        // let v0 = c0.u_sqr() - mul_by_xi_nz(c1.u_mul(c2), field_nz);
-        // let v0 = v0.to_fq(field_nz);
-        // let V1 = mul_by_xi_nz(c2.u_sqr(), field_nz) - c0.u_mul(c1);
-        // let v1 = V1.to_fq(field_nz);
-        // let V2 = c1.u_sqr() - c0.u_mul(c2);
-        // let v2 = V2.to_fq(field_nz);
-
-        // let t = (mul_by_xi_nz(c2.u_mul(v1) + c1.u_mul(v2), field_nz) + c0.u_mul(v0))
-        //     .to_fq(field_nz)
-        //     .inv(field_nz);
-
-        // Fq6 { c0: t * v0, c1: t * v1, c2: t * v2, }
-
         let Fq6 { c0, c1, c2 } = self;
         let c1_mul_c2 = Fq2Ops::mul(c1, c2, m);
         let v0 = Fq2Ops::sqr(c0, m).sub(mul_by_xi_nz_as_circuit(c1_mul_c2, m), m);
@@ -262,5 +246,3 @@ impl FqEqs of FieldEqs<Fq6> {
         lhs.c0 == rhs.c0 && lhs.c1 == rhs.c1 && lhs.c2 == rhs.c2
     }
 }
-
-

@@ -130,3 +130,7 @@ fn sqr_circuit() -> (Fq6SqrC0, Fq6SqrC1, Fq6SqrC2, Fq6SqrC3, Fq6SqrC4, Fq6SqrC5)
     // res
     (Fq6SqrC0 {}, Fq6SqrC1 {}, Fq6SqrC2 {}, Fq6SqrC3 {}, Fq6SqrC4 {}, Fq6SqrC5 {})
 }
+
+// fn inv_circuit() -> (Fq6InvC0, Fq6InvC1, Fq6InvC2, Fq6InvC3, Fq6InvC4, Fq6InvC5) {
+//     (Fq6InvC0 {}, Fq6InvC1 {}, Fq6InvC2 {}, Fq6InvC3 {}, Fq6InvC4 {}, Fq6InvC5 {})
+// }
