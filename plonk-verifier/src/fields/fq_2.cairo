@@ -5,10 +5,9 @@ use core::circuit::{
 };
 use core::traits::TryInto;
 
-use debug::PrintTrait;
-
-use plonk_verifier::circuit_mod::{
-    add_c, div_c, inv_c, mul_c, neg_c, one_384, sqr_c, sub_c, zero_384,
+use plonk_verifier::circuits::{
+    fq_circuits::{one_384, zero_384}, 
+    fq_2_circuits::{add_circuit, div_circuit, inv_circuit, mul_circuit, neg_circuit, sqr_circuit, sub_circuit}
 };
 use plonk_verifier::curve::{circuit_scale_9};
 use plonk_verifier::curve::constants::FIELD_U384;
@@ -26,7 +25,6 @@ struct Fq2 {
 fn fq2(c0: u384, c1: u384) -> Fq2 {
     Fq2 { c0: fq(c0), c1: fq(c1), }
 }
-
 
 #[generate_trait]
 impl Fq2Frobenius of Fq2FrobeniusTrait {
@@ -105,129 +103,139 @@ impl Fq2Utils of FieldUtils<Fq2, u384, CircuitModulus> {
         if power % 2 == 0 {
             self
         } else {
-            // Fq2 { c0: self.c0, c1: self.c1.mul_by_nonresidue(), }
             self.conjugate(m)
         }
     }
 }
 
-// impl Fq2Short of FieldShortcuts<Fq2> {
-//     #[inline(always)]
-//     fn u_add(self: Fq2, rhs: Fq2) -> Fq2 {
-//         // Operation without modding can only be done like 4 times
-//         Fq2 { //
-//          c0: self.c0.u_add(rhs.c0), //
-//          c1: self.c1.u_add(rhs.c1), //
-//          }
-//     }
-
-//     #[inline(always)]
-//     fn u_sub(self: Fq2, rhs: Fq2) -> Fq2 {
-//         // Operation without modding can only be done like 4 times
-//         Fq2 { //
-//          c0: self.c0.u_sub(rhs.c0), //
-//          c1: self.c1.u_sub(rhs.c1), //
-//          }
-//     }
-// }
-
 impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
     #[inline(always)]
     fn add(self: Fq2, rhs: Fq2, m: CircuitModulus) -> Fq2 {
-        Fq2 { c0: self.c0.add(rhs.c0, m), c1: self.c1.add(rhs.c1, m) }
+        let (c0, c1) = add_circuit(); 
+
+        let outputs = match (c0, c1)
+            .new_inputs()
+            .next(self.c0.c0)
+            .next(self.c1.c0)
+            .next(rhs.c0.c0)
+            .next(rhs.c1.c0)
+            .done()
+            .eval(m) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
+        };
+
+        fq2(outputs.get_output(c0), outputs.get_output(c1))
     }
 
     #[inline(always)]
     fn sub(self: Fq2, rhs: Fq2, m: CircuitModulus) -> Fq2 {
-        Fq2 { c0: self.c0.sub(rhs.c0, m), c1: self.c1.sub(rhs.c1, m), }
+        let (c0, c1) = sub_circuit(); 
+
+        let outputs = match (c0, c1)
+            .new_inputs()
+            .next(self.c0.c0)
+            .next(self.c1.c0)
+            .next(rhs.c0.c0)
+            .next(rhs.c1.c0)
+            .done()
+            .eval(m) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
+        };
+
+        fq2(outputs.get_output(c0), outputs.get_output(c1))
     }
 
     #[inline(always)]
     fn mul(self: Fq2, rhs: Fq2, m: CircuitModulus) -> Fq2 {
-        let a0 = CircuitElement::<CircuitInput<0>> {};
-        let a1 = CircuitElement::<CircuitInput<1>> {};
-        let b0 = CircuitElement::<CircuitInput<2>> {};
-        let b1 = CircuitElement::<CircuitInput<3>> {};
+        let (c0, c1) = mul_circuit(); 
 
-        let t0 = circuit_mul(a0, b0);
-        let t1 = circuit_mul(a1, b1);
-        let a0_add_a1 = circuit_add(a0, a1);
-        let b0_add_b1 = circuit_add(b0, b1);
-        let t2 = circuit_mul(a0_add_a1, b0_add_b1);
-        let t3 = circuit_add(t0, t1);
-        let t3 = circuit_sub(t2, t3);
-        let t4 = circuit_sub(t0, t1);
-
-        let a0 = self.c0.c0;
-        let a1 = self.c1.c0;
-        let b0 = rhs.c0.c0;
-        let b1 = rhs.c1.c0;
-
-        let outputs =
-            match (t3, t4,).new_inputs().next(a0).next(a1).next(b0).next(b1).done().eval(m) {
-            Result::Ok(outputs) => { outputs },
-            Result::Err(_) => { panic!("Expected success") }
+        let outputs = match (c0, c1)
+            .new_inputs()
+            .next(self.c0.c0)
+            .next(self.c1.c0)
+            .next(rhs.c0.c0)
+            .next(rhs.c1.c0)
+            .done()
+            .eval(m) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
         };
 
-        let fq_c0 = Fq { c0: outputs.get_output(t4) };
-        let fq_c1 = Fq { c0: outputs.get_output(t3) };
-
-        let fq_t = Fq2 { c0: fq_c0, c1: fq_c1 };
-        fq_t
+        fq2(outputs.get_output(c0), outputs.get_output(c1))
     }
 
     #[inline(always)]
     fn div(self: Fq2, rhs: Fq2, m: CircuitModulus) -> Fq2 {
-        let inv_rhs = rhs.inv(m);
-        let res = Self::mul(self, inv_rhs, m);
-        res
+        let (c0, c1) = div_circuit(); 
+
+        let outputs = match (c0, c1)
+            .new_inputs()
+            .next(self.c0.c0)
+            .next(self.c1.c0)
+            .next(rhs.c0.c0)
+            .next(rhs.c1.c0)
+            .done()
+            .eval(m) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
+        };
+
+        fq2(outputs.get_output(c0), outputs.get_output(c1))
     }
 
     #[inline(always)]
     fn neg(self: Fq2, m: CircuitModulus) -> Fq2 {
-        Fq2 { c0: self.c0.neg(m), c1: self.c1.neg(m), }
+        let (c0, c1) = neg_circuit(); 
+
+        let outputs = match (c0, c1)
+            .new_inputs()
+            .next(self.c0.c0)
+            .next(self.c1.c0)
+            .done()
+            .eval(m) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
+        };
+
+        fq2(outputs.get_output(c0), outputs.get_output(c1))
     }
 
     #[inline(always)]
     fn sqr(self: Fq2, m: CircuitModulus) -> Fq2 {
-        // // Aranha sqr_u + 2r
-        let a0 = CircuitElement::<CircuitInput<0>> {};
-        let a1 = CircuitElement::<CircuitInput<1>> {};
-        let t0 = circuit_add(a0, a1);
-        let t1 = circuit_sub(a0, a1);
-        let T0 = circuit_mul(t0, t1);
-        let t0 = circuit_add(a0, a0);
-        let T1 = circuit_mul(t0, a1);
-        let a0 = self.c0.c0;
-        let a1 = self.c1.c0;
+        let (c0, c1) = sqr_circuit(); 
 
-        let outputs = match (T0, T1,).new_inputs().next(a0).next(a1).done().eval(m) {
-            Result::Ok(outputs) => { outputs },
-            Result::Err(_) => { panic!("Expected success") }
+        let outputs = match (c0, c1)
+            .new_inputs()
+            .next(self.c0.c0)
+            .next(self.c1.c0)
+            .done()
+            .eval(m) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
         };
 
-        let fq_t0 = Fq { c0: outputs.get_output(T0) };
-        let fq_t1 = Fq { c0: outputs.get_output(T1) };
-
-        let fq_t = Fq2 { c0: fq_t0, c1: fq_t1 };
-        fq_t
+        fq2(outputs.get_output(c0), outputs.get_output(c1))
     }
-
 
     #[inline(always)]
     fn inv(self: Fq2, m: CircuitModulus) -> Fq2 {
-        let Fq2 { c0, c1 } = self;
-        let t = c0.sqr(m).add(c1.sqr(m), m).inv(m);
-        Fq2 { c0: c0.mul(t, m), c1: c1.mul(t.neg(m), m) }
+        let (c0, c1) = inv_circuit(); 
+
+        let outputs = match (c0, c1)
+            .new_inputs()
+            .next(self.c0.c0)
+            .next(self.c1.c0)
+            .done()
+            .eval(m) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
+        };
+
+        fq2(outputs.get_output(c0), outputs.get_output(c1))
     }
 }
-
-// impl PartialEqFq of PartialEq<Fq2> {
-//     #[inline(always)]
-//     fn eq(lhs: @Fq2, rhs: @Fq2) -> bool {
-//         FieldOps::eq(lhs, rhs)
-//     }
-// }
 
 impl FqEqs of FieldEqs<Fq2> {
     #[inline(always)]
@@ -235,4 +243,3 @@ impl FqEqs of FieldEqs<Fq2> {
         lhs.c0 == rhs.c0 && lhs.c1 == rhs.c1
     }
 }
-

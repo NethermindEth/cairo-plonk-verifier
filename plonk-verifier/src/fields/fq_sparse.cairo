@@ -3,9 +3,6 @@ use core::circuit::CircuitModulus;
 use core::starknet::secp256_trait::Secp256PointTrait;
 use core::traits::TryInto;
 
-use plonk_verifier::circuit_mod::{
-    add_c, div_c, inv_c, mul_c, neg_c, one_384, sqr_c, sub_c, zero_384,
-};
 use plonk_verifier::curve::{constants::FIELD_U384, mul_by_v_nz_as_circuit, mul_by_xi_nz_as_circuit};
 use plonk_verifier::fields::{
     fq, fq6, fq12, Fq, Fq2, Fq2Ops, Fq6, Fq12, Fq12Frobenius, Fq12Squaring, FieldOps, FieldUtils,
@@ -87,7 +84,7 @@ impl FqSparse of FqSparseTrait {
     // Same as Fq6 u_mul but with b2 as zero (and associated ops removed)
     #[inline(always)]
     fn mul_01(self: Fq6, rhs: Fq6Sparse01, m: CircuitModulus) -> Fq6 {
-        core::internal::revoke_ap_tracking();
+        // core::internal::revoke_ap_tracking();
         // Input:a = (a0 + a1v + a2v2) and b = (b0 + b1v) ∈ Fp6
         // Output:c = a · b = (c0 + c1v + c2v2) ∈ Fp6
         let Fq6 { c0: a0, c1: a1, c2: a2 } = self;

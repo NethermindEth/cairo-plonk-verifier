@@ -124,7 +124,7 @@ fn div() {
 
 #[test]
 fn inv() {
-    core::internal::revoke_ap_tracking();
+    // core::internal::revoke_ap_tracking();
     let b_inv = b().inv(get_field_nz());
     let one = b() * b_inv;
     assert(one == FieldUtils::one(), 'incorrect inv 1');

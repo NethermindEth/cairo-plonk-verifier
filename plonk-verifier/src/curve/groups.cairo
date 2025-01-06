@@ -573,7 +573,6 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
 //     }
 // }
 
-
 #[inline(always)]
 fn g1(x: u256, y: u256) -> Affine<Fq> {
     Affine { x: fq(from_u256(x)), y: fq(from_u256(y)) }

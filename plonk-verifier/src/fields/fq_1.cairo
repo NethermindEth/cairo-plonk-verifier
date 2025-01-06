@@ -7,11 +7,7 @@ use core::circuit::conversions::from_u256;
 use core::num::traits::Zero;
 use core::traits::TryInto;
 
-use debug::PrintTrait;
-
-use integer::u512;
-
-use plonk_verifier::circuit_mod::{
+use plonk_verifier::circuits::fq_circuits::{
     add_c, div_c, inv_c, mul_c, neg_c, one_384, scl_c, sqr_c, sub_c, zero_384,
 };
 use plonk_verifier::curve::constants::FIELD_U384;

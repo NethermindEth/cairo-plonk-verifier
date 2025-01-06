@@ -50,7 +50,7 @@ fn circuit_scale_9(a: f::Fq, m: CircuitModulus) -> f::Fq {
         Result::Ok(outputs) => { outputs },
         Result::Err(_) => { panic!("Expected success") }
     };
-    let fq_a9 = f::Fq { c0: outputs.get_output(a9).try_into().unwrap() };
+    let fq_a9 = f::Fq { c0: outputs.get_output(a9) };
 
     fq_a9
 }
@@ -83,19 +83,18 @@ fn mul_by_xi_nz_as_circuit(t: f::Fq2, m: CircuitModulus) -> f::Fq2 {
     let t1 = t.c1.c0;
     let scl = [9, 0, 0, 0];
 
-    let outputs =
-        match (t0_mul_9_sub_t1, t0_add_t1_mul_9,)
-            .new_inputs()
-            .next(t0)
-            .next(t1)
-            .next(scl)
-            .done()
-            .eval(m) {
-        Result::Ok(outputs) => { outputs },
-        Result::Err(_) => { panic!("Expected success") }
+    let outputs = match (t0_mul_9_sub_t1, t0_add_t1_mul_9,)
+        .new_inputs()
+        .next(t0)
+        .next(t1)
+        .next(scl)
+        .done()
+        .eval(m) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
     };
-    let fq2_c0 = f::Fq { c0: outputs.get_output(t0_mul_9_sub_t1).try_into().unwrap() };
-    let fq2_c1 = f::Fq { c0: outputs.get_output(t0_add_t1_mul_9).try_into().unwrap() };
+    let fq2_c0 = f::Fq { c0: outputs.get_output(t0_mul_9_sub_t1) };
+    let fq2_c1 = f::Fq { c0: outputs.get_output(t0_add_t1_mul_9) };
     let res = f::Fq2 { c0: fq2_c0, c1: fq2_c1 };
     res
 }
@@ -117,7 +116,6 @@ fn mul_by_xi_nz_as_circuit(t: f::Fq2, m: CircuitModulus) -> f::Fq2 {
 //     let (t0, t1, t2) = t;
 //     (mul_by_xi_nz(t2, field_nz), t0, t1)
 // }
-
 
 #[inline(always)]
 fn mul_by_v_nz_as_circuit(t: f::Fq6, m: CircuitModulus) -> f::Fq6 {
