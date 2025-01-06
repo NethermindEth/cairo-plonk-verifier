@@ -17,12 +17,14 @@ use curve::{groups as g, pairing};
 mod circuits {
     mod typedefs {
         mod affine;
+        mod fq_2_type;
         mod fq_6_type;
         mod fq_12_type; 
         mod add_sub_neg;
     }
     mod affine_circuits;
     mod fq_circuits;
+    mod fq_2_circuits;
     mod fq_6_circuits;
     mod fq_12_circuits;
 }
