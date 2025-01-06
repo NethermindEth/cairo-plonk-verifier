@@ -1,9 +1,9 @@
-use plonk_verifier::curve::groups::ECOperations;
-use plonk_verifier::fields::fq;
-use plonk_verifier::curve::groups::{
-    Affine, AffineOps, AffineG1, AffineG1Impl, g1, AffineG2, AffineG2Impl, g2
-};
 use debug::PrintTrait;
+
+use plonk_verifier::curve::groups::{
+    Affine, AffineG1, AffineG1Impl, AffineG2, AffineG2Impl, AffineOps, ECOperations, g1, g2,
+};
+use plonk_verifier::fields::fq;
 
 const DBL_X: u256 = 1368015179489954701390400359078579693043519447331113978918064868415326638035;
 const DBL_Y: u256 = 9918110051302171585080402603319702774565515993150576347155970296011118125764;

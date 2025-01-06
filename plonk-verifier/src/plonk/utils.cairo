@@ -1,7 +1,9 @@
-use core::traits::Into;
-use core::byte_array::ByteArrayTrait;
-use core::to_byte_array::FormatAsByteArray;
-use core::integer::u128_byte_reverse;
+use core::{
+    byte_array::ByteArrayTrait,
+    integer::u128_byte_reverse,
+    to_byte_array::FormatAsByteArray,
+    traits::Into,
+};
 
 fn convert_le_to_be(le: u256) -> ByteArray {
     let hex_base: NonZero<u256> = 16_u256.try_into().unwrap();

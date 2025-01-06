@@ -1,20 +1,34 @@
-use plonk_verifier::traits::{FieldOps as FOps, FieldShortcuts as FShort};
-use plonk_verifier::fields::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg};
-// use plonk_verifier::fields::print::{FqPrintImpl, Fq2PrintImpl};
-use plonk_verifier::fields::{fq, Fq, fq2, Fq2};
-use plonk_verifier::curve::constants::FIELD_U384;
 use core::circuit::{
-    RangeCheck96, AddMod, MulMod, u96, CircuitElement, CircuitInput, circuit_add, circuit_sub,
-    circuit_mul, circuit_inverse, EvalCircuitTrait, u384, CircuitOutputsTrait, CircuitModulus,
-    AddInputResultTrait, CircuitInputs, EvalCircuitResult,
+    AddInputResultTrait, AddMod, CircuitElement, CircuitInput, CircuitInputs, CircuitModulus,
+    CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, MulMod, RangeCheck96, u96, u384,
+    circuit_add, circuit_inverse, circuit_mul, circuit_sub,
 };
 use core::circuit::conversions::from_u256;
-use core::fmt::{Display, Formatter, Error};
+use core::circuit::{
+    AddModGate as A, CircuitElement as CE, CircuitInput as CI, InverseGate as I, MulModGate as M,
+    SubModGate as S,
+};
 
-use debug::PrintTrait as Print;
+use plonk_verifier::circuits::affine_circuits::{
+    fq2_add_circuit, fq2_chord_circuit, fq2_double_circuit, fq2_pt_on_slope_circuit,
+    fq2_tangent_circuit, fq2_y_on_slope_circuit,
+};
+use plonk_verifier::curve::constants::FIELD_U384;
+use plonk_verifier::fields::{fq, fq2, Fq, Fq2};
+use plonk_verifier::traits::{FieldOps as FOps};
 
 type AffineG1 = Affine<Fq>;
 type AffineG2 = Affine<Fq2>;
+
+#[inline(always)]
+fn affine_fq1(c0: u384, c1: u384) -> Affine<Fq> {
+    Affine { x: fq(c0), y: fq(c1)}
+}
+
+#[inline(always)]
+fn affine_fq2(c0: u384, c1: u384, c2: u384, c3: u384) -> Affine<Fq2> {
+    Affine { x: fq2(c0, c1), y: fq2(c2, c3)}
+}
 
 #[derive(Copy, Drop, Serde)]
 struct Affine<T> {
@@ -26,28 +40,28 @@ trait ECGroup<TCoord> {
     fn one() -> Affine<TCoord>;
 }
 
-trait ECOperations<TCoord> {
-    fn x_on_slope(self: @Affine<TCoord>, slope: TCoord, x2: TCoord) -> TCoord;
-    fn y_on_slope(self: @Affine<TCoord>, slope: TCoord, x: TCoord) -> TCoord;
-    fn pt_on_slope(self: @Affine<TCoord>, slope: TCoord, x2: TCoord) -> Affine<TCoord>;
-    fn chord(self: @Affine<TCoord>, rhs: Affine<TCoord>) -> TCoord;
-    fn add(self: @Affine<TCoord>, rhs: Affine<TCoord>) -> Affine<TCoord>;
-    fn tangent(self: @Affine<TCoord>) -> TCoord;
-    fn double(self: @Affine<TCoord>) -> Affine<TCoord>;
-    fn multiply(self: @Affine<TCoord>, multiplier: u384) -> Affine<TCoord>;
-    fn neg(self: @Affine<TCoord>) -> Affine<TCoord>;
-}
-
 trait ECOperationsCircuitFq {
     // fn x_on_slope(self: @Affine<Fq>, slope: Fq, x2: Fq) -> Fq;
     // fn y_on_slope(self: @Affine<Fq>, slope: Fq, x: Fq) -> Fq;
-    fn pt_on_slope(self: @Affine<Fq>, slope: Fq, x2: Fq) -> Affine<Fq>;
-    fn chord(self: @Affine<Fq>, rhs: Affine<Fq>) -> Fq;
-    fn add_as_circuit(self: @Affine<Fq>, rhs: Affine<Fq>) -> Affine<Fq>;
+    fn pt_on_slope(self: @Affine<Fq>, slope: Fq, x2: Fq, m: CircuitModulus) -> Affine<Fq>;
+    fn chord(self: @Affine<Fq>, rhs: Affine<Fq>, m: CircuitModulus) -> Fq;
+    fn add_as_circuit(self: @Affine<Fq>, rhs: Affine<Fq>, m: CircuitModulus) -> Affine<Fq>;
     // fn tangent(self: @Affine<Fq>) -> Fq;
-    fn double_as_circuit(self: @Affine<Fq>) -> Affine<Fq>;
-    fn multiply_as_circuit(self: @Affine<Fq>, multiplier: u384) -> Affine<Fq>;
-    // fn neg(self: @Affine<Fq>) -> Affine<Fq>;
+    fn double_as_circuit(self: @Affine<Fq>, m: CircuitModulus) -> Affine<Fq>;
+    fn multiply_as_circuit(self: @Affine<Fq>, multiplier: u384, m: CircuitModulus) -> Affine<Fq>;
+    fn neg(self: @Affine<Fq>, m: CircuitModulus) -> Affine<Fq>;
+}
+
+trait ECOperationsCircuitFq2 {
+    fn x_on_slope(self: @Affine<Fq2>, slope: Fq2, x2: Fq2, m: CircuitModulus) -> Fq2;
+    fn y_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x: Fq2, m: CircuitModulus) -> Fq2;
+    fn pt_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x2: Fq2, m: CircuitModulus) -> Affine<Fq2>;
+    fn chord_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>, m: CircuitModulus) -> Fq2;
+    fn add_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>, m: CircuitModulus) -> Affine<Fq2>;
+    fn tangent_as_circuit(self: @Affine<Fq2>, m: CircuitModulus) -> Fq2;
+    fn double_as_circuit(self: @Affine<Fq2>, m: CircuitModulus) -> Affine<Fq2>;
+    // fn multiply_as_circuit(self: @Affine<Fq2>, multiplier: u384) -> Affine<Fq2>;
+    fn neg(self: @Affine<Fq2>, m: CircuitModulus) -> Affine<Fq2>;
 }
 
 impl AffinePartialEq<T, +PartialEq<T>> of PartialEq<Affine<T>> {
@@ -61,7 +75,7 @@ impl AffinePartialEq<T, +PartialEq<T>> of PartialEq<Affine<T>> {
 
 // Use only the highest level circuit when implementing (less steps)
 impl AffineOpsFqCircuit of ECOperationsCircuitFq {
-    fn double_as_circuit(self: @Affine<Fq>) -> Affine<Fq> {
+    fn double_as_circuit(self: @Affine<Fq>, m: CircuitModulus) -> Affine<Fq> {
         // λ = (3x^2 + a) / 2y
         // But BN curve has a == 0 so that's one less addition
         // λ = 3x^2 / 2y
@@ -91,7 +105,6 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
             y_slope_mul_lambda_x1_x, y1
         ); // slope * (*self.x - x) - *self.y
 
-        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let x1 = *self.x.c0;
         let y1 = *self.y.c0;
 
@@ -101,18 +114,18 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
                 .next(x1)
                 .next(y1)
                 .done()
-                .eval(modulus) {
+                .eval(m) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
 
-        let x = Fq { c0: outputs.get_output(x_slope_sub_x1_x2).try_into().unwrap() };
-        let y = Fq { c0: outputs.get_output(y_slope_lambda_sub_lambda_x_y).try_into().unwrap() };
+        let x = Fq { c0: outputs.get_output(x_slope_sub_x1_x2) };
+        let y = Fq { c0: outputs.get_output(y_slope_lambda_sub_lambda_x_y) };
 
         Affine { x, y }
     }
 
-    fn add_as_circuit(self: @Affine<Fq>, rhs: Affine<Fq>) -> Affine<Fq> {
+    fn add_as_circuit(self: @Affine<Fq>, rhs: Affine<Fq>, m: CircuitModulus) -> Affine<Fq> {
         let x1 = CircuitElement::<CircuitInput<0>> {};
         let y1 = CircuitElement::<CircuitInput<1>> {};
         let x2 = CircuitElement::<CircuitInput<2>> {};
@@ -135,7 +148,6 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
             y_slope_mul_lambda_x1_x, y1
         ); // slope * (*self.x - x) - *self.y
 
-        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let x1 = *self.x.c0;
         let y1 = *self.y.c0;
         let x2 = rhs.x.c0;
@@ -149,18 +161,18 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
                 .next(x2)
                 .next(y2)
                 .done()
-                .eval(modulus) {
+                .eval(m) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
 
-        let x = Fq { c0: outputs.get_output(x_slope_sub_x1_x2).try_into().unwrap() };
-        let y = Fq { c0: outputs.get_output(y_slope_lambda_sub_lambda_x_y).try_into().unwrap() };
+        let x = Fq { c0: outputs.get_output(x_slope_sub_x1_x2) };
+        let y = Fq { c0: outputs.get_output(y_slope_lambda_sub_lambda_x_y) };
 
         Affine { x, y }
     }
 
-    fn multiply_as_circuit(self: @Affine<Fq>, mut multiplier: u384) -> Affine<Fq> {
+    fn multiply_as_circuit(self: @Affine<Fq>, mut multiplier: u384, m: CircuitModulus) -> Affine<Fq> {
         let nz2: NonZero<u256> = 2_u256.try_into().unwrap();
         let mut dbl_step = *self;
         let mut result = g1(1, 2);
@@ -178,13 +190,13 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
                         // self is zero, return rhs
                         dbl_step
                     } else {
-                        result.add_as_circuit(dbl_step)
+                        result.add_as_circuit(dbl_step, m)
                     }
             }
             if q == 0 {
                 break;
             }
-            dbl_step = dbl_step.double_as_circuit();
+            dbl_step = dbl_step.double_as_circuit(m);
             multiplier = q;
         };
         result
@@ -217,7 +229,7 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
     //     };
     //     result
     // }
-    fn pt_on_slope(self: @Affine<Fq>, slope: Fq, x2: Fq) -> Affine<Fq> {
+    fn pt_on_slope(self: @Affine<Fq>, slope: Fq, x2: Fq, m: CircuitModulus) -> Affine<Fq> {
         let x_2 = x2;
         // x = λ^2 - x1 - x2
         // slope.sqr() - *self.x - x2
@@ -243,7 +255,6 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
             y_slope_mul_lambda_x1_x, y1
         ); // slope * (*self.x - x) - *self.y
 
-        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let lambda = slope.c0;
         let x1 = *self.x.c0;
         let y1 = *self.y.c0;
@@ -257,19 +268,19 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
                 .next(y1)
                 .next(x2)
                 .done()
-                .eval(modulus) {
+                .eval(m) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
 
-        let x = Fq { c0: outputs.get_output(x_slope_sub_x1_x2).try_into().unwrap() };
-        let y = Fq { c0: outputs.get_output(y_slope_lambda_sub_lambda_x_y).try_into().unwrap() };
+        let x = Fq { c0: outputs.get_output(x_slope_sub_x1_x2) };
+        let y = Fq { c0: outputs.get_output(y_slope_lambda_sub_lambda_x_y) };
 
         Affine { x, y }
     }
 
     #[inline(always)]
-    fn chord(self: @Affine<Fq>, rhs: Affine<Fq>) -> Fq {
+    fn chord(self: @Affine<Fq>, rhs: Affine<Fq>, m: CircuitModulus) -> Fq {
         let x1 = CircuitElement::<CircuitInput<0>> {};
         let y1 = CircuitElement::<CircuitInput<1>> {};
         let x2 = CircuitElement::<CircuitInput<2>> {};
@@ -280,137 +291,287 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
         let x2_x1_inv = circuit_inverse(x2_x1);
         let mul = circuit_mul(y2_y1, x2_x1_inv);
 
-        let modulus = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let x1 = *self.x.c0;
         let y1 = *self.y.c0;
         let x2 = rhs.x.c0;
         let y2 = rhs.y.c0;
 
         let outputs =
-            match (mul,).new_inputs().next(x1).next(x2).next(y1).next(y2).done().eval(modulus) {
+            match (mul,).new_inputs().next(x1).next(x2).next(y1).next(y2).done().eval(m) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
-        Fq { c0: outputs.get_output(mul).try_into().unwrap() }
+        Fq { c0: outputs.get_output(mul) }
+    }
+
+    fn neg(self: @Affine<Fq>, m: CircuitModulus) -> Affine<Fq> {
+        Affine { x: *self.x, y: FOps::neg(*self.y, m) }
     }
 }
 
-// Cairo does not support generic and specific implementations concurrently
-impl AffineOps<
-    T, +FOps<T>, +FShort<T>, +Copy<T>, +Drop<T>, impl ECGImpl: ECGroup<T>
-> of ECOperations<T> {
-    #[inline(always)]
-    fn x_on_slope(self: @Affine<T>, slope: T, x2: T) -> T {
+impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
+    fn x_on_slope(self: @Affine<Fq2>, slope: Fq2, x2: Fq2, m: CircuitModulus) -> Fq2 {
         // x = λ^2 - x1 - x2
-        slope.sqr() - *self.x - x2
+        slope.sqr(m).sub(*self.x, m).sub(x2, m)
     }
 
-    #[inline(always)]
-    fn y_on_slope(self: @Affine<T>, slope: T, x: T) -> T {
-        // y = λ(x1 - x) - y1
-        slope * (*self.x - x) - *self.y
-    }
+    fn y_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x: Fq2, m: CircuitModulus) -> Fq2 {
 
-    // #[inline(always)]
-    fn pt_on_slope(self: @Affine<T>, slope: T, x2: T) -> Affine<T> {
-        let x = self.x_on_slope(slope, x2);
-        let y = self.y_on_slope(slope, x);
-        Affine { x, y }
-    }
+        let (c0, c1) = fq2_y_on_slope_circuit();
 
-    #[inline(always)]
-    fn chord(self: @Affine<T>, rhs: Affine<T>) -> T {
-        let Affine { x: x1, y: y1 } = *self;
-        let Affine { x: x2, y: y2 } = rhs;
-        // λ = (y2-y1) / (x2-x1)
-        (y2 - y1) / (x2 - x1)
-    }
-
-    // #[inline(always)]
-    fn add(self: @Affine<T>, rhs: Affine<T>) -> Affine<T> {
-        self.pt_on_slope(self.chord(rhs), rhs.x)
-    }
-
-    // #[inline(always)]
-    fn tangent(self: @Affine<T>) -> T {
-        let Affine { x, y } = *self;
-
-        // λ = (3x^2 + a) / 2y
-        // But BN curve has a == 0 so that's one less addition
-        // λ = 3x^2 / 2y
-        let x_2 = x.sqr();
-        (x_2 + x_2 + x_2) / y.u_add(y)
-    }
-
-    // #[inline(always)]
-    fn double(self: @Affine<T>) -> Affine<T> {
-        self.pt_on_slope(self.tangent(), *self.x)
-    }
-
-    fn multiply(self: @Affine<T>, mut multiplier: u384) -> Affine<T> {
-        let nz2: NonZero<u256> = 2_u256.try_into().unwrap();
-        let mut dbl_step = *self;
-        let mut result = ECGImpl::one();
-        let mut first_add_done = false;
-        let mut multiplier_256: u256 = multiplier.try_into().unwrap();
-
-        // TODO: optimise with u128 ops
-        // Replace u256 multiplier loop with 2x u128 loops
-        loop {
-            let (q, r, _) = integer::u256_safe_divmod(multiplier_256, nz2);
-
-            if r == 1 {
-                result =
-                    if !first_add_done {
-                        first_add_done = true;
-                        // self is zero, return rhs
-                        dbl_step
-                    } else {
-                        result.add(dbl_step)
-                    }
-            }
-            if q == 0 {
-                break;
-            }
-            dbl_step = dbl_step.double();
-            multiplier_256 = q;
+        let out = match (c0, c1,)
+            .new_inputs()
+            .next(*self.x.c0.c0)
+            .next(*self.x.c1.c0)
+            .next(*self.y.c0.c0)
+            .next(*self.y.c1.c0)
+            .next(slope.c0.c0)
+            .next(slope.c1.c0)
+            .next(x.c0.c0)
+            .next(x.c1.c0)
+            .done()
+            .eval(m) {
+                Result::Ok(out) => { out },
+                Result::Err(_) => { panic!("Expected success") }
         };
-        result
+
+        fq2(out.get_output(c0), out.get_output(c1))
     }
-    // fn multiply(self: @Affine<T>, mut multiplier: u256) -> Affine<T> {
-    //     let nz2: NonZero<u256> = 2_u256.try_into().unwrap();
-    //     let mut dbl_step = *self;
-    //     let mut result = ECGImpl::one();
-    //     let mut first_add_done = false;
 
-    //     // TODO: optimise with u128 ops
-    //     // Replace u256 multiplier loop with 2x u128 loops
-    //     loop {
-    //         let (q, r, _) = integer::u256_safe_divmod(multiplier, nz2);
+    fn pt_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x2: Fq2, m: CircuitModulus) -> Affine<Fq2> {
+        let (c0, c1, c2, c3) = fq2_pt_on_slope_circuit();
 
-    //         if r == 1 {
-    //             result =
-    //                 if !first_add_done {
-    //                     first_add_done = true;
-    //                     // self is zero, return rhs
-    //                     dbl_step
-    //                 } else {
-    //                     result.add(dbl_step)
-    //                 }
-    //         }
-    //         if q == 0 {
-    //             break;
-    //         }
-    //         dbl_step = dbl_step.double();
-    //         multiplier = q;
-    //     };
-    //     result
-    // }
+        let out = match (c0, c1, c2, c3)
+            .new_inputs()
+            .next(*self.x.c0.c0)
+            .next(*self.x.c1.c0)
+            .next(*self.y.c0.c0)
+            .next(*self.y.c1.c0)
+            .next(slope.c0.c0)
+            .next(slope.c1.c0)
+            .next(x2.c0.c0)
+            .next(x2.c1.c0)
+            .done()
+            .eval(m) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
+        };
 
-    fn neg(self: @Affine<T>) -> Affine<T> {
-        Affine { x: *self.x, y: (*self.y).neg() }
+        affine_fq2(out.get_output(c0), out.get_output(c1), out.get_output(c2), out.get_output(c3))
+    }
+
+    fn chord_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>, m: CircuitModulus) -> Fq2 {        
+        let (c0, c1) = fq2_chord_circuit();
+
+        let out = match (c0, c1,)
+            .new_inputs()
+            .next(*self.x.c0.c0)
+            .next(*self.x.c1.c0)
+            .next(*self.y.c0.c0)
+            .next(*self.y.c1.c0)
+            .next(rhs.x.c0.c0)
+            .next(rhs.x.c1.c0)
+            .next(rhs.y.c0.c0)
+            .next(rhs.y.c1.c0)
+            .done()
+            .eval(m) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
+        };
+
+        fq2(out.get_output(c0), out.get_output(c1))
+    }
+
+    fn add_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>, m: CircuitModulus) -> Affine<Fq2> {
+        let (c0, c1, c2, c3) = fq2_add_circuit();
+
+        let out = match (c0, c1, c2, c3)
+            .new_inputs()
+            .next(*self.x.c0.c0)
+            .next(*self.x.c1.c0)
+            .next(*self.y.c0.c0)
+            .next(*self.y.c1.c0)
+            .next(rhs.x.c0.c0)
+            .next(rhs.x.c1.c0)
+            .next(rhs.y.c0.c0)
+            .next(rhs.y.c1.c0)
+            .done()
+            .eval(m) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
+        };
+
+        affine_fq2(out.get_output(c0), out.get_output(c1), out.get_output(c2), out.get_output(c3))
+    }
+
+    fn tangent_as_circuit(self: @Affine<Fq2>, m: CircuitModulus) -> Fq2 {        
+        let (c0, c1) = fq2_tangent_circuit();
+
+        let out = match (c0, c1,)
+            .new_inputs()
+            .next(*self.x.c0.c0)
+            .next(*self.x.c1.c0)
+            .next(*self.y.c0.c0)
+            .next(*self.y.c1.c0)
+            .done()
+            .eval(m) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
+        };
+
+        fq2(out.get_output(c0), out.get_output(c1))
+    }
+
+    fn double_as_circuit(self: @Affine<Fq2>, m: CircuitModulus) -> Affine<Fq2> {
+        let (c0, c1, c2, c3) = fq2_double_circuit();
+
+        let out = match (c0, c1, c2, c3)
+            .new_inputs()
+            .next(*self.x.c0.c0)
+            .next(*self.x.c1.c0)
+            .next(*self.y.c0.c0)
+            .next(*self.y.c1.c0)
+            .done()
+            .eval(m) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
+        };
+
+        affine_fq2(out.get_output(c0), out.get_output(c1), out.get_output(c2), out.get_output(c3))
+    }
+
+    fn neg(self: @Affine<Fq2>, m: CircuitModulus) -> Affine<Fq2> {
+        Affine { x: *self.x, y: FOps::neg(*self.y, m) }
     }
 }
+
+// trait ECOperations<TCoord> {
+//     fn x_on_slope(self: @Affine<TCoord>, slope: TCoord, x2: TCoord) -> TCoord;
+//     fn y_on_slope(self: @Affine<TCoord>, slope: TCoord, x: TCoord) -> TCoord;
+//     fn pt_on_slope(self: @Affine<TCoord>, slope: TCoord, x2: TCoord) -> Affine<TCoord>;
+//     fn chord(self: @Affine<TCoord>, rhs: Affine<TCoord>) -> TCoord;
+//     fn add(self: @Affine<TCoord>, rhs: Affine<TCoord>) -> Affine<TCoord>;
+//     fn tangent(self: @Affine<TCoord>) -> TCoord;
+//     fn double(self: @Affine<TCoord>) -> Affine<TCoord>;
+//     fn multiply(self: @Affine<TCoord>, multiplier: u384) -> Affine<TCoord>;
+//     fn neg(self: @Affine<TCoord>) -> Affine<TCoord>;
+// }
+
+// impl AffineOps<
+//     T, +FOps<T>, +Copy<T>, +Drop<T>, impl ECGImpl: ECGroup<T>
+// > of ECOperations<T> {
+//     #[inline(always)]
+//     fn x_on_slope(self: @Affine<T>, slope: T, x2: T) -> T {
+//         // x = λ^2 - x1 - x2
+//         slope.sqr().sub(*self.x).sub(x2)
+//     }
+
+//     #[inline(always)]
+//     fn y_on_slope(self: @Affine<T>, slope: T, x: T) -> T {
+//         // y = λ(x1 - x) - y1
+//         slope * (*self.x - x) - *self.y
+//     }
+
+//     // #[inline(always)]
+//     fn pt_on_slope(self: @Affine<T>, slope: T, x2: T) -> Affine<T> {
+//         let x = self.x_on_slope(slope, x2);
+//         let y = self.y_on_slope(slope, x);
+//         Affine { x, y }
+//     }
+
+//     #[inline(always)]
+//     fn chord(self: @Affine<T>, rhs: Affine<T>) -> T {
+//         let Affine { x: x1, y: y1 } = *self;
+//         let Affine { x: x2, y: y2 } = rhs;
+//         // λ = (y2-y1) / (x2-x1)
+//         (y2 - y1) / (x2 - x1)
+//     }
+
+//     // #[inline(always)]
+//     fn add(self: @Affine<T>, rhs: Affine<T>) -> Affine<T> {
+//         self.pt_on_slope(self.chord(rhs), rhs.x)
+//     }
+
+//     // #[inline(always)]
+//     fn tangent(self: @Affine<T>) -> T {
+//         let Affine { x, y } = *self;
+
+//         // λ = (3x^2 + a) / 2y
+//         // But BN curve has a == 0 so that's one less addition
+//         // λ = 3x^2 / 2y
+//         let x_2 = x.sqr();
+//         (x_2 + x_2 + x_2) / y.add(y)
+//     }
+
+//     // #[inline(always)]
+//     fn double(self: @Affine<T>) -> Affine<T> {
+//         self.pt_on_slope(self.tangent(), *self.x)
+//     }
+
+//     fn multiply(self: @Affine<T>, mut multiplier: u384) -> Affine<T> {
+//         let nz2: NonZero<u256> = 2_u256.try_into().unwrap();
+//         let mut dbl_step = *self;
+//         let mut result = ECGImpl::one();
+//         let mut first_add_done = false;
+//         let mut multiplier_256: u256 = multiplier.try_into().unwrap();
+
+//         // TODO: optimise with u128 ops
+//         // Replace u256 multiplier loop with 2x u128 loops
+//         loop {
+//             let (q, r, _) = integer::u256_safe_divmod(multiplier_256, nz2);
+
+//             if r == 1 {
+//                 result =
+//                     if !first_add_done {
+//                         first_add_done = true;
+//                         // self is zero, return rhs
+//                         dbl_step
+//                     } else {
+//                         result.add(dbl_step)
+//                     }
+//             }
+//             if q == 0 {
+//                 break;
+//             }
+//             dbl_step = dbl_step.double();
+//             multiplier_256 = q;
+//         };
+//         result
+//     }
+//     // fn multiply(self: @Affine<T>, mut multiplier: u256) -> Affine<T> {
+//     //     let nz2: NonZero<u256> = 2_u256.try_into().unwrap();
+//     //     let mut dbl_step = *self;
+//     //     let mut result = ECGImpl::one();
+//     //     let mut first_add_done = false;
+
+//     //     // TODO: optimise with u128 ops
+//     //     // Replace u256 multiplier loop with 2x u128 loops
+//     //     loop {
+//     //         let (q, r, _) = integer::u256_safe_divmod(multiplier, nz2);
+
+//     //         if r == 1 {
+//     //             result =
+//     //                 if !first_add_done {
+//     //                     first_add_done = true;
+//     //                     // self is zero, return rhs
+//     //                     dbl_step
+//     //                 } else {
+//     //                     result.add(dbl_step)
+//     //                 }
+//     //         }
+//     //         if q == 0 {
+//     //             break;
+//     //         }
+//     //         dbl_step = dbl_step.double();
+//     //         multiplier = q;
+//     //     };
+//     //     result
+//     // }
+
+//     fn neg(self: @Affine<T>) -> Affine<T> {
+//         Affine { x: *self.x, y: (*self.y).neg() }
+//     }
+// }
 
 
 #[inline(always)]

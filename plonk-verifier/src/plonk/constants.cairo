@@ -1,10 +1,11 @@
 use core::array::ArrayTrait;
+use core::circuit::{conversions::from_u256, u384};
+use core::fmt::{Display, Error, Formatter};
+
 use debug::PrintTrait;
-use core::fmt::{Display, Formatter, Error};
-use core::circuit::conversions::from_u256;
-use core::circuit::u384;
-use plonk_verifier::fields::{fq, fq2, fq12, fq6, Fq, Fq12, Fq6};
-use plonk_verifier::curve::groups::{g1, g2, AffineG1, AffineG2};
+
+use plonk_verifier::curve::groups::{AffineG1, AffineG2, g1, g2};
+use plonk_verifier::fields::{fq, fq2, fq6, fq12, Fq, Fq6, Fq12};
 
 // proof
 pub fn proof() -> (

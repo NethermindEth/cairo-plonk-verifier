@@ -1,8 +1,9 @@
-use plonk_verifier::curve::{circuit_scale_9, FIELD};
+use core::circuit::CircuitModulus;
+
+use plonk_verifier::curve::{circuit_scale_9, constants::FIELD_U384};
 use plonk_verifier::fields::{
-    FieldUtils, FieldOps, FieldShortcuts, fq, Fq, Fq2, Fq6, Fq12, fq12, FS01234, FS034, FS01
+    fq, fq12, Fq, Fq2, Fq6, Fq12, FieldOps, FieldUtils, FS01, FS034, FS01234,
 };
-// use plonk_verifier::fields::print::{FqDisplay, Fq12Display};
 
 #[inline(always)]
 fn fq12_from_fq(
@@ -18,7 +19,7 @@ fn fq12_from_fq(
     }
 }
 
-fn direct_to_tower(x: Fq12) -> Fq12 {
+fn direct_to_tower(x: Fq12, m: CircuitModulus) -> Fq12 {
     let Fq12 { c0, c1 } = x;
     let Fq6 { c0: b0, c1: b1, c2: b2 } = c0;
     let Fq6 { c0: b3, c1: b4, c2: b5 } = c1; // This should be c1 instead of c0
@@ -30,17 +31,17 @@ fn direct_to_tower(x: Fq12) -> Fq12 {
     let Fq2 { c0: a10, c1: a11 } = b5;
 
     fq12_from_fq(
-        a0 + circuit_scale_9(a6),
+        a0.add(circuit_scale_9(a6, m), m),
         a6,
-        a2 + circuit_scale_9(a8),
+        a2.add(circuit_scale_9(a8, m), m),
         a8,
-        a4 + circuit_scale_9(a10),
+        a4.add(circuit_scale_9(a10, m), m),
         a10,
-        a1 + circuit_scale_9(a7),
+        a1.add(circuit_scale_9(a7, m), m),
         a7,
-        a3 + circuit_scale_9(a9),
+        a3.add(circuit_scale_9(a9, m), m),
         a9,
-        a5 + circuit_scale_9(a11),
+        a5.add(circuit_scale_9(a11, m), m),
         a11,
     )
 }
@@ -70,7 +71,7 @@ impl Fq12DirectIntoFq12 of Into<Fq12Direct, Fq12> {
     }
 }
 
-fn tower_to_direct(x: Fq12) -> Fq12Direct {
+fn tower_to_direct(x: Fq12, m: CircuitModulus) -> Fq12Direct {
     let Fq12 { c0, c1 } = x;
     let Fq6 { c0: b0, c1: b1, c2: b2 } = c0;
     let Fq6 { c0: b3, c1: b4, c2: b5 } = c1; // This should be c1 instead of c0
@@ -82,12 +83,12 @@ fn tower_to_direct(x: Fq12) -> Fq12Direct {
     let Fq2 { c0: a10, c1: a11 } = b5;
 
     (
-        a0 - circuit_scale_9(a1),
-        a6 - circuit_scale_9(a7),
-        a2 - circuit_scale_9(a3),
-        a8 - circuit_scale_9(a9),
-        a4 - circuit_scale_9(a5),
-        a10 - circuit_scale_9(a11),
+        a0.sub(circuit_scale_9(a1, m), m),
+        a6.sub(circuit_scale_9(a7, m), m),
+        a2.sub(circuit_scale_9(a3, m), m),
+        a8.sub(circuit_scale_9(a9, m), m),
+        a4.sub(circuit_scale_9(a5, m), m),
+        a10.sub(circuit_scale_9(a11, m), m),
         a1,
         a7,
         a3,
@@ -97,7 +98,7 @@ fn tower_to_direct(x: Fq12) -> Fq12Direct {
     )
 }
 
-fn tower01234_to_direct(x: FS01234) -> ((Fq, Fq, Fq, Fq, Fq), (Fq, Fq, Fq, Fq, Fq),) {
+fn tower01234_to_direct(x: FS01234, m: CircuitModulus) -> ((Fq, Fq, Fq, Fq, Fq), (Fq, Fq, Fq, Fq, Fq),) {
     let FS01234 { c0, c1 } = x;
     let Fq6 { c0: b0, c1: b1, c2: b2 } = c0;
     let FS01 { c0: b3, c1: b4 } = c1; // This should be c1 instead of c0
@@ -107,12 +108,12 @@ fn tower01234_to_direct(x: FS01234) -> ((Fq, Fq, Fq, Fq, Fq), (Fq, Fq, Fq, Fq, F
     let Fq2 { c0: a6, c1: a7 } = b3;
     let Fq2 { c0: a8, c1: a9 } = b4;
 
-    let a1x9 = circuit_scale_9(a1);
-    let a7x9 = circuit_scale_9(a7);
-    let a3x9 = circuit_scale_9(a3);
-    let a9x9 = circuit_scale_9(a9);
-    let a5x9 = circuit_scale_9(a5);
-    ((a0 - a1x9, a6 - a7x9, a2 - a3x9, a8 - a9x9, a4 - a5x9,), (a1, a7, a3, a9, a5,),)
+    let a1x9 = circuit_scale_9(a1, m);
+    let a7x9 = circuit_scale_9(a7, m);
+    let a3x9 = circuit_scale_9(a3, m);
+    let a9x9 = circuit_scale_9(a9, m);
+    let a5x9 = circuit_scale_9(a5, m);
+    ((a0.sub(a1x9, m), a6.sub(a7x9, m), a2.sub(a3x9, m), a8.sub(a9x9, m), a4.sub(a5x9, m)), (a1, a7, a3, a9, a5,),)
 }
 
 struct FS034Direct {
@@ -122,10 +123,10 @@ struct FS034Direct {
     c9: Fq,
 }
 
-fn tower034_to_direct(x: FS034) -> FS034Direct {
+fn tower034_to_direct(x: FS034, m: CircuitModulus) -> FS034Direct {
     let FS034 { c3: Fq2 { c0: a6, c1: a7 }, c4: Fq2 { c0: a8, c1: a9 } } = x;
 
-    FS034Direct { c1: a6 - circuit_scale_9(a7), c3: a8 - circuit_scale_9(a9), c7: a7, c9: a9, }
+    FS034Direct { c1: a6.sub(circuit_scale_9(a7, m), m), c3: a8.sub(circuit_scale_9(a9, m), m), c7: a7, c9: a9, }
 }
 // #[cfg(test)]
 // mod direct_tower_tests {

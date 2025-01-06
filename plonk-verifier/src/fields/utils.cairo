@@ -1,75 +1,75 @@
-mod conversions {
-    use core::integer::upcast;
-    use core::internal::{
-        bounded_int, bounded_int::{BoundedInt, AddHelper, MulHelper, DivRemHelper,}
-    };
-    use core::circuit::{u384, u96};
-    // use plonk_verifier::curve::u512;
+// mod conversions {
+//     use core::integer::upcast;
+//     use core::internal::{
+//         bounded_int, bounded_int::{BoundedInt, AddHelper, MulHelper, DivRemHelper,}
+//     };
+//     use core::circuit::{u384, u96};
+//     // use plonk_verifier::curve::u512;
 
-    type ConstValue<const VALUE: felt252> = BoundedInt<VALUE, VALUE>;
-    const POW32: felt252 = 0x100000000;
-    const POW32_TYPED: ConstValue<POW32> = 0x100000000;
-    const NZ_POW32_TYPED: NonZero<ConstValue<POW32>> = 0x100000000;
+//     type ConstValue<const VALUE: felt252> = BoundedInt<VALUE, VALUE>;
+//     const POW32: felt252 = 0x100000000;
+//     const POW32_TYPED: ConstValue<POW32> = 0x100000000;
+//     const NZ_POW32_TYPED: NonZero<ConstValue<POW32>> = 0x100000000;
 
-    const POW64: felt252 = 0x10000000000000000;
-    const POW64_TYPED: ConstValue<POW64> = 0x10000000000000000;
-    const NZ_POW64_TYPED: NonZero<ConstValue<POW64>> = 0x10000000000000000;
+//     const POW64: felt252 = 0x10000000000000000;
+//     const POW64_TYPED: ConstValue<POW64> = 0x10000000000000000;
+//     const NZ_POW64_TYPED: NonZero<ConstValue<POW64>> = 0x10000000000000000;
 
-    const POW96: felt252 = 0x1000000000000000000000000;
-    const POW96_TYPED: ConstValue<POW96> = 0x1000000000000000000000000;
-    const NZ_POW96_TYPED: NonZero<ConstValue<POW96>> = 0x1000000000000000000000000;
+//     const POW96: felt252 = 0x1000000000000000000000000;
+//     const POW96_TYPED: ConstValue<POW96> = 0x1000000000000000000000000;
+//     const NZ_POW96_TYPED: NonZero<ConstValue<POW96>> = 0x1000000000000000000000000;
 
-    const POW128: felt252 = 0x100000000000000000000000000000000;
-    const POW128_TYPED: ConstValue<POW128> = 0x100000000000000000000000000000000;
-    const NZ_POW128_TYPED: NonZero<ConstValue<POW128>> = 0x100000000000000000000000000000000;
+//     const POW128: felt252 = 0x100000000000000000000000000000000;
+//     const POW128_TYPED: ConstValue<POW128> = 0x100000000000000000000000000000000;
+//     const NZ_POW128_TYPED: NonZero<ConstValue<POW128>> = 0x100000000000000000000000000000000;
 
-    const POW192: felt252 = 0x1000000000000000000000000000000000000000000000000;
-    const POW192_TYPED: ConstValue<POW192> = 0x1000000000000000000000000000000000000000000000000;
-    const NZ_POW192_TYPED: NonZero<ConstValue<POW192>> =
-        0x1000000000000000000000000000000000000000000000000;
+//     const POW192: felt252 = 0x1000000000000000000000000000000000000000000000000;
+//     const POW192_TYPED: ConstValue<POW192> = 0x1000000000000000000000000000000000000000000000000;
+//     const NZ_POW192_TYPED: NonZero<ConstValue<POW192>> =
+//         0x1000000000000000000000000000000000000000000000000;
 
-    //-----------------DivRemHelpers Parts-----------------
-    impl DivRemU96By32 of DivRemHelper<u96, ConstValue<POW32>> {
-        type DivT = BoundedInt<0, { POW64 - 1 }>;
-        type RemT = BoundedInt<0, { POW32 - 1 }>;
-    }
+//     //-----------------DivRemHelpers Parts-----------------
+//     impl DivRemU96By32 of DivRemHelper<u96, ConstValue<POW32>> {
+//         type DivT = BoundedInt<0, { POW64 - 1 }>;
+//         type RemT = BoundedInt<0, { POW32 - 1 }>;
+//     }
 
-    impl DivRemU96By64 of DivRemHelper<u96, ConstValue<POW64>> {
-        type DivT = BoundedInt<0, { POW32 - 1 }>;
-        type RemT = BoundedInt<0, { POW64 - 1 }>;
-    }
+//     impl DivRemU96By64 of DivRemHelper<u96, ConstValue<POW64>> {
+//         type DivT = BoundedInt<0, { POW32 - 1 }>;
+//         type RemT = BoundedInt<0, { POW64 - 1 }>;
+//     }
 
-    //-----------------MulHelpers Parts-----------------
-    impl Mul32By96Impl of MulHelper<BoundedInt<0, { POW32 - 1 }>, ConstValue<POW96>> {
-        // The result needs to accommodate POW32 * 2^96
-        type Result = BoundedInt<0, { POW128 - POW96 }>;
-    }
+//     //-----------------MulHelpers Parts-----------------
+//     impl Mul32By96Impl of MulHelper<BoundedInt<0, { POW32 - 1 }>, ConstValue<POW96>> {
+//         // The result needs to accommodate POW32 * 2^96
+//         type Result = BoundedInt<0, { POW128 - POW96 }>;
+//     }
 
-    impl MulHelper64By64Impl of MulHelper<BoundedInt<0, { POW64 - 1 }>, ConstValue<POW64>> {
-        type Result = BoundedInt<0, { POW128 - POW64 }>;
-    }
+//     impl MulHelper64By64Impl of MulHelper<BoundedInt<0, { POW64 - 1 }>, ConstValue<POW64>> {
+//         type Result = BoundedInt<0, { POW128 - POW64 }>;
+//     }
 
-    impl MulHigh96Shift32Impl of MulHelper<u96, ConstValue<POW32>> {
-        type Result = BoundedInt<0, { POW128 - POW32 }>;
-    }
+//     impl MulHigh96Shift32Impl of MulHelper<u96, ConstValue<POW32>> {
+//         type Result = BoundedInt<0, { POW128 - POW32 }>;
+//     }
 
-    //-----------------AddHelpers Parts-----------------
-    impl AddHelperHigh32Low96Impl of AddHelper<BoundedInt<0, { POW128 - POW96 }>, u96> {
-        type Result = BoundedInt<0, { POW128 - 1 }>;
-        // type Result = u128;
-    }
+//     //-----------------AddHelpers Parts-----------------
+//     impl AddHelperHigh32Low96Impl of AddHelper<BoundedInt<0, { POW128 - POW96 }>, u96> {
+//         type Result = BoundedInt<0, { POW128 - 1 }>;
+//         // type Result = u128;
+//     }
 
-    impl AddHelperHigh64Low64Impl of AddHelper<
-        BoundedInt<0, { POW64 - 1 }>, BoundedInt<0, { POW128 - POW64 }>
-    > {
-        type Result = BoundedInt<0, { POW128 - 1 }>;
-    }
+//     impl AddHelperHigh64Low64Impl of AddHelper<
+//         BoundedInt<0, { POW64 - 1 }>, BoundedInt<0, { POW128 - POW64 }>
+//     > {
+//         type Result = BoundedInt<0, { POW128 - 1 }>;
+//     }
 
-    impl AddHelperLimb2Parts of AddHelper<
-        BoundedInt<0, { POW32 - 1 }>, BoundedInt<0, { POW128 - POW32 }>
-    > {
-        type Result = BoundedInt<0, { POW128 - 1 }>;
-    }
+//     impl AddHelperLimb2Parts of AddHelper<
+//         BoundedInt<0, { POW32 - 1 }>, BoundedInt<0, { POW128 - POW32 }>
+//     > {
+//         type Result = BoundedInt<0, { POW128 - 1 }>;
+//     }
 
     // pub fn into_u512(value: u384) -> u512 {
     //     // warning: don't use, this function is not well tested
@@ -92,4 +92,4 @@ mod conversions {
     //         limb3: 0,
     //     }
     // }
-}
+// }
