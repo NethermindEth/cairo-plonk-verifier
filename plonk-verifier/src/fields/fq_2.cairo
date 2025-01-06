@@ -199,7 +199,8 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
                 Result::Err(_) => { panic!("Expected success") }
         };
 
-        fq2(outputs.get_output(c0), outputs.get_output(c1))    }
+        fq2(outputs.get_output(c0), outputs.get_output(c1))
+    }
 
     #[inline(always)]
     fn sqr(self: Fq2, m: CircuitModulus) -> Fq2 {
@@ -242,4 +243,3 @@ impl FqEqs of FieldEqs<Fq2> {
         lhs.c0 == rhs.c0 && lhs.c1 == rhs.c1
     }
 }
-
