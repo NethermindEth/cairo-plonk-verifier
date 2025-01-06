@@ -84,7 +84,7 @@ impl FqSparse of FqSparseTrait {
     // Same as Fq6 u_mul but with b2 as zero (and associated ops removed)
     #[inline(always)]
     fn mul_01(self: Fq6, rhs: Fq6Sparse01, m: CircuitModulus) -> Fq6 {
-        core::internal::revoke_ap_tracking();
+        // core::internal::revoke_ap_tracking();
         // Input:a = (a0 + a1v + a2v2) and b = (b0 + b1v) ∈ Fp6
         // Output:c = a · b = (c0 + c1v + c2v2) ∈ Fp6
         let Fq6 { c0: a0, c1: a1, c2: a2 } = self;

@@ -5,7 +5,7 @@ mod plonk {
     mod transcript;
     mod utils;
     // #[cfg(test)]
-// mod plonk_tests;
+    // mod plonk_tests;
 }
 mod traits;
 use traits::{FieldOps, FieldUtils, FieldEqs};
@@ -46,20 +46,19 @@ mod fields {
     #[cfg(test)]
     mod tests {
         // mod fq12;
-// mod fq6;
-// mod fq2;
-// mod fq;
-// mod fq12_expo;
-// mod fq_sparse;
-// mod u512;
-// mod frobenius;
-// mod utils;
+        // mod fq6;
+        // mod fq2;
+        // mod fq;
+        // mod fq12_expo;
+        // mod fq_sparse;
+        // mod u512;
+        // mod frobenius;
+        // mod utils;
     }
 
-    //use fq_generics::{TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,};
     use fq_1::{Fq, FqOps, FqUtils, fq, FqIntoU256};
     use fq_2::{Fq2, Fq2Ops, Fq2Utils, fq2, Fq2Frobenius};
-    use fq_6::{Fq6, Fq6Ops, Fq6Utils, fq6, Fq6Frobenius}; //, SixU512};
+    use fq_6::{Fq6, Fq6Ops, Fq6Utils, fq6, Fq6Frobenius};
     use fq_12::{Fq12, Fq12Ops, Fq12Utils, fq12, Fq12Frobenius};
     use fq_12_exponentiation::Fq12Exponentiation;
     use fq_sparse::{

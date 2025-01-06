@@ -12,7 +12,6 @@ use plonk_verifier::fields::fq_sparse::FqSparseTrait;
 use plonk_verifier::fields::frobenius::pi;
 use plonk_verifier::traits::FieldUtils;
 
-
 // This implementation follows the paper at https://eprint.iacr.org/2022/1162
 // Pairings in Rank-1 Constraint Systems, Youssef El Housni et al.
 // Section 6.1 Miller loop

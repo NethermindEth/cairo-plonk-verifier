@@ -200,8 +200,6 @@ impl Fq12Utils of FieldUtils<Fq12, Fq6, CircuitModulus> {
     }
 }
 
-// type Fq6U512 = ((u512, u512), (u512, u512), (u512, u512));
-
 impl Fq12Ops of FieldOps<Fq12, CircuitModulus> {
     fn add(self: Fq12, rhs: Fq12, m: CircuitModulus) -> Fq12 {
         let (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = add_circuit(); 
@@ -438,14 +436,15 @@ impl Fq12Ops of FieldOps<Fq12, CircuitModulus> {
     }
 
     fn inv(self: Fq12, m: CircuitModulus) -> Fq12 {
-        core::internal::revoke_ap_tracking();
+        // core::internal::revoke_ap_tracking();
         let t = (self.c0.sqr(m).sub(mul_by_v_nz_as_circuit(self.c1.sqr(m), m), m)).inv(m);
 
         Fq12 { c0: self.c0.mul(t, m), c1: (self.c1.mul(t, m)).neg(m) }
     }
 }
+
 fn fq12_karatsuba_sqr(a: Fq12, m: CircuitModulus) -> Fq12 {
-    core::internal::revoke_ap_tracking();
+    // core::internal::revoke_ap_tracking();
     let Fq12 { c0: a0, c1: a1 } = a;
     // Karatsuba squaring
     // v0 = a0² , v1 = a1²

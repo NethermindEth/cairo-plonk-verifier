@@ -64,7 +64,7 @@ impl Fq12Squaring of Fq12SquaringTrait {
 
     // Karabina decompress a2, a3, a4, a5 to Fq12 a0, a1, a2, a3, a4, a5
     fn krbn_decompress(self: Krbn2345, m: CircuitModulus) -> Fq12 {
-        core::internal::revoke_ap_tracking();
+        // core::internal::revoke_ap_tracking();
         let Krbn2345 { g2, g3, g4, g5 } = self;
         // Si = gi^2
         if g2.c0 == FieldUtils::zero() && g2.c1 == FieldUtils::zero() {
@@ -102,7 +102,7 @@ impl Fq12Squaring of Fq12SquaringTrait {
     // This Karabina implementation is adjusted for the quadratic over cubic representation
     // https://github.com/Consensys/gnark-crypto/blob/v0.12.1/ecc/bn254/internal/fptower/e12.go#L143
     fn sqr_krbn_1235(self: Fq12, m: CircuitModulus) -> Fq12 {
-        core::internal::revoke_ap_tracking();
+        // core::internal::revoke_ap_tracking();
         let Fq12 { c0: Fq6 { c0: _g0, c1: g1, c2: g2 }, c1: Fq6 { c0: g3, c1: _g4, c2: g5 } } =
             self;
 
@@ -133,7 +133,7 @@ impl Fq12Squaring of Fq12SquaringTrait {
     // https://eprint.iacr.org/2010/542.pdf
     // Compressed Karabina 2345 square
     fn sqr_krbn(self: Krbn2345, m: CircuitModulus) -> Krbn2345 {
-        core::internal::revoke_ap_tracking();
+        // core::internal::revoke_ap_tracking();
         // Input: self = (a2 +a3s)t+(a4 +a5s)t2 ∈ Gφ6(Fp2)
         // Output: self^2 = (c2 +c3s)t+(c4 +c5s)t2 ∈ Gφ6 (Fp2 ).
         let Krbn2345 { g2, g3, g4, g5 } = self;
@@ -166,7 +166,7 @@ impl Fq12Squaring of Fq12SquaringTrait {
     }
 
     fn sqr_6_times(self: Fq12, m: CircuitModulus) -> Fq12 {
-        core::internal::revoke_ap_tracking();
+        // core::internal::revoke_ap_tracking();
         self
             .krbn_compress_2345()
             .krbn_sqr_4x(m) // ^2^4
@@ -178,7 +178,7 @@ impl Fq12Squaring of Fq12SquaringTrait {
     // Called only once hence inlined
     #[inline(always)]
     fn sqr_7_times(self: Fq12, m: CircuitModulus) -> Fq12 {
-        core::internal::revoke_ap_tracking();
+        // core::internal::revoke_ap_tracking();
         self
             .krbn_compress_2345()
             .krbn_sqr_4x(m) // ^2^4
@@ -189,7 +189,7 @@ impl Fq12Squaring of Fq12SquaringTrait {
     }
 
     fn sqr_8_times(self: Fq12, m: CircuitModulus) -> Fq12 {
-        core::internal::revoke_ap_tracking();
+        // core::internal::revoke_ap_tracking();
         self
             .krbn_compress_2345()
             .krbn_sqr_4x(m)
@@ -200,7 +200,7 @@ impl Fq12Squaring of Fq12SquaringTrait {
     // Called only once hence inlined
     #[inline(always)]
     fn sqr_10_times(self: Fq12, m: CircuitModulus) -> Fq12 {
-        core::internal::revoke_ap_tracking();
+        // core::internal::revoke_ap_tracking();
         self
             .krbn_compress_2345()
             .krbn_sqr_4x(m) // ^2^4
@@ -212,7 +212,7 @@ impl Fq12Squaring of Fq12SquaringTrait {
 
     // Cyclotomic squaring
     fn cyclotomic_sqr(self: Fq12, m: CircuitModulus) -> Fq12 {
-        core::internal::revoke_ap_tracking();
+        // core::internal::revoke_ap_tracking();
 
         let z0 = self.c0.c0;
         let z4 = self.c0.c1;
@@ -329,7 +329,7 @@ impl Fq12Squaring of Fq12SquaringTrait {
 impl Fq12SquaringCircuit of Fq12SquaringCircuitTrait {
     // Cyclotomic squaring
     fn cyclotomic_sqr_circuit(self: Fq12, m: CircuitModulus) -> Fq12 {
-        core::internal::revoke_ap_tracking();
+        // core::internal::revoke_ap_tracking();
 
         let z0_0 = CircuitElement::<CircuitInput<0>> {};
         let z0_1 = CircuitElement::<CircuitInput<1>> {};
