@@ -18,7 +18,7 @@ pub struct PPre {
 }
 
 #[derive(Debug, Clone)]
-struct LineFn {
+pub struct LineFn {
     slope: Fq2,
     c: Fq2,
 }

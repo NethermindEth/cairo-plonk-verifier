@@ -1,5 +1,5 @@
 // Helper Functions for Generating Cairo Circuits
-use crate::fields::{affine::Affine, fq12::{Fq12, sqr_offset}, fq2::Fq2, fq6::Fq6, ECOperations, FieldOps};
+use crate::{fields::{affine::Affine, fq12::{sqr_offset, Fq12}, fq2::Fq2, fq6::Fq6, ECOperations, FieldOps}, pairing::line::LineFn};
 
 use super::{builder::CairoCodeBuilder, circuit::Circuit};
 
@@ -138,5 +138,24 @@ pub fn generate_fq12_optimized_field_ops() -> String {
         // .add_line("// Fq12 Neg")
         // .add_circuit(Fq12::neg(lhs), None);
 
+    builder.build()
+}
+
+pub fn generate_line_fn_step_dbl_add() -> String {
+    let mut builder: CairoCodeBuilder = CairoCodeBuilder::new();
+
+    let mut acc: Affine<Fq2> = Affine::<Fq2>::new_input([0, 1, 2, 3]);
+    let q: Affine<Fq2> = Affine::<Fq2>::new_input([4, 5, 6, 7]);
+    
+    let (lf1, lf2) = LineFn::step_dbl_add(&mut acc, &q);
+    builder
+        .add_line("// step_dbl_add")
+        .add_line("// lf1")
+        .add_circuit(lf1, Some(vec!["Lf1SlopeC0", "Lf1SlopeC1", "Lf1C0", "Lf1C1"]))
+        .add_line("// lf1")
+        .add_circuit(lf2, Some(vec!["Lf2SlopeC0", "Lf2SlopeC1", "Lf2C0", "Lf2C1"]))
+        .add_line("// acc ")
+        .add_circuit(acc, None);
+        
     builder.build()
 }

@@ -21,12 +21,14 @@ mod circuits {
         mod fq_6_type;
         mod fq_12_type; 
         mod add_sub_neg;
+        // mod line_fn_step_dbl_add_type;
     }
     mod affine_circuits;
     mod fq_circuits;
     mod fq_2_circuits;
     mod fq_6_circuits;
     mod fq_12_circuits;
+    // mod line_fn_step_dbl_add_circuits;
 }
 
 // Fix imports with proper libs

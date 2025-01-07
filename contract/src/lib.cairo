@@ -21,6 +21,7 @@ mod PLONK_Verifier{
     use plonk_verifier::plonk::constants;
 
     use plonk_verifier::curve::pairing::optimal_ate::single_ate_pairing;
+    use plonk_verifier::curve::pairing::optimal_ate_impls::{SingleMillerPrecompute, SingleMillerSteps};
     use plonk_verifier::curve::constants::{FIELD_U384};
     use core::circuit::CircuitModulus;
     #[storage]
@@ -53,9 +54,28 @@ mod PLONK_Verifier{
             // let verified: bool = plonk_verifier::plonk::verify::PlonkVerifier::verify(verification_key, proof, public_signals);
             // assert(verified, 'plonk verification failed'); 
 
-            // pairing 
             let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+
+            // pairing 
             single_ate_pairing(Wxiw, verification_key.X_2, m);
+            
+            // miller
+            // let g1 = Wxiw;
+            // let g2 = verification_key.X_2;
+            // let (pre, mut q) = SingleMillerPrecompute::precompute((g1, g2), m);
+
+            // let mut f = SingleMillerSteps::miller_first_second(@pre, 1, 2, ref q);
+
+            // SingleMillerSteps::sqr_target(@pre, 3, ref q, ref f);
+            // SingleMillerSteps::sqr_target(@pre, 3, ref q, ref f);
+
+            // SingleMillerSteps::miller_bit_o(@pre, 3, ref q, ref f);
+            // SingleMillerSteps::miller_bit_p(@pre, 3, ref q, ref f);
+            // SingleMillerSteps::miller_bit_n(@pre, 3, ref q, ref f);
+            
+
+            // SingleMillerSteps::miller_last(@pre, ref q, ref f);
+
             
         }
     }

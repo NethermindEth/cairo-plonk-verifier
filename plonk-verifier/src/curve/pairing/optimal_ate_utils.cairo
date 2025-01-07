@@ -58,6 +58,7 @@ struct LineFn {
 }
 
 mod line_fn {
+    use core::circuit::CircuitModulus;
     use core::circuit::conversions::from_u256;
 
     use plonk_verifier::fields::fq_2::Fq2FrobeniusTrait;
@@ -66,19 +67,14 @@ mod line_fn {
     use plonk_verifier::curve::groups::ECOperationsCircuitFq2;
     use plonk_verifier::curve::groups::{g1, g2, ECGroup};
     use plonk_verifier::curve::groups::{Affine, AffineG1 as PtG1, AffineG2 as PtG2};
-    // use plonk_verifier::fields::fq_generics::{
-    //     TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,
-    // };
     use plonk_verifier::fields::{
         Fq, fq, Fq2, fq2, Fq6, Fq12, Fq12Utils, Fq12Ops, FqOps, Fq2Utils, Fq2Ops,
         Fq12Exponentiation,
     };
     use plonk_verifier::fields::{Fq12Sparse034, Fq12Sparse01234, FqSparse};
-    // use plonk_verifier::fields::print::{Fq2Display, Fq12Display, FqDisplay};
     use plonk_verifier::fields::frobenius::pi;
     use super::{LineFn, PPre, NZNum, F034};
     use plonk_verifier::curve::constants::FIELD_U384;
-    use core::circuit::CircuitModulus;
     
     // #[inline(always)]
     fn line_fn(slope: Fq2, s: PtG2, m: CircuitModulus) -> LineFn {
@@ -131,8 +127,9 @@ mod line_fn {
         // λ2 = (y2-y1)/(x2-x1), subbing y2 = λ(x2-x1)+y1
         // λ2 = -λ1-2y1/(x3-x1)
         let slope2 = slope1.neg(m).sub((s.y.add(s.y, m)).div(x1.sub(s.x, m), m), m);
-        acc = s.pt_on_slope_as_circuit(slope2, x1, m);
         let line2 = line_fn(slope2, s, m);
+
+        acc = s.pt_on_slope_as_circuit(slope2, x1, m);
 
         // line functions
         (line1, line2)
