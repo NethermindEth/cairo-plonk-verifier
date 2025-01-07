@@ -31,6 +31,12 @@ impl Fq {
         let eight = &(four + four);
         eight + self
     }
+
+    // A scale 9 function without any additions, instead passes 9 in as a circuit input 0
+    // Note: In order to use this function, your circuit inputs must be offset by 1.
+    pub fn scl_9_no_add(&self) -> Self {
+        self * &Self::new_input(0)
+    }
 }
 
 impl FieldOps for Fq {

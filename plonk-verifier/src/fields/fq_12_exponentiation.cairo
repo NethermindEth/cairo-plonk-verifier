@@ -4,8 +4,6 @@ use core::circuit::{
     CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, circuit_add, circuit_inverse,
     circuit_mul, circuit_sub, u384,
 };
-use core::circuit::conversions::from_u256;
-use core::starknet::secp256_trait::Secp256PointTrait;
 use core::traits::TryInto;
 
 use plonk_verifier::curve::constants::FIELD_U384;

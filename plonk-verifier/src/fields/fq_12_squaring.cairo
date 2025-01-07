@@ -22,14 +22,14 @@ struct Krbn2345 {
 
 // Todo: Refactor as Circuits
 // #[inline(always)]
-fn x2(a: Fq2) -> Fq2 {
-    a.add(a, TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap())
+fn x2(a: Fq2, m: CircuitModulus) -> Fq2 {
+    a.add(a, m)
 }
 
 // #[inline(always)]
-fn x4(a: Fq2) -> Fq2 {
-    let a_twice = x2(a);
-    a_twice.add(a_twice, TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap())
+fn x4(a: Fq2, m: CircuitModulus) -> Fq2 {
+    let a_twice = x2(a, m);
+    a_twice.add(a_twice, m)
 }
 
 const TWO: u384 = u384 { limb0: 2, limb1: 0, limb2: 0, limb3: 0 };
@@ -69,7 +69,7 @@ impl Fq12Squaring of Fq12SquaringTrait {
         // Si = gi^2
         if g2.c0 == FieldUtils::zero() && g2.c1 == FieldUtils::zero() {
             // g1 = 2g4g5/g3
-            let tg24g5 = x2(g4.mul(g5, m));
+            let tg24g5 = x2(g4.mul(g5, m), m);
             let g1 = tg24g5.mul(g3.inv(m), m);
 
             // g0 = (2S1 - 3g3g4)ξ + 1
@@ -86,7 +86,7 @@ impl Fq12Squaring of Fq12SquaringTrait {
             let S4 = g4.sqr(m);
             let Tmp = S4.sub(g3, m);
             let g1 = S5xi.add(S4.add(Tmp.add(Tmp, m), m), m);
-            let g1 = g1.mul(x4(g2).inv(m), m);
+            let g1 = g1.mul(x4(g2, m).inv(m), m);
 
             // // g0 = (2S1 + g2g5 - 3g3g4)ξ + 1
             let S1 = g1.sqr(m);

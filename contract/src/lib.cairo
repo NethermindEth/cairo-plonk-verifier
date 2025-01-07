@@ -20,6 +20,9 @@ mod PLONK_Verifier{
     use plonk_verifier::plonk::types::{PlonkVerificationKey, PlonkProof};
     use plonk_verifier::plonk::constants;
 
+    use plonk_verifier::curve::pairing::optimal_ate::single_ate_pairing;
+    use plonk_verifier::curve::constants::{FIELD_U384};
+    use core::circuit::CircuitModulus;
     #[storage]
     struct Storage {}
 
@@ -47,8 +50,13 @@ mod PLONK_Verifier{
 
             //public_signals
             let public_signals = constants::public_inputs();
-            let verified: bool = plonk_verifier::plonk::verify::PlonkVerifier::verify(verification_key, proof, public_signals);
-            assert(verified, 'plonk verification failed'); 
+            // let verified: bool = plonk_verifier::plonk::verify::PlonkVerifier::verify(verification_key, proof, public_signals);
+            // assert(verified, 'plonk verification failed'); 
+
+            // pairing 
+            let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+            single_ate_pairing(Wxiw, verification_key.X_2, m);
+            
         }
     }
 }

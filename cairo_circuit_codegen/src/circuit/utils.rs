@@ -1,5 +1,5 @@
 // Helper Functions for Generating Cairo Circuits
-use crate::fields::{affine::Affine, fq12::Fq12, fq2::Fq2, fq6::Fq6, ECOperations, FieldOps};
+use crate::fields::{affine::Affine, fq12::{Fq12, sqr_offset}, fq2::Fq2, fq6::Fq6, ECOperations, FieldOps};
 
 use super::{builder::CairoCodeBuilder, circuit::Circuit};
 
@@ -109,5 +109,34 @@ pub fn generate_affine_fq2_ops() -> String {
         .add_line("// double")
         .add_circuit(lhs.double(), None);
         
+    builder.build()
+}
+
+pub fn generate_fq12_optimized_field_ops() -> String {
+    let mut builder: CairoCodeBuilder = CairoCodeBuilder::new();
+    
+    // idx are offset by 1 to use the offset scaling function
+    let idx_0: [usize; 12] = (1..=12).collect::<Vec<usize>>().try_into().unwrap();
+    let idx_1: [usize; 12] = (13..=24).collect::<Vec<usize>>().try_into().unwrap();
+    
+    let lhs = &Fq12::new_input(idx_0);
+    let rhs = &Fq12::new_input(idx_1); 
+    
+    builder
+        // .add_line("// Fq12 Add")
+        // .add_circuit(Fq12::add(lhs, rhs), None)
+        // .add_line("// Fq12 Sub")
+        // .add_circuit(Fq12::sub(lhs, rhs), None)
+        // .add_line("// Fq12 Mul")
+        // .add_circuit(Fq12::mul(lhs, rhs), None)
+        .add_line("// Fq12 Sqr")
+        .add_circuit(sqr_offset(lhs), None);
+        // .add_line("// Fq12 Div")
+        // .add_circuit(Fq12::div(lhs, rhs), None)
+        // .add_line("// Fq12 Inv")
+        // .add_circuit(Fq12::inv(lhs), None)
+        // .add_line("// Fq12 Neg")
+        // .add_circuit(Fq12::neg(lhs), None);
+
     builder.build()
 }
