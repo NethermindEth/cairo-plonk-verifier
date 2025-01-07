@@ -405,7 +405,6 @@ impl Fq12Ops of FieldOps<Fq12, CircuitModulus> {
         let (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = sqr_circuit();
 
         let outputs = match (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11).new_inputs()
-            .next(u384 {limb0: 9, limb1: 0, limb2: 0, limb3: 0})
             .next(self.c0.c0.c0.c0)
             .next(self.c0.c0.c1.c0)
             .next(self.c0.c1.c0.c0)
