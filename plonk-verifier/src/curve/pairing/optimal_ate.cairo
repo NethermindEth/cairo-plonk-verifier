@@ -164,12 +164,10 @@ fn ate_miller_loop_steps<
     };
 
     precompute.miller_last(ref q_acc, ref f);
-
+   
     f
 }
 
-use core::circuit::u384;
-use plonk_verifier::fields::fq12;
 fn single_ate_pairing(p: AffineG1, q: AffineG2, m: CircuitModulus) -> Fq12 {
     ate_miller_loop(p, q, m).final_exponentiation(m)
 }

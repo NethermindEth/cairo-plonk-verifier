@@ -14,7 +14,6 @@ use plonk_verifier::fields::{
 use plonk_verifier::fields::fq_sparse::FqSparseTrait;
 use plonk_verifier::traits::{FieldUtils, MillerPrecompute, MillerSteps};
 
-
 #[derive(Copy, Drop)]
 struct PreCompute {
     p: PtG1,

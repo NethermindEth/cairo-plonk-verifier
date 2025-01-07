@@ -40,6 +40,13 @@ impl PlonkVerifier of PVerifier {
         let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let m_o = TryInto::<_, CircuitModulus>::try_into(ORDER_U384).unwrap();
 
+        // let points = [proof.A, proof.B, proof.C, proof.Z
+        //     ,proof.T1, proof.T2, proof.T3, proof.Wxi, proof.Wxiw].span(); 
+
+        // for point in points {
+        //     result = result && Self::is_on_curve(*point, m);
+        // };
+         
         result = result
             && Self::is_on_curve(proof.A, m)
             && Self::is_on_curve(proof.B, m)
@@ -90,20 +97,19 @@ impl PlonkVerifier of PVerifier {
     fn is_on_curve(pt: AffineG1, m: CircuitModulus) -> bool {
         // Circuit for bn254 curve equation: y^2 = x^3 + 3
         // As y^2 - x^3 = 3
-        let out = core::circuit::CircuitElement::<core::circuit::SubModGate::<core::circuit::SubModGate::<core::circuit::MulModGate::<core::circuit::CircuitInput::<1>, core::circuit::CircuitInput::<1>>, core::circuit::MulModGate::<core::circuit::MulModGate::<core::circuit::CircuitInput::<0>, core::circuit::CircuitInput::<0>>, core::circuit::CircuitInput::<0>>>, core::circuit::CircuitInput::<2>>> {};
+        let out = core::circuit::CircuitElement::<core::circuit::SubModGate::<core::circuit::MulModGate::<core::circuit::CircuitInput::<1>, core::circuit::CircuitInput::<1>>, core::circuit::MulModGate::<core::circuit::MulModGate::<core::circuit::CircuitInput::<0>, core::circuit::CircuitInput::<0>>, core::circuit::CircuitInput::<0>>>> {};
 
         let outputs = match (out,)
             .new_inputs()
             .next(pt.x.c0)
             .next(pt.y.c0)
-            .next(THREE)
             .done()
             .eval(m) {
                 Result::Ok(outputs) => { outputs },
                 Result::Err(_) => { panic!("Expected success") }
         };
     
-        outputs.get_output(out).is_zero()
+        outputs.get_output(out) == THREE
     }
 
     // step 2: check if the field element is in the field
@@ -248,15 +254,13 @@ impl PlonkVerifier of PVerifier {
     // step 7: compute public input polynomial evaluation
     fn compute_PI(publicSignals: Array<u384>, L: Array<Fq>, m_o: CircuitModulus) -> Fq {
         let mut PI: Fq = FqUtils::zero();
-        let mut i = 0;
 
-        while i < publicSignals.len() {
+        for i in 0..publicSignals.len() {
             let w: u384 = publicSignals[i].clone();
             let w_mul_L: u384 = mul_co(w, L[i + 1].c0.clone(), m_o);
             let pi = sub_co(PI.c0, w_mul_L, m_o);
 
             PI = fq(pi);
-            i += 1;
         };
 
         PI
@@ -394,8 +398,6 @@ impl PlonkVerifier of PVerifier {
         let e5_inner = circuit_mul(u, zw);
         let e5 = circuit_add(e4, e5_inner);
 
-        let order_modulus = TryInto::<_, CircuitModulus>::try_into(ORDER_U384).unwrap();
-
         let outputs =
             match (e5,)
                 .new_inputs()
@@ -413,7 +415,7 @@ impl PlonkVerifier of PVerifier {
                 .next(proof.eval_s2.c0)
                 .next(proof.eval_zw.c0)
                 .done()
-                .eval(order_modulus) {
+                .eval(m_o) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
