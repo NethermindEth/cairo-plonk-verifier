@@ -75,13 +75,13 @@ fn ate_miller_loop<
 fn miller_step<
     TG2, TPreC, +MillerSteps<TPreC, TG2, Fq12>, +Drop<TG2>, +Drop<TPreC>
 >(
-    precompute: @TPreC, i: u32, bit_type: @BitType, ref q_acc: TG2, ref f: Fq12
+    precompute: @TPreC, bit_type: @BitType, ref q_acc: TG2, ref f: Fq12
 ) {
-    precompute.sqr_target(0, ref q_acc, ref f);
+    precompute.sqr_target(ref q_acc, ref f);
     match bit_type {
-        BitType::O => precompute.miller_bit_o(i, ref q_acc, ref f),
-        BitType::N => precompute.miller_bit_n(i, ref q_acc, ref f),
-        BitType::P => precompute.miller_bit_p(i, ref q_acc, ref f),
+        BitType::O => precompute.miller_bit_o(ref q_acc, ref f),
+        BitType::N => precompute.miller_bit_n(ref q_acc, ref f),
+        BitType::P => precompute.miller_bit_p(ref q_acc, ref f),
     }
 }
 
@@ -91,7 +91,7 @@ fn ate_miller_loop_steps<
     precompute: TPreC, ref q_acc: TG2
 ) -> Fq12 {
     // ate_loop[64] = O and ate_loop[63] = N
-    let mut f = precompute.miller_first_second(64, 63, ref q_acc);
+    let mut f = precompute.miller_first_second(ref q_acc);
 
     let steps = [
         BitType::O, // i=62
@@ -160,7 +160,7 @@ fn ate_miller_loop_steps<
     ].span();
 
     for step in steps {
-        miller_step(@precompute, 0, step, ref q_acc, ref f);
+        miller_step(@precompute, step, ref q_acc, ref f);
     };
 
     precompute.miller_last(ref q_acc, ref f);

@@ -15,7 +15,7 @@ use plonk_verifier::fields::{
 // Computes FQ12 exponentiated by -t = -4965661367192848881 = 0x44e992b44a6909f1
 // #[inline(always)]
 fn addchain_exp_by_neg_t(x: Fq12, m: CircuitModulus) -> Fq12 {
-    internal::revoke_ap_tracking();
+    // internal::revoke_ap_tracking();
     // Inversion computation is derived from the addition chain:
     //
     //      _10     = 2*1

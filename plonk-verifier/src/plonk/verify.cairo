@@ -419,7 +419,7 @@ impl PlonkVerifier of PVerifier {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
-        let e: u384 = outputs.get_output(e5).try_into().unwrap();
+        let e: u384 = outputs.get_output(e5);
 
         res = res.multiply_as_circuit(e, m);
 
