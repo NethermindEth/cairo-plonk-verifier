@@ -2,6 +2,7 @@ pub(crate) mod fq;
 pub(crate) mod fq2;
 pub(crate) mod fq6;
 pub(crate) mod fq12;
+pub(crate) mod fq12_squaring;
 pub(crate) mod affine;
 pub(crate) mod sparse;
 

@@ -1,5 +1,5 @@
 // Helper Functions for Generating Cairo Circuits
-use crate::{fields::{affine::Affine, fq12::{sqr_offset, Fq12}, fq2::Fq2, fq6::Fq6, ECOperations, FieldOps}, pairing::line::LineFn};
+use crate::{fields::{affine::Affine, fq12::{sqr_offset, Fq12}, fq12_squaring::Krbn2345, fq2::Fq2, fq6::Fq6, ECOperations, FieldOps}, pairing::line::LineFn};
 
 use super::{builder::CairoCodeBuilder, circuit::Circuit};
 
@@ -156,6 +156,18 @@ pub fn generate_line_fn_step_dbl_add() -> String {
         .add_circuit(lf2, Some(vec!["Lf2SlopeC0", "Lf2SlopeC1", "Lf2C0", "Lf2C1"]))
         .add_line("// acc ")
         .add_circuit(acc, None);
+        
+    builder.build()
+}
+
+pub fn generate_krbn_sqr() -> String {
+    let mut builder: CairoCodeBuilder = CairoCodeBuilder::new();
+
+    let kr = Krbn2345::new_input([0, 1, 2, 3, 4, 5, 6, 7]);;
+    
+    builder
+        .add_line("// krbn_sqr2345")
+        .add_circuit(kr.sqr_krbn(), None);
         
     builder.build()
 }
