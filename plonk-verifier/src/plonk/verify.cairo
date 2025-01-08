@@ -494,27 +494,119 @@ impl PlonkVerifier of PVerifier {
 
         let g2_one = AffineG2Impl::one();
 
-        // let e_A1_vk_x2 = single_ate_pairing(A1, vk.X_2, m);
-        // let e_B1_g2_1 = single_ate_pairing(B1, g2_one, m);
+        let e_A1_vk_x2 = single_ate_pairing(A1, vk.X_2, m);
+        let e_B1_g2_1 = single_ate_pairing(B1, g2_one, m);
 
-        // let res: bool = e_A1_vk_x2.c0 == e_B1_g2_1.c0;
+        let res: bool = e_A1_vk_x2.c0 == e_B1_g2_1.c0;
 
-        let address: ClassHash =
-            (0x0225d938fb98c4614ee1a9f8fef4fab4d4c6b2c0b961f07e7d970319c09ac223)
-            .try_into()
-            .unwrap();
-        let mut call_data: Array<felt252> = array![];
-        Serde::serialize(@A1, ref call_data);
-        Serde::serialize(@vk.X_2, ref call_data);
-        Serde::serialize(@B1, ref call_data);
-        Serde::serialize(@g2_one, ref call_data);
-        println!("call_data: {:?}", call_data);
-        let mut res_serialized = core::starknet::syscalls::library_call_syscall(
-            address, selector!("valid_pairing"), call_data.span()
-        )
-            .unwrap_syscall();
-        let call_res = Serde::<bool>::deserialize(ref res_serialized).unwrap();
-        let res: bool = call_res;
+        // let address: ClassHash =
+        //     (0x0225d938fb98c4614ee1a9f8fef4fab4d4c6b2c0b961f07e7d970319c09ac223)
+        //     .try_into()
+        //     .unwrap();
+        // let mut call_data: Array<felt252> = array![];
+        // Serde::serialize(@A1, ref call_data);
+        // Serde::serialize(@vk.X_2, ref call_data);
+        // Serde::serialize(@B1, ref call_data);
+        // Serde::serialize(@g2_one, ref call_data);
+        // println!("call_data: {:?}", call_data);
+        // let mut res_serialized = core::starknet::syscalls::library_call_syscall(
+        //     address, selector!("valid_pairing"), call_data.span()
+        // )
+        //     .unwrap_syscall();
+        // let call_res = Serde::<bool>::deserialize(ref res_serialized).unwrap();
+        // let res: bool = call_res;
         res
+    }
+
+    fn compute_pairing(
+        proof: PlonkProof,
+        challenges: PlonkChallenge,
+        vk: PlonkVerificationKey,
+        E: AffineG1,
+        F: AffineG1,
+        m: CircuitModulus,
+        m_o: CircuitModulus
+    ) -> (AffineG1, AffineG2, AffineG1, AffineG2) {
+        let mut A1 = proof.Wxi;
+
+        let Wxiw_mul_u = proof.Wxiw.multiply_as_circuit(challenges.u.c0, m);
+        A1 = A1.add_as_circuit(Wxiw_mul_u, m);
+
+        let mut B1 = proof.Wxi.multiply_as_circuit(challenges.xi.c0, m);
+        let s = mul_co(mul_co(challenges.u.c0, challenges.xi.c0, m_o), vk.w, m_o);
+
+        let Wxiw_mul_s = proof.Wxiw.multiply_as_circuit(s, m);
+        B1 = B1.add_as_circuit(Wxiw_mul_s, m);
+
+        B1 = B1.add_as_circuit(F, m);
+
+        B1 = B1.add_as_circuit(E.neg(m), m);
+
+        let g2_one = AffineG2Impl::one();
+
+        (A1, vk.X_2, B1, g2_one)
+    }
+
+    fn verify_except_pairing(
+        verification_key: PlonkVerificationKey, proof: PlonkProof, publicSignals: Array<u384>
+    ) -> (AffineG1, AffineG2, AffineG1, AffineG2) {
+        let mut result = true;
+        let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+        let m_o = TryInto::<_, CircuitModulus>::try_into(ORDER_U384).unwrap();
+
+        // let points = [proof.A, proof.B, proof.C, proof.Z
+        //     ,proof.T1, proof.T2, proof.T3, proof.Wxi, proof.Wxiw].span();
+
+        // for point in points {
+        //     result = result && Self::is_on_curve(*point, m);
+        // };
+
+        result = result
+            && Self::is_on_curve(proof.A, m)
+            && Self::is_on_curve(proof.B, m)
+            && Self::is_on_curve(proof.C, m)
+            && Self::is_on_curve(proof.Z, m)
+            && Self::is_on_curve(proof.T1, m)
+            && Self::is_on_curve(proof.T2, m)
+            && Self::is_on_curve(proof.T3, m)
+            && Self::is_on_curve(proof.Wxi, m)
+            && Self::is_on_curve(proof.Wxiw, m);
+
+        result = result
+            && Self::is_in_field(proof.eval_a)
+            && Self::is_in_field(proof.eval_b)
+            && Self::is_in_field(proof.eval_c)
+            && Self::is_in_field(proof.eval_s1)
+            && Self::is_in_field(proof.eval_s2)
+            && Self::is_in_field(proof.eval_zw);
+
+        result = result
+            && Self::check_public_inputs_length(
+                verification_key.nPublic, publicSignals.len().into()
+            );
+
+        let mut challenges: PlonkChallenge = Self::compute_challenges(
+            verification_key, proof, publicSignals.clone(), m_o
+        );
+
+        let (L, challenges) = Self::compute_lagrange_evaluations(
+            verification_key, challenges, m, m_o
+        );
+
+        let PI = Self::compute_PI(publicSignals.clone(), L.clone(), m_o);
+
+        let R0 = Self::compute_R0(proof, challenges, PI, L[1].clone(), m_o);
+
+        let D = Self::compute_D(proof, challenges, verification_key, L[1].clone(), m, m_o);
+
+        let F = Self::compute_F(proof, challenges, verification_key, D, m);
+
+        let E = Self::compute_E(proof, challenges, R0, m, m_o);
+
+        let (G1_P1, G2_P1, G1_P2, G2_P2) = Self::compute_pairing(
+            proof, challenges, verification_key, E, F, m, m_o
+        );
+
+        (G1_P1, G2_P1, G1_P2, G2_P2)
     }
 }
