@@ -1,0 +1,1 @@
+{"version":1,"contracts":[{"id":"184pud9vnanlq","package_name":"plonk_verifier_contract","contract_name":"pairing","module_path":"plonk_verifier_contract::pairing","artifacts":{"sierra":"plonk_verifier_contract_pairing.contract_class.json","casm":"plonk_verifier_contract_pairing.compiled_contract_class.json"}}]}

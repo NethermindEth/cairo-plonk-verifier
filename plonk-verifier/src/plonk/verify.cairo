@@ -3,29 +3,24 @@ use core::{
     array::ArrayTrait,
     circuit::{
         AddInputResultTrait, AddMod, CircuitElement, CircuitInput, CircuitInputs, CircuitModulus,
-        CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, RangeCheck96, U384Zero, u96,
-        u384, circuit_add, circuit_inverse, circuit_mul, circuit_sub,
-        conversions::from_u256,
+        CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, RangeCheck96, U384Zero, u96, u384,
+        circuit_add, circuit_inverse, circuit_mul, circuit_sub, conversions::from_u256,
     },
-    clone::Clone,
-    cmp::max,
-    traits::{Destruct, Into, TryInto},
+    clone::Clone, cmp::max, traits::{Destruct, Into, TryInto},
 };
 
-use plonk_verifier::circuits::fq_circuits::{add_c, add_co, div_c, div_co, mul_c, mul_co, neg_co, sqr_c, sqr_co, sub_c, sub_co};
+use plonk_verifier::circuits::fq_circuits::{
+    add_c, add_co, div_c, div_co, mul_c, mul_co, neg_co, sqr_c, sqr_co, sub_c, sub_co
+};
 use plonk_verifier::{
     curve::{
         constants::{FIELD_U384, ORDER, ORDER_384, ORDER_U384},
         groups::{AffineG1, AffineG2, AffineG2Impl, ECOperationsCircuitFq, g1, g2},
     },
-    fields::{
-        fq, Fq, Fq12, Fq12Exponentiation, Fq12Utils, FqUtils,
-        fq_generics::TFqPartialEq,
-    },
+    fields::{fq, Fq, Fq12, Fq12Exponentiation, Fq12Utils, FqUtils, fq_generics::TFqPartialEq,},
     pairing::optimal_ate::{ate_miller_loop, single_ate_pairing},
     plonk::{
-        constants::THREE,
-        transcript::{Keccak256Transcript, Transcript, TranscriptElement},
+        constants::THREE, transcript::{Keccak256Transcript, Transcript, TranscriptElement},
         types::{PlonkChallenge, PlonkProof, PlonkVerificationKey},
     },
     traits::{FieldOps, FieldUtils},
@@ -68,7 +63,9 @@ impl PlonkVerifier of PVerifier {
             verification_key, proof, publicSignals.clone(), m_o
         );
 
-        let (L, challenges) = Self::compute_lagrange_evaluations(verification_key, challenges, m, m_o);
+        let (L, challenges) = Self::compute_lagrange_evaluations(
+            verification_key, challenges, m, m_o
+        );
 
         let PI = Self::compute_PI(publicSignals.clone(), L.clone(), m_o);
 
@@ -90,19 +87,29 @@ impl PlonkVerifier of PVerifier {
     fn is_on_curve(pt: AffineG1, m: CircuitModulus) -> bool {
         // Circuit for bn254 curve equation: y^2 = x^3 + 3
         // As y^2 - x^3 = 3
-        let out = core::circuit::CircuitElement::<core::circuit::SubModGate::<core::circuit::SubModGate::<core::circuit::MulModGate::<core::circuit::CircuitInput::<1>, core::circuit::CircuitInput::<1>>, core::circuit::MulModGate::<core::circuit::MulModGate::<core::circuit::CircuitInput::<0>, core::circuit::CircuitInput::<0>>, core::circuit::CircuitInput::<0>>>, core::circuit::CircuitInput::<2>>> {};
+        let out = core::circuit::CircuitElement::<
+            core::circuit::SubModGate<
+                core::circuit::SubModGate<
+                    core::circuit::MulModGate<
+                        core::circuit::CircuitInput<1>, core::circuit::CircuitInput<1>
+                    >,
+                    core::circuit::MulModGate<
+                        core::circuit::MulModGate<
+                            core::circuit::CircuitInput<0>, core::circuit::CircuitInput<0>
+                        >,
+                        core::circuit::CircuitInput<0>
+                    >
+                >,
+                core::circuit::CircuitInput<2>
+            >
+        > {};
 
-        let outputs = match (out,)
-            .new_inputs()
-            .next(pt.x.c0)
-            .next(pt.y.c0)
-            .next(THREE)
-            .done()
-            .eval(m) {
-                Result::Ok(outputs) => { outputs },
-                Result::Err(_) => { panic!("Expected success") }
+        let outputs =
+            match (out,).new_inputs().next(pt.x.c0).next(pt.y.c0).next(THREE).done().eval(m) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
         };
-    
+
         outputs.get_output(out).is_zero()
     }
 
@@ -120,7 +127,10 @@ impl PlonkVerifier of PVerifier {
 
     // step 4: compute challenge
     fn compute_challenges(
-        verification_key: PlonkVerificationKey, proof: PlonkProof, publicSignals: Array<u384>, m_o: CircuitModulus
+        verification_key: PlonkVerificationKey,
+        proof: PlonkProof,
+        publicSignals: Array<u384>,
+        m_o: CircuitModulus
     ) -> PlonkChallenge {
         let mut challenges = PlonkChallenge {
             beta: FqUtils::zero(),
@@ -205,7 +215,10 @@ impl PlonkVerifier of PVerifier {
 
     // step 5,6: compute zero polynomial and calculate the lagrange evaluations
     fn compute_lagrange_evaluations(
-        verification_key: PlonkVerificationKey, mut challenges: PlonkChallenge, m: CircuitModulus, m_o: CircuitModulus
+        verification_key: PlonkVerificationKey,
+        mut challenges: PlonkChallenge,
+        m: CircuitModulus,
+        m_o: CircuitModulus
     ) -> (Array<Fq>, PlonkChallenge) {
         let mut xin = challenges.xi;
         let mut domain_size = FqUtils::one();
@@ -263,14 +276,20 @@ impl PlonkVerifier of PVerifier {
     }
 
     // step 8: compute r constant
-    fn compute_R0(proof: PlonkProof, challenges: PlonkChallenge, PI: Fq, L1: Fq, m_o: CircuitModulus) -> Fq {
+    fn compute_R0(
+        proof: PlonkProof, challenges: PlonkChallenge, PI: Fq, L1: Fq, m_o: CircuitModulus
+    ) -> Fq {
         let e1: u384 = PI.c0;
         let e2: u384 = mul_co(L1.c0, sqr_co(challenges.alpha.c0, m_o), m_o);
 
-        let mut e3a = add_co(proof.eval_a.c0, mul_co(challenges.beta.c0, proof.eval_s1.c0, m_o), m_o);
+        let mut e3a = add_co(
+            proof.eval_a.c0, mul_co(challenges.beta.c0, proof.eval_s1.c0, m_o), m_o
+        );
         e3a = add_co(e3a, challenges.gamma.c0, m_o);
 
-        let mut e3b = add_co(proof.eval_b.c0, mul_co(challenges.beta.c0, proof.eval_s2.c0, m_o), m_o);
+        let mut e3b = add_co(
+            proof.eval_b.c0, mul_co(challenges.beta.c0, proof.eval_s2.c0, m_o), m_o
+        );
         e3b = add_co(e3b, challenges.gamma.c0, m_o);
 
         let mut e3c = add_co(proof.eval_c.c0, challenges.gamma.c0, m_o);
@@ -286,7 +305,12 @@ impl PlonkVerifier of PVerifier {
 
     // step 9: Compute first part of batched polynomial commitment D
     fn compute_D(
-        proof: PlonkProof, challenges: PlonkChallenge, vk: PlonkVerificationKey, l1: Fq, m: CircuitModulus, m_o: CircuitModulus
+        proof: PlonkProof,
+        challenges: PlonkChallenge,
+        vk: PlonkVerificationKey,
+        l1: Fq,
+        m: CircuitModulus,
+        m_o: CircuitModulus
     ) -> AffineG1 {
         let mut d1 = vk.Qm.multiply_as_circuit((mul_co(proof.eval_a.c0, proof.eval_b.c0, m_o)), m);
         d1 = d1.add_as_circuit(vk.Ql.multiply_as_circuit(proof.eval_a.c0, m), m);
@@ -310,19 +334,25 @@ impl PlonkVerifier of PVerifier {
 
         let d2b = mul_co(l1.c0, sqr_co(challenges.alpha.c0, m_o), m_o);
 
-        let d2 = proof.Z.multiply_as_circuit(add_co(add_co(d2a, d2b, m_o), challenges.u.c0, m_o), m);
+        let d2 = proof
+            .Z
+            .multiply_as_circuit(add_co(add_co(d2a, d2b, m_o), challenges.u.c0, m_o), m);
 
         let d3a = add_co(
             add_co(proof.eval_a.c0, mul_co(challenges.beta.c0, proof.eval_s1.c0, m_o), m_o),
-            challenges.gamma.c0, m_o,
+            challenges.gamma.c0,
+            m_o,
         );
 
         let d3b = add_co(
             add_co(proof.eval_b.c0, mul_co(challenges.beta.c0, proof.eval_s2.c0, m_o), m_o),
-            challenges.gamma.c0, m_o
+            challenges.gamma.c0,
+            m_o
         );
 
-        let d3c = mul_co(mul_co(challenges.alpha.c0, challenges.beta.c0, m_o), proof.eval_zw.c0, m_o);
+        let d3c = mul_co(
+            mul_co(challenges.alpha.c0, challenges.beta.c0, m_o), proof.eval_zw.c0, m_o
+        );
 
         let d3 = vk.S3.multiply_as_circuit(mul_co(mul_co(d3a, d3b, m_o), d3c, m_o), m);
 
@@ -342,7 +372,11 @@ impl PlonkVerifier of PVerifier {
 
     // step 10: Compute full batched polynomial commitment F
     fn compute_F(
-        proof: PlonkProof, challenges: PlonkChallenge, vk: PlonkVerificationKey, D: AffineG1, m: CircuitModulus
+        proof: PlonkProof,
+        challenges: PlonkChallenge,
+        vk: PlonkVerificationKey,
+        D: AffineG1,
+        m: CircuitModulus
     ) -> AffineG1 {
         let mut v1a = proof.A.multiply_as_circuit(challenges.v1.c0, m);
         let res_add_d = v1a.add_as_circuit(D, m);
@@ -363,7 +397,13 @@ impl PlonkVerifier of PVerifier {
     }
 
     // step 11: Compute group-encoded batch evaluation E
-    fn compute_E(proof: PlonkProof, challenges: PlonkChallenge, r0: Fq, m: CircuitModulus, m_o: CircuitModulus) -> AffineG1 {
+    fn compute_E(
+        proof: PlonkProof,
+        challenges: PlonkChallenge,
+        r0: Fq,
+        m: CircuitModulus,
+        m_o: CircuitModulus
+    ) -> AffineG1 {
         let mut res: AffineG1 = g1(1, 2);
         let neg_r0 = neg_co(r0.c0, m_o);
 
@@ -430,7 +470,7 @@ impl PlonkVerifier of PVerifier {
         challenges: PlonkChallenge,
         vk: PlonkVerificationKey,
         E: AffineG1,
-        F: AffineG1, 
+        F: AffineG1,
         m: CircuitModulus,
         m_o: CircuitModulus
     ) -> bool {
@@ -450,6 +490,12 @@ impl PlonkVerifier of PVerifier {
         B1 = B1.add_as_circuit(E.neg(m), m);
 
         let g2_one = AffineG2Impl::one();
+        println!("A1 x: {:?}\n", A1.x.c0);
+        println!("A1 y: {:?}\n", B1.y.c0);
+        println!("vk x2 x c0: {:?}\n", vk.X_2.x.c0);
+        println!("vk x2 x c1: {:?}\n", vk.X_2.x.c1);
+        println!("vk x2 y c0: {:?}\n", vk.X_2.y.c0);
+        println!("vk x2 y c1: {:?}\n", vk.X_2.y.c1);
 
         let e_A1_vk_x2 = single_ate_pairing(A1, vk.X_2, m);
         let e_B1_g2_1 = single_ate_pairing(B1, g2_one, m);

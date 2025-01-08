@@ -23,10 +23,10 @@ fn ate_miller_loop<
     +Drop<TG2>,
     +Drop<TPreC>,
     +Drop<M>
->( 
-    p: TG1, q: TG2, m: M 
+>(
+    p: TG1, q: TG2, m: M
 ) -> Fq12 {
-    gas::withdraw_gas().unwrap();
+    // gas::withdraw_gas().unwrap();
     core::internal::revoke_ap_tracking();
 
     // Prepare precompute and q accumulator
@@ -40,8 +40,8 @@ fn ate_miller_loop<
 // The implementation below is the algorithm described below in a single loop.
 //
 //
-// Algorithm 2: Calculate and store line functions for BLS12 curve Input: Q ∈ G2, P ∈ G1, curve parameter u
-// Output: An array g of ⌊log2(u)⌋ line functions ∈ Fp12
+// Algorithm 2: Calculate and store line functions for BLS12 curve Input: Q ∈ G2, P ∈ G1, curve
+// parameter u Output: An array g of ⌊log2(u)⌋ line functions ∈ Fp12
 // 1: T←Q
 // 2: for i ← ⌊log2(u)⌋−1 to 0 do
 // 3:     g[i] ← lT,T(P), T ← 2T
@@ -63,15 +63,9 @@ fn ate_miller_loop<
 // 3:     f ← f^2
 // 4:     Compute g[i] and mul with f based on the bit value
 // 5: return f
-// 
-fn ate_miller_loop_steps<
-    TG2, 
-    TPreC, 
-    +MillerSteps<TPreC, TG2, Fq12>, 
-    +Drop<TG2>, 
-    +Drop<TPreC>
->(
-    precompute: TPreC, ref q_acc: TG2 
+//
+fn ate_miller_loop_steps<TG2, TPreC, +MillerSteps<TPreC, TG2, Fq12>, +Drop<TG2>, +Drop<TPreC>>(
+    precompute: TPreC, ref q_acc: TG2
 ) -> Fq12 {
     let (precompute, mut f) = ate_miller_loop_steps_first_half(precompute, ref q_acc);
     ate_miller_loop_steps_second_half(precompute, ref q_acc, ref f);
@@ -225,5 +219,7 @@ fn ate_miller_loop_steps_second_half<
 }
 
 fn single_ate_pairing(p: AffineG1, q: AffineG2, m: CircuitModulus) -> Fq12 {
-    ate_miller_loop(p, q, m).final_exponentiation(m)
+    // ate_miller_loop(p, q, m).final_exponentiation(m)
+    let o = ate_miller_loop(p, q, m);
+    o.final_exponentiation(m)
 }
