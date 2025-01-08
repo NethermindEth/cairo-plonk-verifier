@@ -49,23 +49,23 @@ fn addchain_exp_by_neg_t(x: Fq12, m: CircuitModulus) -> Fq12 {
     let t6 = t2.cyclotomic_sqr_circuit(m); // Step 9: t6 = x^0x22
     let t1 = t0.mul(t1, m); // Step 10: t1 = x^0x27
     let t0 = t3.mul(t1, m); // Step 11: t0 = x^0x29
-    let t6 = t6.sqr_6_times(m); // Step 17: t6 = x^0x880
+    let t6 = t6.sqr_n_times(6, m); // Step 17: t6 = x^0x880
     let t5 = t5.mul(t6, m); // Step 18: t5 = x^0x884
     let t5 = t4.mul(t5, m); // Step 19: t5 = x^0x89d
-    let t5 = t5.sqr_7_times(m); // Step 26: t5 = x^0x44e80
+    let t5 = t5.sqr_n_times(7, m); // Step 26: t5 = x^0x44e80
     let t4 = t4.mul(t5, m); // Step 27: t4 = x^0x44e99
-    let t4 = t4.sqr_8_times(m); // Step 35: t4 = x^0x44e9900
+    let t4 = t4.sqr_n_times(8, m); // Step 35: t4 = x^0x44e9900
     let t4 = t0.mul(t4, m); // Step 36: t4 = x^0x44e9929
     let t3 = t3.mul(t4, m); // Step 37: t3 = x^0x44e992b
-    let t3 = t3.sqr_6_times(m); // Step 43: t3 = x^0x113a64ac0
+    let t3 = t3.sqr_n_times(6, m); // Step 43: t3 = x^0x113a64ac0
     let t2 = t2.mul(t3, m); // Step 44: t2 = x^0x113a64ad1
-    let t2 = t2.sqr_8_times(m); // Step 52: t2 = x^0x113a64ad100
+    let t2 = t2.sqr_n_times(8, m); // Step 52: t2 = x^0x113a64ad100
     let t2 = t0.mul(t2, m); // Step 53: t2 = x^0x113a64ad129
-    let t2 = t2.sqr_6_times(m); // Step 59: t2 = x^0x44e992b44a40
+    let t2 = t2.sqr_n_times(6, m); // Step 59: t2 = x^0x44e992b44a40
     let t2 = t0.mul(t2, m); // Step 60: t2 = x^0x44e992b44a69
-    let t2 = t2.sqr_10_times(m); // Step 70: t2 = x^0x113a64ad129a400
+    let t2 = t2.sqr_n_times(10, m); // Step 70: t2 = x^0x113a64ad129a400
     let t1 = t1.mul(t2, m); // Step 71: t1 = x^0x113a64ad129a427
-    let t1 = t1.sqr_6_times(m); // Step 77: t1 = x^0x44e992b44a6909c0
+    let t1 = t1.sqr_n_times(6, m); // Step 77: t1 = x^0x44e992b44a6909c0
     let t0 = t0.mul(t1, m); // Step 78: t0 = x^0x44e992b44a6909e9
     let z = z.mul(t0, m); // Step 79: z = x^0x44e992b44a6909f1
 

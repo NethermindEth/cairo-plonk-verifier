@@ -162,33 +162,16 @@ impl Fq12Squaring of Fq12SquaringTrait {
             fq2(o.get_output(g4_c0), o.get_output(g4_c1)), 
             fq2(o.get_output(g5_c0), o.get_output(g5_c1))
         )
+    }
 
-        // // Scaling factor optimized to add instead (2x = x + x)
-        // // core::internal::revoke_ap_tracking();
-        // // Input: self = (a2 +a3s)t+(a4 +a5s)t2 ∈ Gφ6(Fp2)
-        // // Output: self^2 = (c2 +c3s)t+(c4 +c5s)t2 ∈ Gφ6 (Fp2 ).
-        // let Krbn2345 { g2, g3, g4, g5 } = self;
+    fn sqr_n_times(self: Fq12, n: i32, m: CircuitModulus) -> Fq12 {
+        let mut krbn = self.krbn_compress_2345();
 
-        // let S2 = g2.sqr(m);
-        // let S3 = g3.sqr(m);
-        // let S4 = g4.sqr(m);
-        // let S5 = g5.sqr(m);
-        // let S4_5 = g4.add(g5, m).sqr(m);
-        // let S2_3 = g2.add(g3, m).sqr(m);
+        for _ in 0..n {
+            krbn = krbn.sqr_krbn(m);
+        };
 
-        // let Tmp = mul_by_xi_nz_as_circuit(S4_5.sub(S4.add(S5, m), m), m);
-        // let h2 = Tmp.add(g2, m).scale(TWO, m).add(Tmp, m);
-
-        // let Tmp = S4.add(mul_by_xi_nz_as_circuit(S5, m), m);
-        // let h3 = Tmp.sub(g3, m).scale(TWO, m).add(Tmp, m);
-
-        // let Tmp = S2.add(mul_by_xi_nz_as_circuit(S3, m), m);
-        // let h4 = Tmp.sub(g4, m).scale(TWO, m).add(Tmp, m);
-
-        // let Tmp = S2_3.sub(S2, m).sub(S3, m);
-        // let h5 = Tmp.add(g5, m).scale(TWO, m).add(Tmp, m);
-
-        // Krbn2345 { g2: h2, g3: h3, g4: h4, g5: h5, }
+        krbn.krbn_decompress(m)
     }
 
     // #[inline(always)]
