@@ -228,7 +228,7 @@ impl PlonkVerifier of PVerifier {
         while i < verification_key.power {
             let sqr_mod = sqr_co(xin.c0, m_o);
             xin = fq(sqr_mod);
-            domain_size = domain_size.scale(2, m);
+            domain_size = domain_size.add(domain_size,m); //scale(2, m);
             i += 1;
         };
 

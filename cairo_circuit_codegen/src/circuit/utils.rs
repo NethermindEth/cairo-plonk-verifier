@@ -1,5 +1,5 @@
 // Helper Functions for Generating Cairo Circuits
-use crate::{fields::{affine::Affine, fq::Fq, fq12::{sqr_offset, Fq12}, fq12_squaring::Krbn2345, fq2::Fq2, fq6::Fq6, ECOperations, FieldOps}, pairing::line::LineFn};
+use crate::{fields::{affine::Affine, fq::Fq, fq12::{sqr_offset, Fq12}, fq12_squaring::Krbn2345, fq2::Fq2, fq6::Fq6, sparse::{Fq12Sparse034, Fq6Sparse01}, ECOperations, FieldOps}, pairing::line::LineFn};
 
 use super::{builder::CairoCodeBuilder, circuit::Circuit};
 
@@ -251,11 +251,48 @@ pub fn generate_compute_D_partial() -> String {
     let d3ab = Fq::mul(&Fq::mul(&d3a, &d3b), &d3c);
 
     builder
-    .add_line("// d_partial")
-    .add_line("// D2AB")
-    .add_circuit(d2ab, Some(["D2AB"].to_vec()))
-    .add_line("// D3AB")
-    .add_circuit(d3ab, Some(["D3AB"].to_vec()));
+        .add_line("// d_partial")
+        .add_line("// D2AB")
+        .add_circuit(d2ab, Some(["D2AB"].to_vec()))
+        .add_line("// D3AB")
+        .add_circuit(d3ab, Some(["D3AB"].to_vec()));
     
     builder.build()
 }
+
+pub fn generate_sparse_mul_034_by_034() -> String {
+    let mut builder: CairoCodeBuilder = CairoCodeBuilder::new();
+
+    let lhs: Fq12Sparse034 = Fq12Sparse034::new(Fq2::new_input([0, 1]), Fq2::new_input([2, 3]));
+    let rhs: Fq12Sparse034 = Fq12Sparse034::new(Fq2::new_input([4, 5]), Fq2::new_input([6, 7]));
+   
+    let out = lhs.mul_034_by_034(&rhs);
+
+    builder
+        .add_line("// Sparse mul_034_by_034")
+        .add_line("// Fq6")
+        .add_circuit(out.c0().clone(), Some(["M034034_zC0B0C0", "M034034_zC0B0C1", "M034034_C3D3C0", "M034034_C3D3C1", "M034034_X34C0", "M034034_X34C1"].to_vec()))
+        .add_line("// Fq6Sparse01")
+        .add_circuit(out.c1().c0().clone(), Some(["M034034_X03C0", "M034034_X03C1"].to_vec()))
+        .add_circuit(out.c1().c1().clone(), Some(["M034034_X04C0", "M034034_X04C1"].to_vec()));
+    
+    builder.build()
+}
+
+pub fn generate_sparse_mul_01() -> String {
+    let mut builder: CairoCodeBuilder = CairoCodeBuilder::new();
+
+    let lhs: Fq6 = Fq6::new_input([0, 1, 2, 3, 4, 5]);
+    let rhs: Fq6Sparse01 = Fq6Sparse01::new(Fq2::new_input([6, 7]), Fq2::new_input([8, 9]));
+   
+    let out = lhs.mul_01(&rhs);
+
+    builder
+        .add_line("// Sparse mul_01")
+        .add_line("// Fq6")
+        .add_circuit(out, Some(["M01_C0C0", "M01_C0C1", "M01_C1C0", "M01_C1C1", "M01_C2C0", "M01_C2C1"].to_vec()));
+    
+    builder.build()
+}
+
+

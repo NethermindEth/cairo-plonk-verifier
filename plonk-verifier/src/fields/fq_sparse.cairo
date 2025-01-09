@@ -1,11 +1,16 @@
 use core::array::ArrayTrait;
-use core::circuit::CircuitModulus;
-use core::starknet::secp256_trait::Secp256PointTrait;
+use core::circuit::{
+    AddInputResultTrait, AddModGate as A, CircuitElement, CircuitElement as CE, CircuitInput,
+    CircuitInput as CI, CircuitInputs, CircuitModulus, CircuitOutputsTrait, EvalCircuitResult,
+    EvalCircuitTrait, InverseGate as I, MulModGate as M, SubModGate as S, circuit_add,
+    circuit_inverse, circuit_mul, circuit_sub, u384,
+};
 use core::traits::TryInto;
 
+use plonk_verifier::circuits::sparse_circuits::{mul_034_by_034_circuit, mul_01_circuit};
 use plonk_verifier::curve::{constants::FIELD_U384, mul_by_v_nz_as_circuit, mul_by_xi_nz_as_circuit};
 use plonk_verifier::fields::{
-    fq, fq6, fq12, Fq, Fq2, Fq2Ops, Fq6, Fq12, Fq12Frobenius, Fq12Squaring, FieldOps, FieldUtils,
+    fq, fq2, fq6, fq12, Fq, Fq2, Fq2Ops, Fq6, Fq12, Fq12Frobenius, Fq12Squaring, FieldOps, FieldUtils,
 };
 use plonk_verifier::fields::fq_generics::TFqPartialEq;
 
@@ -84,41 +89,29 @@ impl FqSparse of FqSparseTrait {
     // Same as Fq6 u_mul but with b2 as zero (and associated ops removed)
     // #[inline(always)]
     fn mul_01(self: Fq6, rhs: Fq6Sparse01, m: CircuitModulus) -> Fq6 {
-        // core::internal::revoke_ap_tracking();
-        // Input:a = (a0 + a1v + a2v2) and b = (b0 + b1v) ∈ Fp6
-        // Output:c = a · b = (c0 + c1v + c2v2) ∈ Fp6
-        let Fq6 { c0: a0, c1: a1, c2: a2 } = self;
-        let Fq6Sparse01 { c0: b0, c1: b1, } = rhs;
+        let (c0, c1, c2, c3, c4, c5) = mul_01_circuit(); 
 
-        // b2 is zero so all ops associated ar removed
+        let outputs = match (c0, c1, c2, c3, c4, c5, ).new_inputs()
+            .next(self.c0.c0.c0)
+            .next(self.c0.c1.c0)
+            .next(self.c1.c0.c0)
+            .next(self.c1.c1.c0)
+            .next(self.c2.c0.c0)
+            .next(self.c2.c1.c0)
+            .next(rhs.c0.c0.c0)
+            .next(rhs.c0.c1.c0)
+            .next(rhs.c1.c0.c0)
+            .next(rhs.c1.c1.c0)
+            .done().eval(m) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
+        };
 
-        // v0 = a0b0, v1 = a1b1, v2 = a2b2
-        // let (V0, V1,) = (a0.u_mul(b0), a1.u_mul(b1),);
-
-        // c0 = v0 + ξ((a1 + a2)(b1 + b2) - v1 - v2)
-        // let C0 = V0 + mul_by_xi_nz(a1.u_add(a2).u_mul(b1) - V1, field_nz);
-        // c1 =(a0 + a1)(b0 + b1) - v0 - v1 + ξv2
-        // let C1 = a0.u_add(a1).u_mul(b0.u_add(b1)) - V0 - V1;
-
-        // https://eprint.iacr.org/2006/471.pdf Sec 4
-        // Karatsuba:
-        // c2 = (a0 + a2)(b0 + b2) - v0 + v1 - v2,
-        // c2 = (a0 + a2)(b0) - v0 + v1 - v2, b2 = 0
-        // Schoolbook will be faster than Karatsuba for this,
-        // c2 = a0b2 + a1b1 + a2b0,
-        // c2 = V1 + a2b0 ∵ b2 = 0, V1 = a1b1
-        // let C2 = a2.u_mul(b0) + V1;
-        let v0 = a0.mul(b0, m);
-        let v1 = a1.mul(b1, m);
-        let c0 = Fq2Ops::add(
-            v0, mul_by_xi_nz_as_circuit(Fq2Ops::sub(Fq2Ops::mul(Fq2Ops::add(a1, a2, m), b1, m), v1, m), m), m
-        );
-        let c1 = Fq2Ops::sub(
-            Fq2Ops::sub(Fq2Ops::mul(Fq2Ops::add(a0, a1, m), Fq2Ops::add(b0, b1, m), m), v0, m), v1, m
-        );
-        let c2 = Fq2Ops::add(Fq2Ops::mul(a2, b0, m), v1, m);
-
-        Fq6 { c0: c0, c1: c1, c2: c2 }
+        Fq6 { 
+            c0: Fq2 { c0: Fq { c0: outputs.get_output(c0) }, c1: Fq { c0: outputs.get_output(c1) } }, 
+            c1: Fq2 { c0: Fq { c0: outputs.get_output(c2) }, c1: Fq { c0: outputs.get_output(c3) } }, 
+            c2: Fq2 { c0: Fq { c0: outputs.get_output(c4) }, c1: Fq { c0: outputs.get_output(c5) } } 
+        }
     }
 
     // Mul Fq6 with a sparse Fq6 01 derived from a sparse 034 Fq12
@@ -191,7 +184,10 @@ impl FqSparse of FqSparseTrait {
         // zC1B1 = x04
 
         let mut zC0B0: Fq2 = c4d4.mul_by_nonresidue(m);
-        zC0B0.c0 = zC0B0.c0.add(FieldUtils::one(), m); // POTENTIAL OVERFLOW
+
+
+
+        zC0B0.c0 = zC0B0.c0.add(FieldUtils::one(), m); 
         Fq12Sparse01234 {
             c0: Fq6 { c0: zC0B0, c1: c3d3, c2: x34 }, c1: Fq6Sparse01 { c0: x03, c1: x04 },
         }
@@ -262,38 +258,38 @@ impl FqSparse of FqSparseTrait {
         Fq12 { c0: C0, c1: C1 }
     }
 
-    // Mul sparse 01234 Fq12 with a sparse 034 Fq12
-    // Same as Fq12 mul 034 but with a sparse b1 i.e. b1.c2 as 0 and associated ops removed
-    // https://github.com/Consensys/gnark/blob/v0.9.1/std/algebra/emulated/fields_bn254/e12_pairing.go#L208
-    // // #[inline(always)]
-    fn mul_01234_034(self: Fq12Sparse01234, rhs: Fq12Sparse034, m: CircuitModulus) -> Fq12 {
-        let Fq12Sparse01234 { c0: a0, c1: a1 } = self;
+    // // Mul sparse 01234 Fq12 with a sparse 034 Fq12
+    // // Same as Fq12 mul 034 but with a sparse b1 i.e. b1.c2 as 0 and associated ops removed
+    // // https://github.com/Consensys/gnark/blob/v0.9.1/std/algebra/emulated/fields_bn254/e12_pairing.go#L208
+    // // // #[inline(always)]
+    // fn mul_01234_034(self: Fq12Sparse01234, rhs: Fq12Sparse034, m: CircuitModulus) -> Fq12 {
+    //     let Fq12Sparse01234 { c0: a0, c1: a1 } = self;
 
-        // a0 := &E6{B0: *x[0], B1: *x[1], B2: *x[2]}
-        // a1 := &E6{B0: *x[3], B1: *x[4], B2: *e.Ext2.Zero()}
+    //     // a0 := &E6{B0: *x[0], B1: *x[1], B2: *x[2]}
+    //     // a1 := &E6{B0: *x[3], B1: *x[4], B2: *e.Ext2.Zero()}
 
-        let Fq12Sparse034 { c3: mut z3, c4: z4 } = rhs;
+    //     let Fq12Sparse034 { c3: mut z3, c4: z4 } = rhs;
 
-        // a := e.Ext6.Add(e.Ext6.One(), &E6{B0: *z3, B1: *z4, B2: *e.Ext2.Zero()})
-        let mut a = sparse_fq6(z3, z4);
-        a.c0.c0 = a.c0.c0.add(FieldUtils::one(), m); // POTENTIAL OVERFLOW
-        // b := e.Ext6.Add(a0, a1)
-        let mut b = a0;
-        b.c0 = b.c0.add(a1.c0, m);
-        b.c1 = b.c1.add(a1.c1, m);
-        // a = e.Ext6.Mul(a, b)
-        let A = b.mul_01(a, m);
-        // c := e.Ext6.Mul01By01(z3, z4, x[3], x[4])
-        let C = a1.mul_01_by_01(sparse_fq6(z3, z4), m);
-        // z1 := e.Ext6.Sub(a, a0)
-        // z1 = e.Ext6.Sub(z1, c)
-        let Z1 = A.sub(C.add(a0, m), m);
-        // z0 := e.Ext6.MulByNonResidue(c)
-        // z0 = e.Ext6.Add(z0, a0)
-        let Z0 = mul_by_v_nz_as_circuit(C, m).add(a0, m);
+    //     // a := e.Ext6.Add(e.Ext6.One(), &E6{B0: *z3, B1: *z4, B2: *e.Ext2.Zero()})
+    //     let mut a = sparse_fq6(z3, z4);
+    //     a.c0.c0 = a.c0.c0.add(FieldUtils::one(), m); // POTENTIAL OVERFLOW
+    //     // b := e.Ext6.Add(a0, a1)
+    //     let mut b = a0;
+    //     b.c0 = b.c0.add(a1.c0, m);
+    //     b.c1 = b.c1.add(a1.c1, m);
+    //     // a = e.Ext6.Mul(a, b)
+    //     let A = b.mul_01(a, m);
+    //     // c := e.Ext6.Mul01By01(z3, z4, x[3], x[4])
+    //     let C = a1.mul_01_by_01(sparse_fq6(z3, z4), m);
+    //     // z1 := e.Ext6.Sub(a, a0)
+    //     // z1 = e.Ext6.Sub(z1, c)
+    //     let Z1 = A.sub(C.add(a0, m), m);
+    //     // z0 := e.Ext6.MulByNonResidue(c)
+    //     // z0 = e.Ext6.Add(z0, a0)
+    //     let Z0 = mul_by_v_nz_as_circuit(C, m).add(a0, m);
 
-        Fq12 { c0: Z0, c1: Z1, }
-    }
+    //     Fq12 { c0: Z0, c1: Z1, }
+    // }
 
     // Mul Fq12 with a sparse 01234 Fq12
     // Same as Fq12 mul but with a sparse b1 i.e. b1.c2 as 0 and associated ops removed

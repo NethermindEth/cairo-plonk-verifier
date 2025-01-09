@@ -71,6 +71,7 @@ impl FieldOps for Fq {
 }
 
 impl FieldConstants for Fq {
+    // DANGEROUS, ASSUMES C0 IS NON-ZERO
     fn one() -> Self {
         let c0 = Self::new_input(0); 
         &c0 / &c0

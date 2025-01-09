@@ -22,6 +22,7 @@ mod circuits {
         mod fq_12_type; 
         mod fq_12_squaring_type;
         mod add_sub_neg;
+        mod sparse_type;
         // mod line_fn_step_dbl_add_type;
     }
     mod affine_circuits;
@@ -30,6 +31,7 @@ mod circuits {
     mod fq_6_circuits;
     mod fq_12_circuits;
     mod fq_12_squaring_circuits;
+    mod sparse_circuits;
     // mod line_fn_step_dbl_add_circuits;
 }
 
