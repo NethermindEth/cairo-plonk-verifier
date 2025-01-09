@@ -171,3 +171,33 @@ pub fn generate_krbn_sqr() -> String {
         
     builder.build()
 }
+
+pub fn generate_krbn_decompress() -> String {
+    let mut builder: CairoCodeBuilder = CairoCodeBuilder::new();
+
+    let kr = Krbn2345::new_input([0, 1, 2, 3, 4, 5, 6, 7]);;
+    let (g0, g1) = kr.krbn_decompress_if_zero();
+    builder
+        .add_line("// krbn_decompress")
+        .add_line("// g0")
+        .add_circuit(g0, Some(["KbrnDecompZeroG0C0", "KbrnDecompZeroG0C1"].to_vec()))
+        .add_line("// g1")
+        .add_circuit(g1, Some(["KbrnDecompZeroG1C0", "KbrnDecompZeroG1C1"].to_vec()));
+        
+    builder.build()
+}
+
+pub fn generate_krbn_non_zero_decompress() -> String {
+    let mut builder: CairoCodeBuilder = CairoCodeBuilder::new();
+
+    let kr = Krbn2345::new_input([0, 1, 2, 3, 4, 5, 6, 7]);;
+    let (g0, g1) = kr.krbn_decompress_else();
+    builder
+        .add_line("// krbn_decompress")
+        .add_line("// g0")
+        .add_circuit(g0, Some(["KbrnDecompNonZeroG0C0", "KbrnDecompNonZeroG0C1"].to_vec()))
+        .add_line("// g1")
+        .add_circuit(g1, Some(["KbrnDecompNonZeroG1C0", "KbrnDecompNonZeroG1C1"].to_vec()));
+        
+    builder.build()
+}

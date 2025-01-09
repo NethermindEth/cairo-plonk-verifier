@@ -70,4 +70,49 @@ impl Krbn2345 {
 
         Self { g2: h2, g3: h3, g4: h4, g5: h5, inp: None }
     }
+
+    // Decompress krbn into fq12 except final g0 add 1 (Fq12 { c0: Fq6 { c0: g0, c1: g4, c2: g3 }, c1: Fq6 { c0: g2, c1: g1, c2: g5 } })
+    // Note:
+    // 1. Does not use g2, offset all circuit inputs by fq2
+    // 2. Scale is replaced by addition circuit
+    pub fn krbn_decompress_if_zero(&self) -> (Fq2, Fq2) {
+        let (g3, g4, g5)= (self.g2(), self.g3(), self.g4());
+
+        let g4mg5 = g4.mul(g5);
+        let tg24g5 = &g4mg5 + &g4mg5;
+        let g1 = tg24g5.mul(&g3.inv());
+
+        // g0 = (2S1 - 3g3g4)ξ + 1
+        let S1 = g1.sqr();
+        let T_g3g4 = g3.mul(g4);
+        let Tmp = (S1.sub(&T_g3g4));
+        let Tmp = &Tmp + &Tmp; //.scale(TWO);
+        let g0 = Tmp.sub(&T_g3g4.mul_by_xi());
+
+        (g0, g1)
+    }
+
+
+    // Note:
+    // 1. Scale is replaced by addition circuit
+    pub fn krbn_decompress_else(&self) -> (Fq2, Fq2) {
+        let (g2, g3, g4, g5)= (self.g2(), self.g3(), self.g4(), self.g5());
+
+        let S5xi = g5.sqr().mul_by_xi();
+        let S4 = g4.sqr();
+        let Tmp = S4.sub(g3);
+        let g1 = S5xi.add(&S4.add(&Tmp.add(&Tmp)));
+        let x4g2 = &(&(g2 + g2) + g2) + g2;
+        let g1 = g1.mul(&x4g2.inv());
+
+        // // g0 = (2S1 + g2g5 - 3g3g4)ξ + 1
+        let S1 = g1.sqr();
+        let T_g3g4 = g3.mul(g4);
+        let T_g2g5 = g2.mul(g5);
+        let s1sg3g4 = S1.sub(&T_g3g4);
+        let Tmp = &s1sg3g4 + &s1sg3g4;
+        let g0 = Tmp.add(&T_g2g5.sub(&T_g3g4)).mul_by_xi();
+
+        (g0, g1)
+    }
 }
