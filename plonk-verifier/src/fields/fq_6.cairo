@@ -113,24 +113,6 @@ impl Fq6Utils of FieldUtils<Fq6, Fq2, CircuitModulus> {
     fn mul_by_nonresidue(self: Fq6, m: CircuitModulus) -> Fq6 {
         Fq6 { c0: self.c2.mul_by_nonresidue(m), c1: self.c0, c2: self.c1, }
     }
-
-    // #[inline(always)]
-    fn frobenius_map(self: Fq6, power: usize, m: CircuitModulus) -> Fq6 {
-        let rem = power % 6;
-        if rem == 0 {
-            self.frob0()
-        } else if rem == 1 {
-            self.frob1(m)
-        } else if rem == 2 {
-            self.frob2(m)
-        } else if rem == 3 {
-            self.frob3(m)
-        } else if rem == 4 {
-            self.frob4(m)
-        } else {
-            self.frob5(m)
-        }
-    }
 }
 
 impl Fq6Ops of FieldOps<Fq6, CircuitModulus> {

@@ -207,8 +207,6 @@ impl FqSparse of FqSparseTrait {
 
         // let mut zC0B0: Fq2 = c4d4.mul_by_nonresidue(m);
 
-
-
         zC0B0.c0 = zC0B0.c0.add(FieldUtils::one(), m); 
         Fq12Sparse01234 {
             c0: Fq6 { c0: zC0B0, c1: c3d3, c2: x34 }, c1: Fq6Sparse01 { c0: x03, c1: x04 },

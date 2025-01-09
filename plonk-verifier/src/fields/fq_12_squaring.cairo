@@ -172,8 +172,10 @@ impl Fq12Squaring of Fq12SquaringTrait {
     fn sqr_n_times(self: Fq12, n: i32, m: CircuitModulus) -> Fq12 {
         let mut krbn = self.krbn_compress_2345();
 
-        for _ in 0..n {
+        let mut i = 0;
+        while i < n {
             krbn = krbn.sqr_krbn(m);
+            i = i + 1;
         };
 
         krbn.krbn_decompress(m)

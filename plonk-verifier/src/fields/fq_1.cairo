@@ -54,12 +54,6 @@ impl FqUtils of FieldUtils<Fq, u128, CircuitModulus> {
         assert(false, 'no_impl: fq conjugate');
         FieldUtils::zero()
     }
-
-    // #[inline(always)]
-    fn frobenius_map(self: Fq, power: usize, m: CircuitModulus) -> Fq {
-        assert(false, 'no_impl: fq frobenius_map');
-        FieldUtils::zero()
-    }
 }
 
 impl FqOps of FieldOps<Fq, CircuitModulus> {

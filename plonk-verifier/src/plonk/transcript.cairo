@@ -56,26 +56,25 @@ impl Transcript of Keccak256Transcript<PlonkTranscript, CircuitModulus> {
 
         let mut buffer: ByteArray = "";
 
-        for i in 0
-            ..self
-                .data
-                .len() {
-                    match self.data.at(i) {
-                        TranscriptElement::Polynomial(pt) => {
-                            let x: u256 = (*pt.x.c0).try_into().unwrap();
-                            let y: u256 = (*pt.y.c0).try_into().unwrap();
-                            let mut x_bytes: ByteArray = decimal_to_byte_array(x);
-                            let mut y_bytes: ByteArray = decimal_to_byte_array(y);
-                            buffer.append(@x_bytes);
-                            buffer.append(@y_bytes);
-                        },
-                        TranscriptElement::Scalar(scalar) => {
-                            let s: u256 = (*scalar.c0).try_into().unwrap();
-                            let mut s_bytes: ByteArray = decimal_to_byte_array(s);
-                            buffer.append(@s_bytes);
-                        },
-                    };
-                };
+        let mut i = 0; 
+        while i < self.data.len() {
+            match self.data.at(i) {
+                TranscriptElement::Polynomial(pt) => {
+                    let x: u256 = (*pt.x.c0).try_into().unwrap();
+                    let y: u256 = (*pt.y.c0).try_into().unwrap();
+                    let mut x_bytes: ByteArray = decimal_to_byte_array(x);
+                    let mut y_bytes: ByteArray = decimal_to_byte_array(y);
+                    buffer.append(@x_bytes);
+                    buffer.append(@y_bytes);
+                },
+                TranscriptElement::Scalar(scalar) => {
+                    let s: u256 = (*scalar.c0).try_into().unwrap();
+                    let mut s_bytes: ByteArray = decimal_to_byte_array(s);
+                    buffer.append(@s_bytes);
+                },
+            };
+            i = i + 1;
+        }; 
 
         let le_value = keccak::compute_keccak_byte_array(@buffer);
         let be_u256 = reverse_endianness(le_value);

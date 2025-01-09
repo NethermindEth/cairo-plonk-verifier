@@ -4,10 +4,7 @@ use core::circuit::{
     EvalCircuitTrait, InverseGate as I, MulModGate as M, SubModGate as S, circuit_add,
     circuit_inverse, circuit_mul, circuit_sub, u384,
 };
-use core::circuit::conversions::from_u256;
 use core::traits::TryInto;
-
-use debug::PrintTrait;
 
 use plonk_verifier::circuits::fq_12_circuits::{
     add_circuit, mul_circuit, neg_circuit, sqr_circuit, sub_circuit,
@@ -168,35 +165,6 @@ impl Fq12Utils of FieldUtils<Fq12, Fq6, CircuitModulus> {
     fn mul_by_nonresidue(self: Fq12, m: CircuitModulus) -> Fq12 {
         assert(false, 'no_impl: fq12 non residue');
         Self::one()
-    }
-
-    fn frobenius_map(self: Fq12, power: usize, m: CircuitModulus) -> Fq12 {
-        let rem = power % 12;
-        if rem == 1 {
-            self.frob1(m)
-        } else if rem == 2 {
-            self.frob2(m)
-        } else if rem == 3 {
-            self.frob3(m)
-        } else if rem == 4 {
-            self.frob4(m)
-        } else if rem == 5 {
-            self.frob5(m)
-        } else if rem == 6 {
-            self.frob6(m)
-        } else if rem == 7 {
-            self.frob7(m)
-        } else if rem == 8 {
-            self.frob8(m)
-        } else if rem == 9 {
-            self.frob9(m)
-        } else if rem == 10 {
-            self.frob10(m)
-        } else if rem == 11 {
-            self.frob11(m)
-        } else {
-            self.frob0()
-        }
     }
 }
 
@@ -443,20 +411,20 @@ impl Fq12Ops of FieldOps<Fq12, CircuitModulus> {
     }
 }
 
-fn fq12_karatsuba_sqr(a: Fq12, m: CircuitModulus) -> Fq12 {
-    // core::internal::revoke_ap_tracking();
-    let Fq12 { c0: a0, c1: a1 } = a;
-    // Karatsuba squaring
-    // v0 = a0² , v1 = a1²
-    let V0 = a0.sqr(m);
-    let V1 = a1.sqr(m);
+// fn fq12_karatsuba_sqr(a: Fq12, m: CircuitModulus) -> Fq12 {
+//     // core::internal::revoke_ap_tracking();
+//     let Fq12 { c0: a0, c1: a1 } = a;
+//     // Karatsuba squaring
+//     // v0 = a0² , v1 = a1²
+//     let V0 = a0.sqr(m);
+//     let V1 = a1.sqr(m);
 
-    // c0 = v0 + βv1
-    let C0 = Fq6Ops::add(V0, mul_by_v_nz_as_circuit(V1, m), m);
-    // c1 = (a0 +a1)² - v0 - v1,
-    let C1 = Fq6Ops::add(a0, a1, m).sqr(m).sub(V0, m).sub(V1, m);
-    Fq12 { c0: C0, c1: C1 }
-}
+//     // c0 = v0 + βv1
+//     let C0 = Fq6Ops::add(V0, mul_by_v_nz_as_circuit(V1, m), m);
+//     // c1 = (a0 +a1)² - v0 - v1,
+//     let C1 = Fq6Ops::add(a0, a1, m).sqr(m).sub(V0, m).sub(V1, m);
+//     Fq12 { c0: C0, c1: C1 }
+// }
 
 impl FqEqs of FieldEqs<Fq12> {
     // #[inline(always)]

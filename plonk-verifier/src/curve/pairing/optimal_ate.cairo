@@ -34,8 +34,8 @@ fn ate_miller_loop<
 >( 
     p: TG1, q: TG2, m: M 
 ) -> Fq12 {
-    gas::withdraw_gas().unwrap();
-    core::internal::revoke_ap_tracking();
+    //gas::withdraw_gas().unwrap();
+    //core::internal::revoke_ap_tracking();
 
     // Prepare precompute and q accumulator
     let (precompute, mut q_acc) = (p, q).precompute(m);

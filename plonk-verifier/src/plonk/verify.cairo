@@ -166,10 +166,12 @@ impl PlonkVerifier of PVerifier {
         //     beta_transcript.add_poly_commitment(*p);
         // };
 
-        for i in 0
-            ..publicSignals.len() {
-                beta_transcript.add_scalar(fq(*publicSignals.at(i)));
-            };
+        let mut i = 0;
+        while i < publicSignals.len() {
+            beta_transcript.add_scalar(fq(*publicSignals.at(i)));
+
+            i = i + 1;
+        };
 
         beta_transcript.add_poly_commitment(proof.A);
         beta_transcript.add_poly_commitment(proof.B);
@@ -272,12 +274,14 @@ impl PlonkVerifier of PVerifier {
     fn compute_PI(publicSignals: @Array<u384>, L: @Array<Fq>, m_o: CircuitModulus) -> Fq {
         let mut PI: Fq = FqUtils::zero();
 
-        for i in 0..publicSignals.len() {
+        let mut i = 0;
+        while i < publicSignals.len() {
             let w: u384 = *publicSignals[i];
             let w_mul_L: u384 = mul_co(w, *L[i + 1].c0, m_o);
             let pi = sub_co(PI.c0, w_mul_L, m_o);
 
             PI = fq(pi);
+            i = i + 1;
         };
 
         PI

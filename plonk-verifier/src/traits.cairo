@@ -18,7 +18,6 @@ trait FieldUtils<TFq, TFqChildren, M> {
     fn conjugate(self: TFq, m: M) -> TFq;
     fn scale(self: TFq, by: TFqChildren, m: M) -> TFq;
     fn mul_by_nonresidue(self: TFq, m: M) -> TFq;
-    fn frobenius_map(self: TFq, power: usize, m: M) -> TFq;
 }
 
 trait MillerPrecompute<TG1, TG2, TPreComp, M> {

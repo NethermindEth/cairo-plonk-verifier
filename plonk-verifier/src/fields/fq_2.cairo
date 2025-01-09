@@ -97,15 +97,6 @@ impl Fq2Utils of FieldUtils<Fq2, u384, CircuitModulus> {
             c1: a0.add(circuit_scale_9(a1, m), m), //
         }
     }
-
-    // #[inline(always)]
-    fn frobenius_map(self: Fq2, power: usize, m: CircuitModulus) -> Fq2 {
-        if power % 2 == 0 {
-            self
-        } else {
-            self.conjugate(m)
-        }
-    }
 }
 
 impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
