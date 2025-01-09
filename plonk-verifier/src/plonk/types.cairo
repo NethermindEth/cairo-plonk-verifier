@@ -1,17 +1,11 @@
-use core::{
-    array::ArrayTrait,
-    circuit::u384,
-    fmt::{Display, Error, Formatter},
-    traits::Into,
-};
-
+use core::{array::ArrayTrait, circuit::u384, fmt::{Display, Error, Formatter}, traits::Into,};
+use core::serde::Serde;
+use core::circuit::U384Serde;
 use plonk_verifier::{
-    curve::groups::{AffineG1, AffineG2},
-    fields::{Fq},
-    fields::fq_generics::TFqPartialEq,
+    curve::groups::{AffineG1, AffineG2}, fields::{Fq}, fields::fq_generics::TFqPartialEq,
 };
 
-#[derive(Copy, Drop)]
+#[derive(Copy, Drop, Serde)]
 struct PlonkProof {
     A: AffineG1,
     B: AffineG1,
@@ -30,7 +24,7 @@ struct PlonkProof {
     eval_zw: Fq
 }
 
-#[derive(Copy, Drop)]
+#[derive(Copy, Drop, Serde)]
 struct PlonkVerificationKey {
     n: u256,
     power: u256,

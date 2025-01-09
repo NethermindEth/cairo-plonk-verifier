@@ -1,18 +1,22 @@
 pub use plonk_verifier::plonk::types::{PlonkVerificationKey, PlonkProof};
 pub use plonk_verifier::plonk::verify;
 use core::array::ArrayTrait;
+use core::circuit::u384;
 
 #[starknet::interface]
 trait IVerifier<T> {
-    // fn verify(
-    //     ref self: T,
-    //     verification_key: PlonkVerificationKey, proof: PlonkProof, publicSignals: Array<u256>
-    // );
-    fn verify(ref self: T) -> bool;
+    fn verify(
+        ref self: T,
+        verification_key: PlonkVerificationKey,
+        proof: PlonkProof,
+        public_signals: Array<u384>
+    ) -> bool;
+    // fn verify(ref self: T) -> bool;
 }
 
 #[starknet::contract]
 mod PLONK_Verifier {
+    use super::u384;
     use core::array::ArrayTrait;
 
     use plonk_verifier::plonk::verify;
@@ -20,7 +24,7 @@ mod PLONK_Verifier {
     use plonk_verifier::plonk::constants;
     use plonk_verifier::curve::groups::{AffineG1, AffineG2, fq, fq2};
     use plonk_verifier::curve::constants::{FIELD_U384};
-    use core::circuit::{CircuitModulus, u384};
+    use core::circuit::{CircuitModulus, U384Serde};
     use core::starknet::{ContractAddress, ClassHash};
     use starknet::SyscallResultTrait;
 
@@ -35,26 +39,33 @@ mod PLONK_Verifier {
 
     #[abi(embed_v0)]
     impl PLONK_verifier of super::IVerifier<ContractState> {
-        // fn verify(ref self: ContractState, verification_key: PlonkVerificationKey, proof:
-        // PlonkProof, publicSignals: Array<u256>) {
-        fn verify(ref self: ContractState) -> bool {
-            let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
-                constants::verification_key();
-            let verification_key: PlonkVerificationKey = PlonkVerificationKey {
-                n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
-            };
+        #[derive(Serde)]
+        fn verify(
+            ref self: ContractState,
+            verification_key: PlonkVerificationKey,
+            proof: PlonkProof,
+            public_signals: Array<u384>
+        ) -> bool {
+            // fn verify(ref self: ContractState) -> bool {
+            // let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
+            //     constants::verification_key();
+            // let verification_key: PlonkVerificationKey = PlonkVerificationKey {
+            //     n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
+            // };
 
-            // proof
-            let (
-                A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
-            ) =
-                constants::proof();
-            let proof: PlonkProof = PlonkProof {
-                A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
-            };
+            // // proof
+            // let (
+            //     A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2,
+            //     eval_zw
+            // ) =
+            //     constants::proof();
+            // let proof: PlonkProof = PlonkProof {
+            //     A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2,
+            //     eval_zw
+            // };
 
-            //public_signals
-            let public_signals = constants::public_inputs();
+            // //public_signals
+            // let public_signals = constants::public_inputs();
 
             let (A1, vk_X2, B1, g2_one) =
                 plonk_verifier::plonk::verify::PlonkVerifier::verify_except_pairing(

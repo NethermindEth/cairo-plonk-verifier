@@ -25,8 +25,6 @@ use plonk_verifier::{
     },
     traits::{FieldOps, FieldUtils},
 };
-use core::starknet::{ContractAddress, ClassHash};
-use starknet::SyscallResultTrait;
 
 #[generate_trait]
 impl PlonkVerifier of PVerifier {
@@ -499,22 +497,6 @@ impl PlonkVerifier of PVerifier {
 
         let res: bool = e_A1_vk_x2.c0 == e_B1_g2_1.c0;
 
-        // let address: ClassHash =
-        //     (0x0225d938fb98c4614ee1a9f8fef4fab4d4c6b2c0b961f07e7d970319c09ac223)
-        //     .try_into()
-        //     .unwrap();
-        // let mut call_data: Array<felt252> = array![];
-        // Serde::serialize(@A1, ref call_data);
-        // Serde::serialize(@vk.X_2, ref call_data);
-        // Serde::serialize(@B1, ref call_data);
-        // Serde::serialize(@g2_one, ref call_data);
-        // println!("call_data: {:?}", call_data);
-        // let mut res_serialized = core::starknet::syscalls::library_call_syscall(
-        //     address, selector!("valid_pairing"), call_data.span()
-        // )
-        //     .unwrap_syscall();
-        // let call_res = Serde::<bool>::deserialize(ref res_serialized).unwrap();
-        // let res: bool = call_res;
         res
     }
 
@@ -553,13 +535,6 @@ impl PlonkVerifier of PVerifier {
         let mut result = true;
         let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let m_o = TryInto::<_, CircuitModulus>::try_into(ORDER_U384).unwrap();
-
-        // let points = [proof.A, proof.B, proof.C, proof.Z
-        //     ,proof.T1, proof.T2, proof.T3, proof.Wxi, proof.Wxiw].span();
-
-        // for point in points {
-        //     result = result && Self::is_on_curve(*point, m);
-        // };
 
         result = result
             && Self::is_on_curve(proof.A, m)
