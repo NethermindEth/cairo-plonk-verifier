@@ -6,7 +6,7 @@ fn main() {
     system.refresh_all();
 
     // let code = generate_fq12_field_ops();
-    let code = cairo_circuit_codegen::circuit::utils::generate_krbn_non_zero_decompress();
+    let code = cairo_circuit_codegen::circuit::utils::generate_compute_D_partial();
 
     // Write the generated code to out.cairo
     

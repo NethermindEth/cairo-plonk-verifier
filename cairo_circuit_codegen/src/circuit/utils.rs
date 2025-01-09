@@ -1,5 +1,5 @@
 // Helper Functions for Generating Cairo Circuits
-use crate::{fields::{affine::Affine, fq12::{sqr_offset, Fq12}, fq12_squaring::Krbn2345, fq2::Fq2, fq6::Fq6, ECOperations, FieldOps}, pairing::line::LineFn};
+use crate::{fields::{affine::Affine, fq::Fq, fq12::{sqr_offset, Fq12}, fq12_squaring::Krbn2345, fq2::Fq2, fq6::Fq6, ECOperations, FieldOps}, pairing::line::LineFn};
 
 use super::{builder::CairoCodeBuilder, circuit::Circuit};
 
@@ -199,5 +199,63 @@ pub fn generate_krbn_non_zero_decompress() -> String {
         .add_line("// g1")
         .add_circuit(g1, Some(["KbrnDecompNonZeroG1C0", "KbrnDecompNonZeroG1C1"].to_vec()));
         
+    builder.build()
+}
+
+pub fn generate_compute_D_partial() -> String {
+    let mut builder: CairoCodeBuilder = CairoCodeBuilder::new();
+
+    let beta: Fq = Fq::new_input(0);
+    let xi: Fq = Fq::new_input(1);
+    let eval_a: Fq = Fq::new_input(2);
+    let gamma: Fq = Fq::new_input(3);
+    let vk_k1: Fq = Fq::new_input(4);
+    let eval_b: Fq = Fq::new_input(5);
+    let vk_k2: Fq = Fq::new_input(6);
+    let eval_c: Fq = Fq::new_input(7);
+    let alpha: Fq = Fq::new_input(8);
+    let l1: Fq = Fq::new_input(9);
+    let u: Fq = Fq::new_input(10);
+    let eval_s1: Fq = Fq::new_input(11);
+    let eval_s2: Fq = Fq::new_input(12);
+    let eval_zw: Fq = Fq::new_input(13);
+
+    let betaxi = Fq::mul(&beta, &xi);
+    let mut d2a1 = Fq::add(&eval_a, &betaxi);
+    d2a1 = Fq::add(&d2a1, &gamma);
+
+    let mut d2a2 = Fq::mul(&betaxi, &vk_k1);
+    d2a2 = Fq::add(&eval_b, &d2a2);
+    d2a2 = Fq::add(&d2a2, &gamma);
+
+    let mut d2a3 = Fq::mul(&betaxi, &vk_k2);
+    d2a3 = Fq::add(&eval_c, &d2a3);
+    d2a3 = Fq::add(&d2a3, &gamma);
+
+    let d2a = Fq::mul(&Fq::mul(&Fq::mul(&d2a1, &d2a2), &d2a3), &alpha);
+
+    let d2b = Fq::mul(&l1, &Fq::sqr(&alpha));
+    let d2ab = Fq::add(&Fq::add(&d2a, &d2b), &u);
+    
+    let d3a = Fq::add(
+        &Fq::add(&eval_a, &Fq::mul(&beta, &eval_s1)),
+        &gamma,
+    );
+
+    let d3b = Fq::add(
+        &Fq::add(&eval_b, &Fq::mul(&beta, &eval_s2)),
+        &gamma
+    );
+
+    let d3c = Fq::mul(&Fq::mul(&alpha, &beta), &eval_zw);
+    let d3ab = Fq::mul(&Fq::mul(&d3a, &d3b), &d3c);
+
+    builder
+    .add_line("// d_partial")
+    .add_line("// D2AB")
+    .add_circuit(d2ab, Some(["D2AB"].to_vec()))
+    .add_line("// D3AB")
+    .add_circuit(d3ab, Some(["D3AB"].to_vec()));
+    
     builder.build()
 }

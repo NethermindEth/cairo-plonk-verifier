@@ -2,10 +2,10 @@ use core::num::traits::Zero;
 use core::{
     array::ArrayTrait,
     circuit::{
-        AddInputResultTrait, AddMod, CircuitElement, CircuitInput, CircuitInputs, CircuitModulus,
-        CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, RangeCheck96, U384Zero, u96,
-        u384, circuit_add, circuit_inverse, circuit_mul, circuit_sub,
-        conversions::from_u256,
+        AddInputResultTrait, AddModGate as A, CircuitElement, CircuitElement as CE, CircuitInput,
+        CircuitInput as CI, CircuitInputs, CircuitModulus, CircuitOutputsTrait, EvalCircuitResult,
+        EvalCircuitTrait, InverseGate as I, MulModGate as M, SubModGate as S, circuit_add,
+        circuit_inverse, circuit_mul, circuit_sub, u384,
     },
     clone::Clone,
     cmp::max,
@@ -40,13 +40,18 @@ impl PlonkVerifier of PVerifier {
         let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let m_o = TryInto::<_, CircuitModulus>::try_into(ORDER_U384).unwrap();
 
-        // let points = [proof.A, proof.B, proof.C, proof.Z
-        //     ,proof.T1, proof.T2, proof.T3, proof.Wxi, proof.Wxiw].span(); 
+        // let points = [proof.A, proof.B, proof.C, proof.Z ,proof.T1, proof.T2, proof.T3, proof.Wxi, proof.Wxiw].span(); 
+
+        // let fields = [proof.eval_a, proof.eval_b, proof.eval_c, proof.eval_s1, proof.eval_s2, proof.eval_zw].span(); 
 
         // for point in points {
         //     result = result && Self::is_on_curve(*point, m);
         // };
-         
+
+        // for field in fields {
+        //     result = result && Self::is_in_field(*field); 
+        // };
+
         result = result
             && Self::is_on_curve(proof.A, m)
             && Self::is_on_curve(proof.B, m)
@@ -187,6 +192,9 @@ impl PlonkVerifier of PVerifier {
         // // Challenge round 5: v
         let mut v_transcript = Transcript::new();
         v_transcript.add_scalar(challenges.xi);
+        // for field in prf_flds{
+        //     v_transcript.add_scalar(*field);
+        // };
         v_transcript.add_scalar(proof.eval_a);
         v_transcript.add_scalar(proof.eval_b);
         v_transcript.add_scalar(proof.eval_c);
@@ -298,37 +306,63 @@ impl PlonkVerifier of PVerifier {
         d1 = d1.add_as_circuit(vk.Qo.multiply_as_circuit(proof.eval_c.c0, m), m);
         d1 = d1.add_as_circuit(vk.Qc, m);
 
-        let betaxi = mul_co(challenges.beta.c0, challenges.xi.c0, m_o);
-        let mut d2a1 = add_co(proof.eval_a.c0, betaxi, m_o);
-        d2a1 = add_co(d2a1, challenges.gamma.c0, m_o);
+        let d2ab = CE::<A::<A::<M::<M::<M::<A::<A::<CI::<2>, M::<CI::<0>, CI::<1>>>, CI::<3>>, A::<A::<CI::<5>, M::<M::<CI::<0>, CI::<1>>, CI::<4>>>, CI::<3>>>, A::<A::<CI::<7>, M::<M::<CI::<0>, CI::<1>>, CI::<6>>>, CI::<3>>>, CI::<8>>, M::<CI::<9>, M::<CI::<8>, CI::<8>>>>, CI::<10>>> {};
+        let d3ab = CE::<M::<M::<A::<A::<CI::<2>, M::<CI::<0>, CI::<11>>>, CI::<3>>, A::<A::<CI::<5>, M::<CI::<0>, CI::<12>>>, CI::<3>>>, M::<M::<CI::<8>, CI::<0>>, CI::<13>>>> {};
 
-        let mut d2a2 = mul_co(betaxi, vk.k1, m_o);
-        d2a2 = add_co(proof.eval_b.c0, d2a2, m_o);
-        d2a2 = add_co(d2a2, challenges.gamma.c0, m_o);
+        let o = match (d2ab, d3ab)
+            .new_inputs()
+            .next(challenges.beta.c0)
+            .next(challenges.xi.c0)
+            .next(proof.eval_a.c0)
+            .next(challenges.gamma.c0)
+            .next(vk.k1)
+            .next(proof.eval_b.c0)
+            .next(vk.k2)
+            .next(proof.eval_c.c0)
+            .next(challenges.alpha.c0)
+            .next(l1.c0)
+            .next(challenges.u.c0)
+            .next(proof.eval_s1.c0)
+            .next(proof.eval_s2.c0)
+            .next(proof.eval_zw.c0)
+            .done()
+            .eval(m_o) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
+        };
 
-        let mut d2a3 = mul_co(betaxi, vk.k2, m_o);
-        d2a3 = add_co(proof.eval_c.c0, d2a3, m_o);
-        d2a3 = add_co(d2a3, challenges.gamma.c0, m_o);
+        let d2ab = o.get_output(d2ab);
+        let d3ab = o.get_output(d3ab);
 
-        let d2a = mul_co(mul_co(mul_co(d2a1, d2a2, m_o), d2a3, m_o), challenges.alpha.c0, m_o);
+        // let betaxi = mul_co(challenges.beta.c0, challenges.xi.c0, m_o);
+        // let mut d2a1 = add_co(proof.eval_a.c0, betaxi, m_o);
+        // d2a1 = add_co(d2a1, challenges.gamma.c0, m_o);
 
-        let d2b = mul_co(l1.c0, sqr_co(challenges.alpha.c0, m_o), m_o);
+        // let mut d2a2 = mul_co(betaxi, vk.k1, m_o);
+        // d2a2 = add_co(proof.eval_b.c0, d2a2, m_o);
+        // d2a2 = add_co(d2a2, challenges.gamma.c0, m_o);
 
-        let d2 = proof.Z.multiply_as_circuit(add_co(add_co(d2a, d2b, m_o), challenges.u.c0, m_o), m);
+        // let mut d2a3 = mul_co(betaxi, vk.k2, m_o);
+        // d2a3 = add_co(proof.eval_c.c0, d2a3, m_o);
+        // d2a3 = add_co(d2a3, challenges.gamma.c0, m_o);
 
-        let d3a = add_co(
-            add_co(proof.eval_a.c0, mul_co(challenges.beta.c0, proof.eval_s1.c0, m_o), m_o),
-            challenges.gamma.c0, m_o,
-        );
+        // let d2a = mul_co(mul_co(mul_co(d2a1, d2a2, m_o), d2a3, m_o), challenges.alpha.c0, m_o);
 
-        let d3b = add_co(
-            add_co(proof.eval_b.c0, mul_co(challenges.beta.c0, proof.eval_s2.c0, m_o), m_o),
-            challenges.gamma.c0, m_o
-        );
+        // let d2b = mul_co(l1.c0, sqr_co(challenges.alpha.c0, m_o), m_o);
+        // let d2ab = add_co(add_co(d2a, d2b, m_o), challenges.u.c0, m_o);
+        
+        // let d3a = add_co(
+        //     add_co(proof.eval_a.c0, mul_co(challenges.beta.c0, proof.eval_s1.c0, m_o), m_o),
+        //     challenges.gamma.c0, m_o,
+        // );
 
-        let d3c = mul_co(mul_co(challenges.alpha.c0, challenges.beta.c0, m_o), proof.eval_zw.c0, m_o);
+        // let d3b = add_co(
+        //     add_co(proof.eval_b.c0, mul_co(challenges.beta.c0, proof.eval_s2.c0, m_o), m_o),
+        //     challenges.gamma.c0, m_o
+        // );
 
-        let d3 = vk.S3.multiply_as_circuit(mul_co(mul_co(d3a, d3b, m_o), d3c, m_o), m);
+        // let d3c = mul_co(mul_co(challenges.alpha.c0, challenges.beta.c0, m_o), proof.eval_zw.c0, m_o);
+        // let d3ab = mul_co(mul_co(d3a, d3b, m_o), d3c, m_o);
 
         let d4low = proof.T1;
         let d4mid = proof.T2.multiply_as_circuit(challenges.xin.c0, m);
@@ -336,6 +370,9 @@ impl PlonkVerifier of PVerifier {
         let mut d4 = d4mid.add_as_circuit(d4high, m);
         d4 = d4.add_as_circuit(d4low, m);
         d4 = d4.multiply_as_circuit(challenges.zh.c0, m);
+
+        let d2 = proof.Z.multiply_as_circuit(d2ab, m);
+        let d3 = vk.S3.multiply_as_circuit(d3ab, m);
 
         let mut d = d1.add_as_circuit(d2, m);
         d = d.add_as_circuit(d3.neg(m), m);

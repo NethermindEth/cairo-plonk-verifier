@@ -103,7 +103,7 @@ impl Fq12Exponentiation of PairingExponentiationTrait {
     // https://github.com/paritytech/bn/blob/master/src/fields/fq12.rs#L75
     // #[inline(always)]
     fn final_exponentiation_hard_part(self: Fq12, m: CircuitModulus) -> Fq12 {
-        internal::revoke_ap_tracking();
+        // internal::revoke_ap_tracking();
         let a = self.exp_by_neg_t(m);
         let b = a.cyclotomic_sqr_circuit(m);
         let c = b.cyclotomic_sqr_circuit(m);
