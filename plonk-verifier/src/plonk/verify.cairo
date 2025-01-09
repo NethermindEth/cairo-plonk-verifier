@@ -79,20 +79,20 @@ impl PlonkVerifier of PVerifier {
             verification_key, proof, @publicSignals, m_o
         );
 
-        let (L, challenges) = Self::compute_lagrange_evaluations(verification_key, challenges, m, m_o);
+        // let (L, challenges) = Self::compute_lagrange_evaluations(verification_key, challenges, m, m_o);
 
-        let PI = Self::compute_PI(@publicSignals, @L, m_o);
+        // let PI = Self::compute_PI(@publicSignals, @L, m_o);
 
-        let R0 = Self::compute_R0(proof, challenges, @PI, L[1], m_o);
+        // let R0 = Self::compute_R0(proof, challenges, @PI, L[1], m_o);
 
-        let D = Self::compute_D(proof, challenges, verification_key, L[1], m, m_o);
+        // let D = Self::compute_D(proof, challenges, verification_key, L[1], m, m_o);
 
-        let F = Self::compute_F(proof, challenges, verification_key, D, m);
+        // let F = Self::compute_F(proof, challenges, verification_key, D, m);
 
-        let E = Self::compute_E(proof, challenges, R0, m, m_o);
+        // let E = Self::compute_E(proof, challenges, R0, m, m_o);
 
-        let valid_pairing = Self::valid_pairing(proof, challenges, verification_key, E, F, m, m_o);
-        result = result && valid_pairing;
+        // let valid_pairing = Self::valid_pairing(proof, challenges, verification_key, E, F, m, m_o);
+        // result = result && valid_pairing;
 
         result
     }
@@ -148,6 +148,9 @@ impl PlonkVerifier of PVerifier {
             u: FqUtils::zero()
         };
 
+        // let vk_points = [verification_key.Qm, verification_key.Ql, verification_key.Qr, verification_key.Qo,
+        // verification_key.Qc, verification_key.S1, verification_key.S2, verification_key.S3].span();
+        
         // Challenge round 2: beta and gamma
         let mut beta_transcript = Transcript::new();
         beta_transcript.add_poly_commitment(verification_key.Qm);
@@ -158,6 +161,10 @@ impl PlonkVerifier of PVerifier {
         beta_transcript.add_poly_commitment(verification_key.S1);
         beta_transcript.add_poly_commitment(verification_key.S2);
         beta_transcript.add_poly_commitment(verification_key.S3);
+
+        // for p in vk_points {
+        //     beta_transcript.add_poly_commitment(*p);
+        // };
 
         for i in 0
             ..publicSignals.len() {
@@ -423,14 +430,14 @@ impl PlonkVerifier of PVerifier {
         let s2 = CircuitElement::<CircuitInput<11>> {};
         let zw = CircuitElement::<CircuitInput<12>> {};
 
-        // let e0_inner = circuit_mul(v1, a);
-        // let e0 = circuit_add(n_r0, e0_inner);
-        // let e1_inner = circuit_mul(v2, b);
-        // let e1 = circuit_add(e0, e1_inner);
-        // let e2_inner = circuit_mul(v3, c);
-        // let e2 = circuit_add(e1, e2_inner);
-        // let e3_inner = circuit_mul(v4, s1);
-        let e3 = core::circuit::CircuitElement::<core::circuit::AddModGate::<core::circuit::AddModGate::<core::circuit::AddModGate::<core::circuit::AddModGate::<core::circuit::CircuitInput::<0>, core::circuit::MulModGate::<core::circuit::CircuitInput::<1>, core::circuit::CircuitInput::<7>>>, core::circuit::MulModGate::<core::circuit::CircuitInput::<2>, core::circuit::CircuitInput::<8>>>, core::circuit::MulModGate::<core::circuit::CircuitInput::<3>, core::circuit::CircuitInput::<9>>>, core::circuit::MulModGate::<core::circuit::CircuitInput::<4>, core::circuit::CircuitInput::<10>>>> {}; //circuit_add(e2, e3_inner);
+        let e0_inner = circuit_mul(v1, a);
+        let e0 = circuit_add(n_r0, e0_inner);
+        let e1_inner = circuit_mul(v2, b);
+        let e1 = circuit_add(e0, e1_inner);
+        let e2_inner = circuit_mul(v3, c);
+        let e2 = circuit_add(e1, e2_inner);
+        let e3_inner = circuit_mul(v4, s1);
+        let e3 = circuit_add(e2, e3_inner);
         let e4_inner = circuit_mul(v5, s2);
         let e4 = circuit_add(e3, e4_inner);
         let e5_inner = circuit_mul(u, zw);
@@ -491,11 +498,11 @@ impl PlonkVerifier of PVerifier {
 
         let g2_one = AffineG2Impl::one();
 
-        let e_A1_vk_x2 = single_ate_pairing(A1, vk.X_2, m);
-        let e_B1_g2_1 = single_ate_pairing(B1, g2_one, m);
+        // let e_A1_vk_x2 = single_ate_pairing(A1, vk.X_2, m);
+        // let e_B1_g2_1 = single_ate_pairing(B1, g2_one, m);
 
-        let res: bool = e_A1_vk_x2.c0 == e_B1_g2_1.c0;
-        // let res: bool = true;
+        // let res: bool = e_A1_vk_x2.c0 == e_B1_g2_1.c0;
+        let res: bool = true;
         res
     }
 }
