@@ -79,20 +79,20 @@ impl PlonkVerifier of PVerifier {
             verification_key, proof, @publicSignals, m_o
         );
 
-        // let (L, challenges) = Self::compute_lagrange_evaluations(verification_key, challenges, m, m_o);
+        let (L, challenges) = Self::compute_lagrange_evaluations(verification_key, challenges, m, m_o);
 
-        // let PI = Self::compute_PI(@publicSignals, @L, m_o);
+        let PI = Self::compute_PI(@publicSignals, @L, m_o);
 
-        // let R0 = Self::compute_R0(proof, challenges, @PI, L[1], m_o);
+        let R0 = Self::compute_R0(proof, challenges, @PI, L[1], m_o);
 
-        // let D = Self::compute_D(proof, challenges, verification_key, L[1], m, m_o);
+        let D = Self::compute_D(proof, challenges, verification_key, L[1], m, m_o);
 
-        // let F = Self::compute_F(proof, challenges, verification_key, D, m);
+        let F = Self::compute_F(proof, challenges, verification_key, D, m);
 
-        // let E = Self::compute_E(proof, challenges, R0, m, m_o);
+        let E = Self::compute_E(proof, challenges, R0, m, m_o);
 
-        // let valid_pairing = Self::valid_pairing(proof, challenges, verification_key, E, F, m, m_o);
-        // result = result && valid_pairing;
+        let valid_pairing = Self::valid_pairing(proof, challenges, verification_key, E, F, m, m_o);
+        result = result && valid_pairing;
 
         result
     }
@@ -248,10 +248,12 @@ impl PlonkVerifier of PVerifier {
         let n: Fq = domain_size;
         let mut w: Fq = FqUtils::one();
 
-        let n_public: u32 = verification_key.nPublic.try_into().unwrap();
-
+        let mut n_public: u32 = verification_key.nPublic.try_into().unwrap();
+        if n_public == 0 {
+            n_public = 1; 
+        }
         let mut j = 1;
-        while j <= max(1, n_public) {
+        while j <= n_public {
             let xi_sub_w = challenges.xi.sub(w, m);
             let xi_mul_n = mul_co(n.c0, xi_sub_w.c0, m_o);
             let w_mul_zh = mul_co(w.c0, challenges.zh.c0, m_o);
@@ -498,11 +500,11 @@ impl PlonkVerifier of PVerifier {
 
         let g2_one = AffineG2Impl::one();
 
-        // let e_A1_vk_x2 = single_ate_pairing(A1, vk.X_2, m);
-        // let e_B1_g2_1 = single_ate_pairing(B1, g2_one, m);
+        let e_A1_vk_x2 = single_ate_pairing(A1, vk.X_2, m);
+        let e_B1_g2_1 = single_ate_pairing(B1, g2_one, m);
 
-        // let res: bool = e_A1_vk_x2.c0 == e_B1_g2_1.c0;
-        let res: bool = true;
+        let res: bool = e_A1_vk_x2.c0 == e_B1_g2_1.c0;
+        // let res: bool = true;
         res
     }
 }

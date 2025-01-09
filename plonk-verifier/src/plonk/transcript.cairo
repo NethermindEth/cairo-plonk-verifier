@@ -79,7 +79,7 @@ impl Transcript of Keccak256Transcript<PlonkTranscript, CircuitModulus> {
 
         let le_value = keccak::compute_keccak_byte_array(@buffer);
         let be_u256 = reverse_endianness(le_value);
-        let be_mod = from_u256(be_u256);
+        let be_mod = add_co(from_u256(be_u256), zero_384, m_o);
         let challenge: Fq = fq(be_mod);
 
         challenge
