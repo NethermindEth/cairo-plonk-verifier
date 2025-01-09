@@ -5,7 +5,7 @@ use core::fmt::{Display, Error, Formatter};
 use plonk_verifier::curve::groups::{AffineG1, AffineG2, g1, g2};
 use plonk_verifier::fields::{fq, fq2, fq6, fq12, Fq, Fq6, Fq12};
 
-const ZERO: u384 = u384 { limb0: 0, limb1: 0, limb2: 0, limb3: 0 };
+// const ZERO: u384 = u384 { limb0: 0, limb1: 0, limb2: 0, limb3: 0 };
 const THREE: u384 = u384 { limb0: 3, limb1: 0, limb2: 0, limb3: 0 };
 
 // ================== Testing Constants ================== //

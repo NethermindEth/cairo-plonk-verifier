@@ -260,6 +260,49 @@ pub fn generate_compute_D_partial() -> String {
     builder.build()
 }
 
+
+pub fn generate_compute_R0() -> String {
+    let mut builder: CairoCodeBuilder = CairoCodeBuilder::new();
+
+    let pi: Fq = Fq::new_input(0);
+    let l1: Fq = Fq::new_input(1);
+    let alpha: Fq = Fq::new_input(2);
+    let eval_a: Fq = Fq::new_input(3);
+    let beta: Fq = Fq::new_input(4);
+    let eval_s1: Fq = Fq::new_input(5);
+    let gamma: Fq = Fq::new_input(6);
+    let eval_b: Fq = Fq::new_input(7);
+    let eval_s2: Fq = Fq::new_input(8);
+    let eval_c: Fq = Fq::new_input(9);
+    let eval_zw: Fq = Fq::new_input(10);
+
+    let e1 = pi;
+    let e2 = Fq::mul(&l1, &Fq::sqr(&alpha));
+
+    let mut e3a = Fq::add(&eval_a, &Fq::mul(&beta, &eval_s1));
+    e3a = Fq::add(&e3a, &gamma);
+
+    let mut e3b = Fq::add(&eval_b, &Fq::mul(&beta, &eval_s2));
+    e3b = Fq::add(&e3b, &gamma);
+
+    let mut e3c = Fq::add(&eval_c, &gamma);
+
+    let mut e3 = Fq::mul(&Fq::mul(&e3a, &e3b), &e3c);
+    e3 = Fq::mul(&e3, &eval_zw);
+    e3 = Fq::mul(&e3, &alpha);
+
+    let r0 = Fq::sub(&Fq::sub(&e1, &e2), &e3);
+
+
+    builder
+        .add_line("// compute R0")
+        .add_line("// r0")
+        .add_circuit(r0, Some(["R0_C0"].to_vec()));
+
+    
+    builder.build()
+}
+
 pub fn generate_sparse_mul_034_by_034() -> String {
     let mut builder: CairoCodeBuilder = CairoCodeBuilder::new();
 

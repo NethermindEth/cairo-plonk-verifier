@@ -93,7 +93,7 @@ fn test_compute_challenges() {
     let public_signals = constants::public_inputs();
 
     let challenges: PlonkChallenge = PlonkVerifier::compute_challenges(
-        verification_key.clone(), proof.clone(), public_signals.clone(), m_o
+        verification_key.clone(), proof.clone(), @public_signals, m_o
     );
     let correct_challenges: PlonkChallenge = PlonkChallenge {
         beta: fq(
@@ -211,7 +211,7 @@ fn test_compute_PI() {
         fq(from_u256(4022337429609156333024873048706819958201086574374594171651602119736297244553)),
         fq(from_u256(6617265984905210439143759470664564048122583210514619596354035502195742709385)),
     ];
-    let PI = PlonkVerifier::compute_PI(public_signals, L, m_o);
+    let PI = PlonkVerifier::compute_PI(@public_signals, @L, m_o);
     let PI_u256 = (PI.c0).try_into().unwrap();
     let correct_PI_256: u256 =
         18271457399299900228442257502287788641966159684441642978038700334889779304449;
@@ -236,7 +236,7 @@ fn test_compute_R0() {
 
     let public_signals = constants::public_inputs();
     let challenges = PlonkVerifier::compute_challenges(
-        verification_key.clone(), proof.clone(), public_signals.clone(), m_o
+        verification_key.clone(), proof.clone(), @public_signals, m_o
     );
     let L = array![
         fq(from_u256(0)),
@@ -246,8 +246,8 @@ fn test_compute_R0() {
         fq(from_u256(4022337429609156333024873048706819958201086574374594171651602119736297244553)),
         fq(from_u256(6617265984905210439143759470664564048122583210514619596354035502195742709385)),
     ];
-    let PI = PlonkVerifier::compute_PI(public_signals.clone(), L.clone(), m_o);
-    let R0 = PlonkVerifier::compute_R0(proof, challenges, PI, L[1].clone(), m_o);
+    let PI = PlonkVerifier::compute_PI(@public_signals, @L, m_o);
+    let R0 = PlonkVerifier::compute_R0(proof, challenges, @PI, L[1], m_o);
 
     let correct_R0: u256 =
         8252012205077960742641393316361079931166529015625841574934366119104137152715;
@@ -309,7 +309,7 @@ fn test_compute_D() {
     let L1 = fq(
         from_u256(2620616904154172175670395853552055689556084771717235903725482226645091308782)
     );
-    let D = PlonkVerifier::compute_D(proof, challenges, verification_key, L1, m, m_o);
+    let D = PlonkVerifier::compute_D(proof, challenges, verification_key, @L1, m, m_o);
     let corret_D = g1(
         4333398450220542935061332802082369181528242679087535767638817155055555907729,
         3001452470579370622125939372942669046487921723785465821088780020440992474494

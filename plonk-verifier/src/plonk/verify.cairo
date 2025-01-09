@@ -5,9 +5,8 @@ use core::{
         AddInputResultTrait, AddModGate as A, CircuitElement, CircuitElement as CE, CircuitInput,
         CircuitInput as CI, CircuitInputs, CircuitModulus, CircuitOutputsTrait, EvalCircuitResult,
         EvalCircuitTrait, InverseGate as I, MulModGate as M, SubModGate as S, circuit_add,
-        circuit_inverse, circuit_mul, circuit_sub, u384,
+        circuit_inverse, circuit_mul, circuit_sub, u96, u384,
     },
-    clone::Clone,
     cmp::max,
     traits::{Destruct, Into, TryInto},
 };
@@ -121,6 +120,7 @@ impl PlonkVerifier of PVerifier {
     fn is_in_field(num: Fq) -> bool {
         // bn254 curve field:
         // 21888242871839275222246405745257275088548364400416034343698204186575808495617
+
         (num.c0).try_into().unwrap() < ORDER
     }
 
@@ -276,6 +276,7 @@ impl PlonkVerifier of PVerifier {
 
     // step 8: compute r constant
     fn compute_R0(proof: PlonkProof, challenges: PlonkChallenge, PI: @Fq, L1: @Fq, m_o: CircuitModulus) -> Fq {
+
         let e1: u384 = *PI.c0;
         let e2: u384 = mul_co(*L1.c0, sqr_co(challenges.alpha.c0, m_o), m_o);
 
@@ -422,14 +423,14 @@ impl PlonkVerifier of PVerifier {
         let s2 = CircuitElement::<CircuitInput<11>> {};
         let zw = CircuitElement::<CircuitInput<12>> {};
 
-        let e0_inner = circuit_mul(v1, a);
-        let e0 = circuit_add(n_r0, e0_inner);
-        let e1_inner = circuit_mul(v2, b);
-        let e1 = circuit_add(e0, e1_inner);
-        let e2_inner = circuit_mul(v3, c);
-        let e2 = circuit_add(e1, e2_inner);
-        let e3_inner = circuit_mul(v4, s1);
-        let e3 = circuit_add(e2, e3_inner);
+        // let e0_inner = circuit_mul(v1, a);
+        // let e0 = circuit_add(n_r0, e0_inner);
+        // let e1_inner = circuit_mul(v2, b);
+        // let e1 = circuit_add(e0, e1_inner);
+        // let e2_inner = circuit_mul(v3, c);
+        // let e2 = circuit_add(e1, e2_inner);
+        // let e3_inner = circuit_mul(v4, s1);
+        let e3 = core::circuit::CircuitElement::<core::circuit::AddModGate::<core::circuit::AddModGate::<core::circuit::AddModGate::<core::circuit::AddModGate::<core::circuit::CircuitInput::<0>, core::circuit::MulModGate::<core::circuit::CircuitInput::<1>, core::circuit::CircuitInput::<7>>>, core::circuit::MulModGate::<core::circuit::CircuitInput::<2>, core::circuit::CircuitInput::<8>>>, core::circuit::MulModGate::<core::circuit::CircuitInput::<3>, core::circuit::CircuitInput::<9>>>, core::circuit::MulModGate::<core::circuit::CircuitInput::<4>, core::circuit::CircuitInput::<10>>>> {}; //circuit_add(e2, e3_inner);
         let e4_inner = circuit_mul(v5, s2);
         let e4 = circuit_add(e3, e4_inner);
         let e5_inner = circuit_mul(u, zw);
@@ -490,11 +491,11 @@ impl PlonkVerifier of PVerifier {
 
         let g2_one = AffineG2Impl::one();
 
-        // let e_A1_vk_x2 = single_ate_pairing(A1, vk.X_2, m);
-        // let e_B1_g2_1 = single_ate_pairing(B1, g2_one, m);
+        let e_A1_vk_x2 = single_ate_pairing(A1, vk.X_2, m);
+        let e_B1_g2_1 = single_ate_pairing(B1, g2_one, m);
 
-        let res: bool = true; //e_A1_vk_x2.c0 == e_B1_g2_1.c0;
-
+        let res: bool = e_A1_vk_x2.c0 == e_B1_g2_1.c0;
+        // let res: bool = true;
         res
     }
 }

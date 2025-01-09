@@ -1,7 +1,6 @@
 use core::{
     byte_array::ByteArrayTrait,
     circuit::{CircuitModulus, conversions::from_u256},
-    clone::Clone,
     fmt::{Display, Error, Formatter},
     keccak,
     to_byte_array::{AppendFormattedToByteArray, FormatAsByteArray},
@@ -63,15 +62,15 @@ impl Transcript of Keccak256Transcript<PlonkTranscript, CircuitModulus> {
                 .len() {
                     match self.data.at(i) {
                         TranscriptElement::Polynomial(pt) => {
-                            let x: u256 = (pt.x.c0.clone()).try_into().unwrap();
-                            let y: u256 = (pt.y.c0.clone()).try_into().unwrap();
+                            let x: u256 = (*pt.x.c0).try_into().unwrap();
+                            let y: u256 = (*pt.y.c0).try_into().unwrap();
                             let mut x_bytes: ByteArray = decimal_to_byte_array(x);
                             let mut y_bytes: ByteArray = decimal_to_byte_array(y);
                             buffer.append(@x_bytes);
                             buffer.append(@y_bytes);
                         },
                         TranscriptElement::Scalar(scalar) => {
-                            let s: u256 = (scalar.c0.clone()).try_into().unwrap();
+                            let s: u256 = (*scalar.c0).try_into().unwrap();
                             let mut s_bytes: ByteArray = decimal_to_byte_array(s);
                             buffer.append(@s_bytes);
                         },

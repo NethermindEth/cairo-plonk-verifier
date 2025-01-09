@@ -157,33 +157,55 @@ impl FqSparse of FqSparseTrait {
     // https://github.com/Consensys/gnark/blob/v0.9.1/std/algebra/emulated/fields_bn254/e12_pairing.go#L150
     // // #[inline(always)]
     fn mul_034_by_034(self: Fq12Sparse034, rhs: Fq12Sparse034, m: CircuitModulus) -> Fq12Sparse01234 {
-        let Fq12Sparse034 { c3: c3, c4: c4 } = self;
-        let Fq12Sparse034 { c3: d3, c4: d4 } = rhs;
-        // x3 = c3 * d3
-        let c3d3 = c3.mul(d3, m);
-        // x4 = c4 * d4
-        let c4d4 = c4.mul(d4, m);
-        // x04 = c4 + d4
-        let x04 = c4.add(d4, m);
-        // x03 = c3 + d3
-        let x03 = c3.add(d3, m);
-        // tmp = c3 + c4
-        // x34 = d3 + d4
-        // x34 = x34 * tmp
-        let x34 = d3.add(d4, m).mul(c3.add(c4, m), m); // d3c3 + d3c4 + d4c3 + d4c4
-        // x34 = x34 - x3
-        let x34 = x34.sub(c3d3, m); // d3c4 + d4c3 + d4c4
-        // x34 = x34 - x4
-        let x34 = x34.sub(c4d4, m); // d3c4 + d4c3
+        let (M034034_zC0B0C0, M034034_zC0B0C1, M034034_C3D3C0, M034034_C3D3C1, M034034_X34C0, M034034_X34C1, M034034_X03C0, M034034_X03C1, M034034_X04C0, M034034_X04C1) = mul_034_by_034_circuit(); 
+        
+        let o = match (M034034_zC0B0C0, M034034_zC0B0C1, M034034_C3D3C0, M034034_C3D3C1, M034034_X34C0, M034034_X34C1, M034034_X03C0, M034034_X03C1, M034034_X04C0, M034034_X04C1).new_inputs()
+            .next(self.c3.c0.c0)
+            .next(self.c3.c1.c0)
+            .next(self.c4.c0.c0)
+            .next(self.c4.c1.c0)
+            .next(rhs.c3.c0.c0)
+            .next(rhs.c3.c1.c0)
+            .next(rhs.c4.c0.c0)
+            .next(rhs.c4.c1.c0)
+            .done().eval(m) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
+        };
 
-        // zC0B0 = ξx4
-        // zC0B0 = zC0B0 + 1
-        // zC0B1 = x3
-        // zC0B2 = x34
-        // zC1B0 = x03
-        // zC1B1 = x04
+        let mut zC0B0 = fq2(o.get_output(M034034_zC0B0C0), o.get_output(M034034_zC0B0C1));
+        let c3d3 = fq2(o.get_output(M034034_C3D3C0), o.get_output(M034034_C3D3C1));
+        let x34 = fq2(o.get_output(M034034_X34C0), o.get_output(M034034_X34C1));
+        let x03 = fq2(o.get_output(M034034_X03C0), o.get_output(M034034_X03C1));
+        let x04 = fq2(o.get_output(M034034_X04C0), o.get_output(M034034_X04C1));
+        
+        // let Fq12Sparse034 { c3: c3, c4: c4 } = self;
+        // let Fq12Sparse034 { c3: d3, c4: d4 } = rhs;
+        // // x3 = c3 * d3
+        // let c3d3 = c3.mul(d3, m);
+        // // x4 = c4 * d4
+        // let c4d4 = c4.mul(d4, m);
+        // // x04 = c4 + d4
+        // let x04 = c4.add(d4, m);
+        // // x03 = c3 + d3
+        // let x03 = c3.add(d3, m);
+        // // tmp = c3 + c4
+        // // x34 = d3 + d4
+        // // x34 = x34 * tmp
+        // let x34 = d3.add(d4, m).mul(c3.add(c4, m), m); // d3c3 + d3c4 + d4c3 + d4c4
+        // // x34 = x34 - x3
+        // let x34 = x34.sub(c3d3, m); // d3c4 + d4c3 + d4c4
+        // // x34 = x34 - x4
+        // let x34 = x34.sub(c4d4, m); // d3c4 + d4c3
 
-        let mut zC0B0: Fq2 = c4d4.mul_by_nonresidue(m);
+        // // zC0B0 = ξx4
+        // // zC0B0 = zC0B0 + 1
+        // // zC0B1 = x3
+        // // zC0B2 = x34
+        // // zC1B0 = x03
+        // // zC1B1 = x04
+
+        // let mut zC0B0: Fq2 = c4d4.mul_by_nonresidue(m);
 
 
 

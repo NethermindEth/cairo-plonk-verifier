@@ -13,7 +13,6 @@ trait IVerifier<T> {
 
 #[starknet::contract]
 mod PLONK_Verifier{
-
     use core::array::ArrayTrait;
     
     use plonk_verifier::plonk::verify;
@@ -50,14 +49,14 @@ mod PLONK_Verifier{
             };
 
             //public_signals
-            // let public_signals = constants::public_inputs();
-            // let verified: bool = plonk_verifier::plonk::verify::PlonkVerifier::verify(verification_key, proof, public_signals);
-            // assert(verified, 'plonk verification failed'); 
+            let public_signals = constants::public_inputs();
+            let verified: bool = plonk_verifier::plonk::verify::PlonkVerifier::verify(verification_key, proof, public_signals);
+            assert(verified, 'plonk verification failed'); 
 
-            let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+            // let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
 
-            // pairing 
-            single_ate_pairing(Wxiw, verification_key.X_2, m);
+            // // pairing 
+            //  single_ate_pairing(Wxiw, verification_key.X_2, m);
             
             // miller
             // let g1 = Wxiw;

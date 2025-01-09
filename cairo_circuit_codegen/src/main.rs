@@ -6,7 +6,7 @@ fn main() {
     system.refresh_all();
 
     // let code = generate_fq12_field_ops();
-    let code = cairo_circuit_codegen::circuit::utils::generate_sparse_mul_01();
+    let code = cairo_circuit_codegen::circuit::utils::generate_compute_R0();
 
     // Write the generated code to out.cairo
     
