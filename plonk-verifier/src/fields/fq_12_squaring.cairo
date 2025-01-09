@@ -6,7 +6,7 @@ use core::circuit::{
 };
 use core::circuit::conversions::from_u256;
 
-use plonk_verifier::circuits::fq_12_squaring_circuits::sqr_circuit;
+use plonk_verifier::circuits::fq_12_squaring_circuits::{decompress_zero_circuit, decompress_non_zero_circuit, sqr_circuit};
 
 use plonk_verifier::curve::{constants::FIELD_U384, mul_by_xi_nz_as_circuit};
 use plonk_verifier::fields::{
@@ -70,71 +70,76 @@ impl Fq12Squaring of Fq12SquaringTrait {
 
     // Karabina decompress a2, a3, a4, a5 to Fq12 a0, a1, a2, a3, a4, a5
     fn krbn_decompress(self: Krbn2345, m: CircuitModulus) -> Fq12 {
-        // core::internal::revoke_ap_tracking();
+        // // core::internal::revoke_ap_tracking();
         let Krbn2345 { g2, g3, g4, g5 } = self;
         // Si = gi^2
         if g2.c0 == FieldUtils::zero() && g2.c1 == FieldUtils::zero() {
-            // g1 = 2g4g5/g3
-            let tg24g5 = x2(g4.mul(g5, m), m);
-            let g1 = tg24g5.mul(g3.inv(m), m);
+            let (g0_c0, g0_c1, g1_c0, g1_c1) = decompress_zero_circuit(); 
 
-            // g0 = (2S1 - 3g3g4)ξ + 1
-            let S1 = g1.sqr(m);
-            let T_g3g4 = g3.mul(g4, m);
-            let Tmp = (S1.sub(T_g3g4, m)).scale(TWO, m);
-            let mut g0 = (Tmp.sub(T_g3g4, m)).mul_by_nonresidue(m);
+            let o = match (g0_c0, g0_c1, g1_c0, g1_c1).new_inputs()
+                .next(self.g3.c0.c0)
+                .next(self.g3.c1.c0)
+                .next(self.g4.c0.c0)
+                .next(self.g4.c1.c0)
+                .next(self.g5.c0.c0)
+                .next(self.g5.c1.c0)
+                .done().eval(m) {
+                    Result::Ok(outputs) => { outputs },
+                    Result::Err(_) => { panic!("Expected success") }
+            };
+    
+            let mut g0 = fq2(o.get_output(g0_c0), o.get_output(g0_c1));
+            let g1 = fq2(o.get_output(g1_c0), o.get_output(g1_c1));
+        //     // g1 = 2g4g5/g3
+        //     let tg24g5 = x2(g4.mul(g5, m), m);
+        //     let g1 = tg24g5.mul(g3.inv(m), m);
+
+        //     // g0 = (2S1 - 3g3g4)ξ + 1
+        //     let S1 = g1.sqr(m);
+        //     let T_g3g4 = g3.mul(g4, m);
+        //     let Tmp = (S1.sub(T_g3g4, m)).scale(TWO, m);
+        //     let mut g0 = (Tmp.sub(T_g3g4, m)).mul_by_nonresidue(m);
+
             g0 = g0.add(FieldUtils::one(), m);
 
             Fq12 { c0: Fq6 { c0: g0, c1: g4, c2: g3 }, c1: Fq6 { c0: g2, c1: g1, c2: g5 } }
         } else {
-            // g1 = (S5ξ + 3S4 - 2g3)/4g2
-            let S5xi = mul_by_xi_nz_as_circuit(g5.sqr(m), m);
-            let S4 = g4.sqr(m);
-            let Tmp = S4.sub(g3, m);
-            let g1 = S5xi.add(S4.add(Tmp.add(Tmp, m), m), m);
-            let g1 = g1.mul(x4(g2, m).inv(m), m);
+            let (g0_c0, g0_c1, g1_c0, g1_c1) = decompress_non_zero_circuit(); 
 
-            // // g0 = (2S1 + g2g5 - 3g3g4)ξ + 1
-            let S1 = g1.sqr(m);
-            let T_g3g4 = g3.mul(g4, m);
-            let T_g2g5 = g2.mul(g5, m);
-            let Tmp = (S1.sub(T_g3g4, m)).scale(TWO, m);
-            let mut g0 = (Tmp.add(T_g2g5.sub(T_g3g4, m), m)).mul_by_nonresidue(m);
+            let o = match (g0_c0, g0_c1, g1_c0, g1_c1).new_inputs()
+                .next(self.g2.c0.c0)
+                .next(self.g2.c1.c0)
+                .next(self.g3.c0.c0)
+                .next(self.g3.c1.c0)
+                .next(self.g4.c0.c0)
+                .next(self.g4.c1.c0)
+                .next(self.g5.c0.c0)
+                .next(self.g5.c1.c0)
+                .done().eval(m) {
+                    Result::Ok(outputs) => { outputs },
+                    Result::Err(_) => { panic!("Expected success") }
+            };
+    
+            let mut g0 = fq2(o.get_output(g0_c0), o.get_output(g0_c1));
+            let g1 = fq2(o.get_output(g1_c0), o.get_output(g1_c1));
+            
+            // g1 = (S5ξ + 3S4 - 2g3)/4g2
+            // let S5xi = mul_by_xi_nz_as_circuit(g5.sqr(m), m);
+            // let S4 = g4.sqr(m);
+            // let Tmp = S4.sub(g3, m);
+            // let g1 = S5xi.add(S4.add(Tmp.add(Tmp, m), m), m);
+            // let g1 = g1.mul(x4(g2, m).inv(m), m);
+
+            // // // g0 = (2S1 + g2g5 - 3g3g4)ξ + 1
+            // let S1 = g1.sqr(m);
+            // let T_g3g4 = g3.mul(g4, m);
+            // let T_g2g5 = g2.mul(g5, m);
+            // let Tmp = (S1.sub(T_g3g4, m)).scale(TWO, m);
+            // let mut g0 = (Tmp.add(T_g2g5.sub(T_g3g4, m), m)).mul_by_nonresidue(m);
             g0 = g0.add(FieldUtils::one(), m);
             Fq12 { c0: Fq6 { c0: g0, c1: g4, c2: g3 }, c1: Fq6 { c0: g2, c1: g1, c2: g5 } }
         }
     }
-
-    // // This Karabina implementation is adjusted for the quadratic over cubic representation
-    // // https://github.com/Consensys/gnark-crypto/blob/v0.12.1/ecc/bn254/internal/fptower/e12.go#L143
-    // fn sqr_krbn_1235(self: Fq12, m: CircuitModulus) -> Fq12 {
-    //     // core::internal::revoke_ap_tracking();
-    //     let Fq12 { c0: Fq6 { c0: _g0, c1: g1, c2: g2 }, c1: Fq6 { c0: g3, c1: _g4, c2: g5 } } =
-    //         self;
-
-    //     let S1 = g1.sqr(m);
-    //     let S2 = g2.sqr(m);
-    //     let S3 = g3.sqr(m);
-    //     let S5 = g5.sqr(m);
-    //     let S1_5 = (g1.add(g5, m)).sqr(m);
-    //     let S2_3 = (g2.add(g3, m)).sqr(m);
-
-    //     let Tmp = S3.add(mul_by_xi_nz_as_circuit(S2, m), m);
-    //     let h1 = Tmp.sub(g1, m).scale(TWO, m).add(Tmp, m);
-
-    //     let Tmp = mul_by_xi_nz_as_circuit(S5, m).add(S1, m);
-    //     let h2 = Tmp.sub(g2, m).scale(TWO, m).add(Tmp, m);
-
-    //     let Tmp = mul_by_xi_nz_as_circuit(S1_5.sub(S1, m).sub(S5, m), m);
-    //     let h3 = Tmp.add(g3, m).scale(TWO, m).add(Tmp, m);
-
-    //     let Tmp = S2_3.sub(S2, m).sub(S3, m);
-    //     let h5 = Tmp.add(g5, m).scale(TWO, m).add(Tmp, m);
-
-    //     let _0 = FieldUtils::zero();
-
-    //     Fq12 { c0: Fq6 { c0: _0, c1: h1, c2: h2 }, c1: Fq6 { c0: h3, c1: _0, c2: h5 } }
-    // }
 
     // https://eprint.iacr.org/2010/542.pdf
     // Compressed Karabina 2345 square
@@ -174,55 +179,55 @@ impl Fq12Squaring of Fq12SquaringTrait {
         krbn.krbn_decompress(m)
     }
 
-    // #[inline(always)]
-    fn krbn_sqr_4x(self: Krbn2345, m: CircuitModulus) -> Krbn2345 {
-        self.sqr_krbn(m).sqr_krbn(m).sqr_krbn(m).sqr_krbn(m)
-    }
+    // // #[inline(always)]
+    // fn krbn_sqr_4x(self: Krbn2345, m: CircuitModulus) -> Krbn2345 {
+    //     self.sqr_krbn(m).sqr_krbn(m).sqr_krbn(m).sqr_krbn(m)
+    // }
 
-    fn sqr_6_times(self: Fq12, m: CircuitModulus) -> Fq12 {
-        // core::internal::revoke_ap_tracking();
-        self
-            .krbn_compress_2345()
-            .krbn_sqr_4x(m) // ^2^4
-            .sqr_krbn(m) // ^2^5
-            .sqr_krbn(m) // ^2^6
-            .krbn_decompress(m)
-    }
+    // fn sqr_6_times(self: Fq12, m: CircuitModulus) -> Fq12 {
+    //     // core::internal::revoke_ap_tracking();
+    //     self
+    //         .krbn_compress_2345()
+    //         .krbn_sqr_4x(m) // ^2^4
+    //         .sqr_krbn(m) // ^2^5
+    //         .sqr_krbn(m) // ^2^6
+    //         .krbn_decompress(m)
+    // }
 
-    // Called only once hence inlined
-    // #[inline(always)]
-    fn sqr_7_times(self: Fq12, m: CircuitModulus) -> Fq12 {
-        // core::internal::revoke_ap_tracking();
-        self
-            .krbn_compress_2345()
-            .krbn_sqr_4x(m) // ^2^4
-            .sqr_krbn(m) // ^2^5
-            .sqr_krbn(m) // ^2^6
-            .sqr_krbn(m) // ^2^7
-            .krbn_decompress(m)
-    }
+    // // Called only once hence inlined
+    // // #[inline(always)]
+    // fn sqr_7_times(self: Fq12, m: CircuitModulus) -> Fq12 {
+    //     // core::internal::revoke_ap_tracking();
+    //     self
+    //         .krbn_compress_2345()
+    //         .krbn_sqr_4x(m) // ^2^4
+    //         .sqr_krbn(m) // ^2^5
+    //         .sqr_krbn(m) // ^2^6
+    //         .sqr_krbn(m) // ^2^7
+    //         .krbn_decompress(m)
+    // }
 
-    fn sqr_8_times(self: Fq12, m: CircuitModulus) -> Fq12 {
-        // core::internal::revoke_ap_tracking();
-        self
-            .krbn_compress_2345()
-            .krbn_sqr_4x(m)
-            .krbn_sqr_4x(m)
-            .krbn_decompress(m)
-    }
+    // fn sqr_8_times(self: Fq12, m: CircuitModulus) -> Fq12 {
+    //     // core::internal::revoke_ap_tracking();
+    //     self
+    //         .krbn_compress_2345()
+    //         .krbn_sqr_4x(m)
+    //         .krbn_sqr_4x(m)
+    //         .krbn_decompress(m)
+    // }
 
-    // Called only once hence inlined
-    // #[inline(always)]
-    fn sqr_10_times(self: Fq12, m: CircuitModulus) -> Fq12 {
-        // core::internal::revoke_ap_tracking();
-        self
-            .krbn_compress_2345()
-            .krbn_sqr_4x(m) // ^2^4
-            .krbn_sqr_4x(m) // ^2^8
-            .sqr_krbn(m) // ^2^9
-            .sqr_krbn(m) // ^2^10
-            .krbn_decompress(m)
-    }
+    // // Called only once hence inlined
+    // // #[inline(always)]
+    // fn sqr_10_times(self: Fq12, m: CircuitModulus) -> Fq12 {
+    //     // core::internal::revoke_ap_tracking();
+    //     self
+    //         .krbn_compress_2345()
+    //         .krbn_sqr_4x(m) // ^2^4
+    //         .krbn_sqr_4x(m) // ^2^8
+    //         .sqr_krbn(m) // ^2^9
+    //         .sqr_krbn(m) // ^2^10
+    //         .krbn_decompress(m)
+    // }
 
     // Cyclotomic squaring
     fn cyclotomic_sqr(self: Fq12, m: CircuitModulus) -> Fq12 {

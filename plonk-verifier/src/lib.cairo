@@ -41,7 +41,7 @@ mod fields {
     mod fq_2;
     mod fq_6;
     mod fq_12;
-    mod fq_12_direct;
+    // mod fq_12_direct;
     mod fq_12_squaring;
     mod fq_12_exponentiation;
     mod frobenius;
