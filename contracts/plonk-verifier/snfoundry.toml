@@ -1,4 +1,0 @@
-[sncast.myprofile]
-account = "user"
-accounts-file = "~/my_accounts.json"
-url = "https://rpc.nethermind.io/sepolia-juno"

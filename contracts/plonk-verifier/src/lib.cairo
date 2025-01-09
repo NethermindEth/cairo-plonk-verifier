@@ -46,27 +46,6 @@ mod PLONK_Verifier {
             proof: PlonkProof,
             public_signals: Array<u384>
         ) -> bool {
-            // fn verify(ref self: ContractState) -> bool {
-            // let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
-            //     constants::verification_key();
-            // let verification_key: PlonkVerificationKey = PlonkVerificationKey {
-            //     n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
-            // };
-
-            // // proof
-            // let (
-            //     A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2,
-            //     eval_zw
-            // ) =
-            //     constants::proof();
-            // let proof: PlonkProof = PlonkProof {
-            //     A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2,
-            //     eval_zw
-            // };
-
-            // //public_signals
-            // let public_signals = constants::public_inputs();
-
             let (A1, vk_X2, B1, g2_one) =
                 plonk_verifier::plonk::verify::PlonkVerifier::verify_except_pairing(
                 verification_key, proof, public_signals
