@@ -177,8 +177,8 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
         let mut dbl_step = *self;
         let mut result = AffineG1Impl::one();
         let mut first_add_done = false;
-        let mut multiplier: u256 = multiplier.try_into().unwrap();
 
+        let mut multiplier: u256 = multiplier.try_into().unwrap();
         // TODO:: outside loop reduce down to u256-> felt252, then use loop using felt252
         loop {
             let (q, r, _) = integer::u256_safe_divmod(multiplier, nz2);
@@ -316,7 +316,6 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
     }
 
     fn y_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x: Fq2, m: CircuitModulus) -> Fq2 {
-
         let (c0, c1) = fq2_y_on_slope_circuit();
 
         let out = match (c0, c1,)

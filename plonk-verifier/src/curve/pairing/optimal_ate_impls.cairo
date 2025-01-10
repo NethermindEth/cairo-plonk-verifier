@@ -47,12 +47,14 @@ impl SingleMillerSteps of MillerSteps<PreCompute, PtG2, Fq12> {
         // sqr with mul 034 by 034
         let f_01234 = l0.mul_034_by_034(l0, m); // use mul instead of sqr to save bytecode
         // step -1, the next negative one step
-        let (l1, l2) = step_dbl_add(ref acc, self.ppc, *self.p, *self.neg_q, m);
-        // let f = f_01234.mul_01234_034(l1, *self.field_nz);
-        // f.mul_034(l2, *self.field_nz)
         let f = Fq12 { c0: f_01234.c0 , c1: Fq6 { c0: f_01234.c1.c0, c1: f_01234.c1.c1, c2: FieldUtils::zero() } };
-        //(f_01234.c0, f_01234.c1, FieldUtils::zero());
-        f.mul_01234(l1.mul_034_by_034(l2, m), m) // use 01234 mul instead of 01234_01234
+
+        // let (l1, l2) = step_dbl_add(ref acc, self.ppc, *self.p, *self.neg_q, m);
+        // // let f = f_01234.mul_01234_034(l1, *self.field_nz);
+        // // f.mul_034(l2, *self.field_nz)
+        // //(f_01234.c0, f_01234.c1, FieldUtils::zero());
+        // f.mul_01234(l1.mul_034_by_034(l2, m), m) // use 01234 mul instead of 01234_01234
+        f
     }
 
     // 0 bit

@@ -2,10 +2,12 @@ use core::circuit::CircuitModulus;
 use core::debug::PrintTrait;
 
 use plonk_verifier::curve::constants::FIELD_U384;
-use plonk_verifier::curve::{groups, pairing::optimal_ate_impls};
+use plonk_verifier::curve::{groups, pairing::{optimal_ate_impls, optimal_ate_impls::step_double}};
 use plonk_verifier::fields::{
     fq, Fq, Fq2, Fq6, Fq12, Fq12Exponentiation, Fq12Utils, FieldOps, FieldUtils,
 };
+use plonk_verifier::fields::fq_sparse::FqSparseTrait;
+
 use plonk_verifier::traits::{MillerPrecompute, MillerSteps};
 
 use groups::{Affine, AffineG1, AffineG2, ECGroup, g2};
@@ -91,10 +93,9 @@ fn ate_miller_loop_steps<
     precompute: TPreC, ref q_acc: TG2
 ) -> Fq12 {
     // ate_loop[64] = O and ate_loop[63] = N
-    let mut f = precompute.miller_first_second(ref q_acc);
-    // let mut f = Fq12 {c0: FieldUtils::zero(), c1: FieldUtils::zero()};
-    // precompute.miller_bit_o(ref q_acc, ref f);
-    // precompute.miller_bit_n(ref q_acc, ref f);
+    let mut f = precompute.miller_first(ref q_acc); // first
+    precompute.miller_bit_n(ref q_acc, ref f); // second
+    
     let steps = [
         BitType::O, // i=62
         BitType::P, // i=61

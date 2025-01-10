@@ -28,7 +28,7 @@ trait MillerSteps<TPreComp, TG2, TFq> {
     // square target group element
     fn sqr_target(self: @TPreComp, ref acc: TG2, ref f: TFq);
     // first and second step
-    fn miller_first_second(self: @TPreComp, ref acc: TG2) -> TFq;
+    fn miller_first(self: @TPreComp, ref acc: TG2) -> TFq;
     // 0 bit
     fn miller_bit_o(self: @TPreComp, ref acc: TG2, ref f: TFq);
     // 1 bit
