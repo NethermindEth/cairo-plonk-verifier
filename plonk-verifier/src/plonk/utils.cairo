@@ -8,7 +8,7 @@ use core::circuit::{CircuitModulus, u384};
 
 use plonk_verifier::curve::{
     constants::FIELD_U384,
-    groups::{AffineG1, AffineG2, AffineG2Impl, ECOperationsCircuitFq, g1, g2},
+    groups::{AffineG1, AffineG2, AffineG2Impl, ECOperationsCircuitFq, g2},
 };
 use plonk_verifier::fields::{fq12, Fq12};
 

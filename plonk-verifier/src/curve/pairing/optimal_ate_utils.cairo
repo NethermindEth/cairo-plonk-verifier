@@ -1,7 +1,7 @@
 use core::circuit::CircuitModulus;
 
 use plonk_verifier::curve::groups::{
-    Affine, AffineG1 as PtG1, AffineG2 as PtG2, ECGroup, g1, g2,
+    Affine, AffineG1 as PtG1, AffineG2 as PtG2, ECGroup, g2,
 };
 use plonk_verifier::fields::{
     fq, Fq, Fq2, fq2, Fq6, Fq12, FqOps, Fq2Ops, Fq2Utils, Fq12Ops, Fq12Utils, Fq12Exponentiation,
@@ -65,7 +65,7 @@ mod line_fn {
     use plonk_verifier::fields::fq_sparse::FqSparseTrait;
     use plonk_verifier::traits::{FieldUtils};
     use plonk_verifier::curve::groups::ECOperationsCircuitFq2;
-    use plonk_verifier::curve::groups::{g1, g2, ECGroup};
+    use plonk_verifier::curve::groups::{g2, ECGroup};
     use plonk_verifier::curve::groups::{Affine, AffineG1 as PtG1, AffineG2 as PtG2};
     use plonk_verifier::fields::{
         Fq, fq, Fq2, fq2, Fq6, Fq12, Fq12Utils, Fq12Ops, FqOps, Fq2Utils, Fq2Ops,

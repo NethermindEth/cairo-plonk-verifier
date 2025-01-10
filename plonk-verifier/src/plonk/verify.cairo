@@ -15,7 +15,7 @@ use plonk_verifier::circuits::fq_circuits::{add_c, add_co, div_c, div_co, mul_c,
 use plonk_verifier::{
     curve::{
         constants::{FIELD_U384, ORDER, ORDER_384, ORDER_U384},
-        groups::{AffineG1, AffineG2, AffineG2Impl, ECOperationsCircuitFq, g1, g2},
+        groups::{AffineG1, AffineG2, AffineG1Impl, AffineG2Impl, ECOperationsCircuitFq, g2},
     },
     fields::{
         fq, Fq, Fq12, Fq12Exponentiation, Fq12Utils, FqUtils,
@@ -419,7 +419,7 @@ impl PlonkVerifier of PVerifier {
 
     // step 11: Compute group-encoded batch evaluation E
     fn compute_E(proof: PlonkProof, challenges: PlonkChallenge, r0: Fq, m: CircuitModulus, m_o: CircuitModulus) -> AffineG1 {
-        let mut res: AffineG1 = g1(1, 2);
+        let mut res: AffineG1 = AffineG1Impl::one();
         let neg_r0 = neg_co(r0.c0, m_o);
 
         let n_r0 = CircuitElement::<CircuitInput<0>> {};
@@ -508,7 +508,7 @@ impl PlonkVerifier of PVerifier {
         let e_B1_g2_1 = single_ate_pairing(B1, g2_one, m);
 
         let res: bool = e_A1_vk_x2.c0 == e_B1_g2_1.c0;
-        // let res: bool = true;
+
         res
     }
 }

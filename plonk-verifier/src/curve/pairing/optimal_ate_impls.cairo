@@ -1,7 +1,7 @@
 use core::circuit::{CircuitModulus, u384};
 
 use plonk_verifier::curve::groups::{
-    Affine, AffineG1 as PtG1, AffineG2 as PtG2, ECGroup, ECOperationsCircuitFq2, g1, g2,
+    Affine, AffineG1 as PtG1, AffineG2 as PtG2, ECGroup, ECOperationsCircuitFq2, g2,
 };
 use plonk_verifier::curve::pairing::optimal_ate_utils::{
     PPrecompute, correction_step_to_f, p_precompute, step_dbl_add, step_dbl_add_to_f,

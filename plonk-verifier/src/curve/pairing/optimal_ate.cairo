@@ -8,7 +8,7 @@ use plonk_verifier::fields::{
 };
 use plonk_verifier::traits::{MillerPrecompute, MillerSteps};
 
-use groups::{Affine, AffineG1, AffineG2, ECGroup, g1, g2};
+use groups::{Affine, AffineG1, AffineG2, ECGroup, g2};
 use optimal_ate_impls::{SingleMillerPrecompute, SingleMillerSteps};
 use plonk_verifier::curve::pairing::optimal_ate_impls::PreCompute;
 
