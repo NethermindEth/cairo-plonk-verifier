@@ -121,38 +121,38 @@ mod line_fn {
     // // #[inline(always)]
     fn step_dbl_add(ref acc: PtG2, q: PtG2, m: CircuitModulus) -> (LineFn, LineFn) {
 
-        let (slope1_c0, slope1_c1, x1_c0, x1_c1, slope2_c0, slope2_c1) = step_dbl_add_slopes_circuit();
+        // let (slope1_c0, slope1_c1, x1_c0, x1_c1, slope2_c0, slope2_c1) = step_dbl_add_slopes_circuit();
 
-        let o = match (slope1_c0, slope1_c1, x1_c0, x1_c1, slope2_c0, slope2_c1).new_inputs()
-            .next(acc.x.c0.c0)
-            .next(acc.x.c1.c0)
-            .next(acc.y.c0.c0)
-            .next(acc.y.c1.c0)
-            .next(q.x.c0.c0)
-            .next(q.x.c1.c0)
-            .next(q.y.c0.c0)
-            .next(q.y.c1.c0)
-            .done().eval(m) {
-                Result::Ok(outputs) => { outputs },
-                Result::Err(_) => { panic!("Expected success") }
-        };
+        // let o = match (slope1_c0, slope1_c1, x1_c0, x1_c1, slope2_c0, slope2_c1).new_inputs()
+        //     .next(acc.x.c0.c0)
+        //     .next(acc.x.c1.c0)
+        //     .next(acc.y.c0.c0)
+        //     .next(acc.y.c1.c0)
+        //     .next(q.x.c0.c0)
+        //     .next(q.x.c1.c0)
+        //     .next(q.y.c0.c0)
+        //     .next(q.y.c1.c0)
+        //     .done().eval(m) {
+        //         Result::Ok(outputs) => { outputs },
+        //         Result::Err(_) => { panic!("Expected success") }
+        // };
 
-        let slope1 = fq2(o.get_output(slope1_c0), o.get_output(slope1_c1));
-        let x1 = fq2(o.get_output(x1_c0), o.get_output(x1_c1));
-        let slope2 = fq2(o.get_output(slope2_c0), o.get_output(slope2_c1));
+        // let slope1 = fq2(o.get_output(slope1_c0), o.get_output(slope1_c1));
+        // let x1 = fq2(o.get_output(x1_c0), o.get_output(x1_c1));
+        // let slope2 = fq2(o.get_output(slope2_c0), o.get_output(slope2_c1));
 
         // let s = acc;
         // s + q
-        // let slope1 = acc.chord_as_circuit(q, m);
-        // let x1 = acc.x_on_slope(slope1, q.x, m);
+        let slope1 = acc.chord_as_circuit(q, m);
+        let x1 = acc.x_on_slope(slope1, q.x, m);
         
 
-        // // we skip y1 calculation and sub slope1 directly in second slope calculation
+        // we skip y1 calculation and sub slope1 directly in second slope calculation
 
-        // // s + (s + q)
-        // // λ2 = (y2-y1)/(x2-x1), subbing y2 = λ(x2-x1)+y1
-        // // λ2 = -λ1-2y1/(x3-x1)
-        // let slope2 = slope1.neg(m).sub((acc.y.add(acc.y, m)).div(x1.sub(acc.x, m), m), m); // rm div -> circuit
+        // s + (s + q)
+        // λ2 = (y2-y1)/(x2-x1), subbing y2 = λ(x2-x1)+y1
+        // λ2 = -λ1-2y1/(x3-x1)
+        let slope2 = slope1.neg(m).sub((acc.y.add(acc.y, m)).div(x1.sub(acc.x, m), m), m); // rm div -> circuit
 
         let line1 = line_fn(slope1, acc, m);
         let line2 = line_fn(slope2, acc, m);
@@ -238,21 +238,6 @@ fn line_evaluation_at_p(slope: Fq2, p_pre: @PPre, s: PtG2, m: CircuitModulus) ->
         c4: (slope.mul(s.x, m).sub(s.y, m)).scale(*p_pre.y_inv.c0, m),
     }
 }
-
-// let m = *self.modulus;
-// // Handle O, N steps
-// // step 0, run step double
-// let l0 = step_double(ref acc, self.ppc, *self.p, m);
-// // sqr with mul 034 by 034
-// let f_01234 = l0.mul_034_by_034(l0, m); // use mul instead of sqr to save bytecode
-// // step -1, the next negative one step
-// let f = Fq12 { c0: f_01234.c0 , c1: Fq6 { c0: f_01234.c1.c0, c1: f_01234.c1.c1, c2: FieldUtils::zero() } };
-
-// let (l1, l2) = step_dbl_add(ref acc, self.ppc, *self.p, *self.neg_q, m);
-// // let f = f_01234.mul_01234_034(l1, *self.field_nz);
-// // f.mul_034(l2, *self.field_nz)
-// //(f_01234.c0, f_01234.c1, FieldUtils::zero());
-// f.mul_01234(l1.mul_034_by_034(l2, m), m) // use 01234 mul instead of 01234_01234
 
 // #[inline(always)]
 fn step_dbl_add_to_f(ref acc: PtG2, ref f: Fq12, p_pre: @PPre, p: PtG1, q: PtG2, m: CircuitModulus) {

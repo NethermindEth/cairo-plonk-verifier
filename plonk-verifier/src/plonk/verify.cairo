@@ -153,63 +153,63 @@ impl PlonkVerifier of PVerifier {
         
         // Challenge round 2: beta and gamma
         let mut beta_transcript = Transcript::new();
-        beta_transcript.add_poly_commitment(verification_key.Qm);
-        beta_transcript.add_poly_commitment(verification_key.Ql);
-        beta_transcript.add_poly_commitment(verification_key.Qr);
-        beta_transcript.add_poly_commitment(verification_key.Qo);
-        beta_transcript.add_poly_commitment(verification_key.Qc);
-        beta_transcript.add_poly_commitment(verification_key.S1);
-        beta_transcript.add_poly_commitment(verification_key.S2);
-        beta_transcript.add_poly_commitment(verification_key.S3);
+        beta_transcript.add(TranscriptElement::Polynomial(verification_key.Qm));
+        beta_transcript.add(TranscriptElement::Polynomial(verification_key.Ql));
+        beta_transcript.add(TranscriptElement::Polynomial(verification_key.Qr));
+        beta_transcript.add(TranscriptElement::Polynomial(verification_key.Qo));
+        beta_transcript.add(TranscriptElement::Polynomial(verification_key.Qc));
+        beta_transcript.add(TranscriptElement::Polynomial(verification_key.S1));
+        beta_transcript.add(TranscriptElement::Polynomial(verification_key.S2));
+        beta_transcript.add(TranscriptElement::Polynomial(verification_key.S3));
 
         // for p in vk_points {
-        //     beta_transcript.add_poly_commitment(*p);
+        //     beta_transcript.add(*p);
         // };
 
         let mut i = 0;
         while i < publicSignals.len() {
-            beta_transcript.add_scalar(fq(*publicSignals.at(i)));
+            beta_transcript.add(TranscriptElement::Scalar(fq(*publicSignals.at(i))));
 
             i = i + 1;
         };
 
-        beta_transcript.add_poly_commitment(proof.A);
-        beta_transcript.add_poly_commitment(proof.B);
-        beta_transcript.add_poly_commitment(proof.C);
+        beta_transcript.add(TranscriptElement::Polynomial(proof.A));
+        beta_transcript.add(TranscriptElement::Polynomial(proof.B));
+        beta_transcript.add(TranscriptElement::Polynomial(proof.C));
 
         challenges.beta = beta_transcript.get_challenge(m_o);
 
         let mut gamma_transcript = Transcript::new();
-        gamma_transcript.add_scalar(challenges.beta);
+        gamma_transcript.add(TranscriptElement::Scalar(challenges.beta));
         challenges.gamma = gamma_transcript.get_challenge(m_o);
 
         // Challenge round 3: alpha
         let mut alpha_transcript = Transcript::new();
-        alpha_transcript.add_scalar(challenges.beta);
-        alpha_transcript.add_scalar(challenges.gamma);
-        alpha_transcript.add_poly_commitment(proof.Z);
+        alpha_transcript.add(TranscriptElement::Scalar(challenges.beta));
+        alpha_transcript.add(TranscriptElement::Scalar(challenges.gamma));
+        alpha_transcript.add(TranscriptElement::Polynomial(proof.Z));
         challenges.alpha = alpha_transcript.get_challenge(m_o);
 
         // Challenge round 4: xi
         let mut xi_transcript = Transcript::new();
-        xi_transcript.add_scalar(challenges.alpha);
-        xi_transcript.add_poly_commitment(proof.T1);
-        xi_transcript.add_poly_commitment(proof.T2);
-        xi_transcript.add_poly_commitment(proof.T3);
+        xi_transcript.add(TranscriptElement::Scalar(challenges.alpha));
+        xi_transcript.add(TranscriptElement::Polynomial(proof.T1));
+        xi_transcript.add(TranscriptElement::Polynomial(proof.T2));
+        xi_transcript.add(TranscriptElement::Polynomial(proof.T3));
         challenges.xi = xi_transcript.get_challenge(m_o);
 
         // // Challenge round 5: v
         let mut v_transcript = Transcript::new();
-        v_transcript.add_scalar(challenges.xi);
+        v_transcript.add(TranscriptElement::Scalar(challenges.xi));
         // for field in prf_flds{
-        //     v_transcript.add_scalar(*field);
+        //     v_transcript.add(*field);
         // };
-        v_transcript.add_scalar(proof.eval_a);
-        v_transcript.add_scalar(proof.eval_b);
-        v_transcript.add_scalar(proof.eval_c);
-        v_transcript.add_scalar(proof.eval_s1);
-        v_transcript.add_scalar(proof.eval_s2);
-        v_transcript.add_scalar(proof.eval_zw);
+        v_transcript.add(TranscriptElement::Scalar(proof.eval_a));
+        v_transcript.add(TranscriptElement::Scalar(proof.eval_b));
+        v_transcript.add(TranscriptElement::Scalar(proof.eval_c));
+        v_transcript.add(TranscriptElement::Scalar(proof.eval_s1));
+        v_transcript.add(TranscriptElement::Scalar(proof.eval_s2));
+        v_transcript.add(TranscriptElement::Scalar(proof.eval_zw));
 
         challenges.v1 = v_transcript.get_challenge(m_o);
         challenges.v2 = fq(mul_co(challenges.v1.c0, challenges.v1.c0, m_o));
@@ -219,8 +219,8 @@ impl PlonkVerifier of PVerifier {
 
         // Challenge: u
         let mut u_transcript = Transcript::new();
-        u_transcript.add_poly_commitment(proof.Wxi);
-        u_transcript.add_poly_commitment(proof.Wxiw);
+        u_transcript.add(TranscriptElement::Polynomial(proof.Wxi));
+        u_transcript.add(TranscriptElement::Polynomial(proof.Wxiw));
         challenges.u = u_transcript.get_challenge(m_o);
 
         challenges

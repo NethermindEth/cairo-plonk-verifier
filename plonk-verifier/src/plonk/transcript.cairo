@@ -29,25 +29,29 @@ enum TranscriptElement<AffineG1, Fq> {
 }
 
 #[derive(Drop)]
-trait Keccak256Transcript<T, M> {
+trait Keccak256Transcript<T, M, TG1, TFq> {
     fn new() -> T;
-    fn add_poly_commitment(ref self: T, polynomial_commitment: AffineG1);
-    fn add_scalar(ref self: T, scalar: Fq);
+    fn add(ref self: T, item: TranscriptElement<TG1, TFq>);
+    // fn add_poly_commitment(ref self: T, polynomial_commitment: AffineG1);
+    // fn add_scalar(ref self: T, scalar: Fq);
     fn get_challenge(self: T, m_o: M) -> Fq;
 }
 
 #[derive(Drop)]
-impl Transcript of Keccak256Transcript<PlonkTranscript, CircuitModulus> {
+impl Transcript of Keccak256Transcript<PlonkTranscript, CircuitModulus, AffineG1, Fq> {
     fn new() -> PlonkTranscript {
         PlonkTranscript { data: ArrayTrait::new() }
     }
-    fn add_poly_commitment(ref self: PlonkTranscript, polynomial_commitment: AffineG1) {
-        self.data.append(TranscriptElement::Polynomial(polynomial_commitment));
+    fn add(ref self: PlonkTranscript, item: TranscriptElement<AffineG1, Fq>) {
+        self.data.append(item); 
     }
+    // fn add_poly_commitment(ref self: PlonkTranscript, polynomial_commitment: AffineG1) {
+    //     self.data.append(TranscriptElement::Polynomial(polynomial_commitment));
+    // }
 
-    fn add_scalar(ref self: PlonkTranscript, scalar: Fq) {
-        self.data.append(TranscriptElement::Scalar(scalar));
-    }
+    // fn add_scalar(ref self: PlonkTranscript, scalar: Fq) {
+    //     self.data.append(TranscriptElement::Scalar(scalar));
+    // }
 
     fn get_challenge(mut self: PlonkTranscript, m_o: CircuitModulus) -> Fq {
         if 0 == self.data.len() {
