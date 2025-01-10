@@ -69,20 +69,21 @@ impl FqOps of FieldOps<Fq, CircuitModulus> {
 
     // #[inline(always)]
     fn mul(self: Fq, rhs: Fq, m: CircuitModulus) -> Fq {
-        let a = CircuitElement::<CircuitInput<0>> {};
-        let b = CircuitElement::<CircuitInput<1>> {};
-        let mul = circuit_mul(a, b);
+        fq(mul_c(self.c0, rhs.c0, m))
+        // let a = CircuitElement::<CircuitInput<0>> {};
+        // let b = CircuitElement::<CircuitInput<1>> {};
+        // let mul = circuit_mul(a, b);
 
-        let a = self.c0;
-        let b = rhs.c0;
+        // let a = self.c0;
+        // let b = rhs.c0;
 
-        let outputs = match (mul,).new_inputs().next(a).next(b).done().eval(m) {
-            Result::Ok(outputs) => { outputs },
-            Result::Err(_) => { panic!("Expected success") }
-        };
+        // let outputs = match (mul,).new_inputs().next(a).next(b).done().eval(m) {
+        //     Result::Ok(outputs) => { outputs },
+        //     Result::Err(_) => { panic!("Expected success") }
+        // };
 
-        let fq_c0 = Fq { c0: outputs.get_output(mul).try_into().unwrap() };
-        fq_c0
+        // let fq_c0 = Fq { c0: outputs.get_output(mul).try_into().unwrap() };
+        // fq_c0
     }
 
     // #[inline(always)]
