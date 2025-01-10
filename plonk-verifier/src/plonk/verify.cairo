@@ -235,7 +235,7 @@ impl PlonkVerifier of PVerifier {
 
         let mut i = 0;
         while i < verification_key.power {
-            let sqr_mod = sqr_c(xin.c0, m_o);
+            let sqr_mod = mul_c(xin.c0, xin.c0, m_o);
             xin = fq(sqr_mod);
             domain_size = domain_size.add(domain_size,m); //scale(2, m);
             i += 1;
@@ -292,7 +292,7 @@ impl PlonkVerifier of PVerifier {
     fn compute_R0(proof: PlonkProof, challenges: PlonkChallenge, PI: @Fq, L1: @Fq, m_o: CircuitModulus) -> Fq {
 
         let e1: u384 = *PI.c0;
-        let e2: u384 = mul_c(*L1.c0, sqr_c(challenges.alpha.c0, m_o), m_o);
+        let e2: u384 = mul_c(*L1.c0, mul_c(challenges.alpha.c0, challenges.alpha.c0, m_o), m_o);
 
         let mut e3a = add_c(proof.eval_a.c0, mul_c(challenges.beta.c0, proof.eval_s1.c0, m_o), m_o);
         e3a = add_c(e3a, challenges.gamma.c0, m_o);
@@ -381,7 +381,7 @@ impl PlonkVerifier of PVerifier {
 
         let d4low = proof.T1;
         let d4mid = proof.T2.multiply_as_circuit(challenges.xin.c0, m);
-        let d4high = proof.T3.multiply_as_circuit(sqr_c(challenges.xin.c0, m_o), m);
+        let d4high = proof.T3.multiply_as_circuit(mul_c(challenges.xin.c0, challenges.xin.c0, m_o), m);
         let mut d4 = d4mid.add_as_circuit(d4high, m);
         d4 = d4.add_as_circuit(d4low, m);
         d4 = d4.multiply_as_circuit(challenges.zh.c0, m);
