@@ -92,7 +92,9 @@ fn ate_miller_loop_steps<
 ) -> Fq12 {
     // ate_loop[64] = O and ate_loop[63] = N
     let mut f = precompute.miller_first_second(ref q_acc);
-
+    // let mut f = Fq12 {c0: FieldUtils::zero(), c1: FieldUtils::zero()};
+    // precompute.miller_bit_o(ref q_acc, ref f);
+    // precompute.miller_bit_n(ref q_acc, ref f);
     let steps = [
         BitType::O, // i=62
         BitType::P, // i=61

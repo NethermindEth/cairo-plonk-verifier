@@ -235,10 +235,10 @@ fn step_double(ref acc: PtG2, p_pre: @PPre, p: PtG1, m: CircuitModulus) -> F034 
 }
 
 // #[inline(always)]
-fn step_add(ref acc: PtG2, p_pre: @PPre, p: PtG1, q: PtG2, m: CircuitModulus) -> F034 {
-    let lf = line_fn::step_add(ref acc, q, m);
-    line_fn_at_p(lf, p_pre, m)
-}
+// fn step_add(ref acc: PtG2, p_pre: @PPre, p: PtG1, q: PtG2, m: CircuitModulus) -> F034 {
+//     let lf = line_fn::step_add(ref acc, q, m);
+//     line_fn_at_p(lf, p_pre, m)
+// }
 
 // #[inline(always)]
 fn correction_step_to_f(

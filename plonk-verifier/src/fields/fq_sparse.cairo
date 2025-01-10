@@ -336,6 +336,7 @@ impl FqSparse of FqSparseTrait {
     // // #[inline(always)]
     fn mul_01234_01234(self: Fq12Sparse01234, rhs: Fq12Sparse01234, m: CircuitModulus) -> Fq12 {
         let Fq12Sparse01234 { c0: a0, c1: a1 } = self;
+        // let Fq12 {c0: a0, c1: a1 } = Fq12 {c0: a0, c1: Fq6 {c0:a1.c0, c1:a1.c1, c2: FieldUtils::zero()}}
         let Fq12Sparse01234 { c0: b0, c1: b1 } = rhs;
 
         // Doing this part before U, V cost less for some reason
