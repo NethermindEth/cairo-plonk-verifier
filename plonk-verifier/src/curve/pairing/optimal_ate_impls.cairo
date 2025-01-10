@@ -39,7 +39,7 @@ impl SingleMillerSteps of MillerSteps<PreCompute, PtG2, Fq12> {
         f = f.sqr(*self.modulus);
     }
 
-    fn miller_first_second(self: @PreCompute, ref acc: PtG2) -> Fq12 {
+    fn miller_first(self: @PreCompute, ref acc: PtG2) -> Fq12 {
         let m = *self.modulus;
         // Handle O, N steps
         // step 0, run step double
