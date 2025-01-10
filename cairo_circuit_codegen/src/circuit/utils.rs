@@ -338,4 +338,26 @@ pub fn generate_sparse_mul_01() -> String {
     builder.build()
 }
 
+pub fn generate_step_dbl_add_slopes() -> String {
+    let mut builder: CairoCodeBuilder = CairoCodeBuilder::new();
+
+    let acc: Affine<Fq2> = Affine::<Fq2>::new_input([0, 1, 2, 3]);
+    let q: Affine<Fq2> = Affine::<Fq2>::new_input([4, 5, 6, 7]);
+
+    let slope1 = acc.chord(&q);
+    let x1 = acc.x_on_slope(&slope1, &q.x());
+    
+    let slope2 = slope1.neg().sub(&(&acc.y().add(&acc.y())).div(&x1.sub(&acc.x()))); // rm div -> circuit
+    
+    builder
+        .add_line("// step_dbl_add_slopes")
+        .add_line("// Fq2")
+        .add_circuit(slope1, Some(["Slope1_C0", "Slope1_C1"].to_vec()))
+        .add_line("// Fq2")
+        .add_circuit(x1, Some(["X1_C0", "X1_C1"].to_vec()))
+        .add_line("// Fq2")
+        .add_circuit(slope2, Some(["Slope2_C0", "Slope2_C1"].to_vec()));
+
+    builder.build()
+}
 
