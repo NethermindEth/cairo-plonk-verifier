@@ -1,5 +1,4 @@
 use core::circuit::CircuitModulus;
-use core::debug::PrintTrait;
 
 use plonk_verifier::curve::constants::FIELD_U384;
 use plonk_verifier::curve::{groups, pairing::{optimal_ate_impls, optimal_ate_impls::step_double}};
@@ -38,7 +37,6 @@ fn ate_miller_loop<
 ) -> Fq12 {
     //gas::withdraw_gas().unwrap();
     //core::internal::revoke_ap_tracking();
-
     // Prepare precompute and q accumulator
     let (precompute, mut q_acc) = (p, q).precompute(m);
     
@@ -95,7 +93,7 @@ fn ate_miller_loop_steps<
     // ate_loop[64] = O and ate_loop[63] = N
     let mut f = precompute.miller_first(ref q_acc); // first
     precompute.miller_bit_n(ref q_acc, ref f); // second
-    
+
     let steps = [
         BitType::O, // i=62
         BitType::P, // i=61

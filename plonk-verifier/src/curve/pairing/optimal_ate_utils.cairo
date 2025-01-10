@@ -58,9 +58,15 @@ struct LineFn {
 }
 
 mod line_fn {
-    use core::circuit::CircuitModulus;
+    use core::circuit::{
+        AddInputResultTrait, AddModGate as A, CircuitElement, CircuitElement as CE, CircuitInput,
+        CircuitInput as CI, CircuitInputs, CircuitModulus, CircuitOutputsTrait, EvalCircuitResult,
+        EvalCircuitTrait, InverseGate as I, MulModGate as M, SubModGate as S, circuit_add,
+        circuit_inverse, circuit_mul, circuit_sub, u384,
+    };    
     use core::circuit::conversions::from_u256;
 
+    use plonk_verifier::circuits::ate_circuits::step_dbl_add_slopes_circuit;
     use plonk_verifier::fields::fq_2::Fq2FrobeniusTrait;
     use plonk_verifier::fields::fq_sparse::FqSparseTrait;
     use plonk_verifier::traits::{FieldUtils};
@@ -88,7 +94,6 @@ mod line_fn {
         a.mul(fq2(pi::Q1X2_C0, pi::Q1X2_C1), m)
     }
 
-
     // For πₚ frobeneus map
     // Multiply by Fp2::NONRESIDUE^(3((q^1) - 1)/6)
     // #[inline(always)]
@@ -115,21 +120,43 @@ mod line_fn {
     // returns product of line evaluations to multiply with f
     // // #[inline(always)]
     fn step_dbl_add(ref acc: PtG2, q: PtG2, m: CircuitModulus) -> (LineFn, LineFn) {
-        let s = acc;
+
+        let (slope1_c0, slope1_c1, x1_c0, x1_c1, slope2_c0, slope2_c1) = step_dbl_add_slopes_circuit();
+
+        let o = match (slope1_c0, slope1_c1, x1_c0, x1_c1, slope2_c0, slope2_c1).new_inputs()
+            .next(acc.x.c0.c0)
+            .next(acc.x.c1.c0)
+            .next(acc.y.c0.c0)
+            .next(acc.y.c1.c0)
+            .next(q.x.c0.c0)
+            .next(q.x.c1.c0)
+            .next(q.y.c0.c0)
+            .next(q.y.c1.c0)
+            .done().eval(m) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
+        };
+
+        let slope1 = fq2(o.get_output(slope1_c0), o.get_output(slope1_c1));
+        let x1 = fq2(o.get_output(x1_c0), o.get_output(x1_c1));
+        let slope2 = fq2(o.get_output(slope2_c0), o.get_output(slope2_c1));
+
+        // let s = acc;
         // s + q
-        let slope1 = s.chord_as_circuit(q, m);
-        let x1 = s.x_on_slope(slope1, q.x, m);
-        let line1 = line_fn(slope1, s, m);
+        // let slope1 = acc.chord_as_circuit(q, m);
+        // let x1 = acc.x_on_slope(slope1, q.x, m);
+        
 
-        // we skip y1 calculation and sub slope1 directly in second slope calculation
+        // // we skip y1 calculation and sub slope1 directly in second slope calculation
 
-        // s + (s + q)
-        // λ2 = (y2-y1)/(x2-x1), subbing y2 = λ(x2-x1)+y1
-        // λ2 = -λ1-2y1/(x3-x1)
-        let slope2 = slope1.neg(m).sub((s.y.add(s.y, m)).div(x1.sub(s.x, m), m), m);
-        let line2 = line_fn(slope2, s, m);
+        // // s + (s + q)
+        // // λ2 = (y2-y1)/(x2-x1), subbing y2 = λ(x2-x1)+y1
+        // // λ2 = -λ1-2y1/(x3-x1)
+        // let slope2 = slope1.neg(m).sub((acc.y.add(acc.y, m)).div(x1.sub(acc.x, m), m), m); // rm div -> circuit
 
-        acc = s.pt_on_slope_as_circuit(slope2, x1, m);
+        let line1 = line_fn(slope1, acc, m);
+        let line2 = line_fn(slope2, acc, m);
+        acc = acc.pt_on_slope_as_circuit(slope2, x1, m);
 
         // line functions
         (line1, line2)
@@ -219,10 +246,11 @@ fn line_evaluation_at_p(slope: Fq2, p_pre: @PPre, s: PtG2, m: CircuitModulus) ->
 // // sqr with mul 034 by 034
 // let f_01234 = l0.mul_034_by_034(l0, m); // use mul instead of sqr to save bytecode
 // // step -1, the next negative one step
+// let f = Fq12 { c0: f_01234.c0 , c1: Fq6 { c0: f_01234.c1.c0, c1: f_01234.c1.c1, c2: FieldUtils::zero() } };
+
 // let (l1, l2) = step_dbl_add(ref acc, self.ppc, *self.p, *self.neg_q, m);
 // // let f = f_01234.mul_01234_034(l1, *self.field_nz);
 // // f.mul_034(l2, *self.field_nz)
-// let f = Fq12 { c0: f_01234.c0 , c1: Fq6 { c0: f_01234.c1.c0, c1: f_01234.c1.c1, c2: FieldUtils::zero() } };
 // //(f_01234.c0, f_01234.c1, FieldUtils::zero());
 // f.mul_01234(l1.mul_034_by_034(l2, m), m) // use 01234 mul instead of 01234_01234
 
