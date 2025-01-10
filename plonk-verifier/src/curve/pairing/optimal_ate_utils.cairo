@@ -120,7 +120,6 @@ mod line_fn {
     // returns product of line evaluations to multiply with f
     // // #[inline(always)]
     fn step_dbl_add(ref acc: PtG2, q: PtG2, m: CircuitModulus) -> (LineFn, LineFn) {
-
         // let (slope1_c0, slope1_c1, x1_c0, x1_c1, slope2_c0, slope2_c1) = step_dbl_add_slopes_circuit();
 
         // let o = match (slope1_c0, slope1_c1, x1_c0, x1_c1, slope2_c0, slope2_c1).new_inputs()
@@ -143,6 +142,7 @@ mod line_fn {
 
         // let s = acc;
         // s + q
+        
         let slope1 = acc.chord_as_circuit(q, m);
         let x1 = acc.x_on_slope(slope1, q.x, m);
         

@@ -7,8 +7,8 @@ use core::circuit::conversions::from_u128;
 
 use plonk_verifier::curve::constants::{FIELD_U384, ORDER_U384};
 
-const zero_384: u384 = u384 { limb0: 0, limb1: 0, limb2: 0, limb3: 0 };
-const one_384: u384 = u384 { limb0: 1, limb1: 0, limb2: 0, limb3: 0 };
+const ZERO: u384 = u384 { limb0: 0, limb1: 0, limb2: 0, limb3: 0 };
+const ONE: u384 = u384 { limb0: 1, limb1: 0, limb2: 0, limb3: 0 };
 
 // #[inline(always)]
 fn add_c(mut a: u384, mut b: u384, m: CircuitModulus) -> u384 {

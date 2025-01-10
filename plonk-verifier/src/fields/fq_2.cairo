@@ -3,13 +3,12 @@ use core::circuit::{
     CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, circuit_add, circuit_inverse,
     circuit_mul, circuit_sub, u384,
 };
-use core::traits::TryInto;
 
 use plonk_verifier::circuits::{
-    fq_circuits::{one_384, zero_384}, 
+    fq_circuits::{ONE, ZERO}, 
     fq_2_circuits::{add_circuit, div_circuit, inv_circuit, mul_circuit, neg_circuit, sqr_circuit, sub_circuit}
 };
-use plonk_verifier::curve::{circuit_scale_9};
+use plonk_verifier::curve::circuit_scale_9;
 use plonk_verifier::curve::constants::FIELD_U384;
 use plonk_verifier::fields::{fq, Fq, FqOps};
 use plonk_verifier::fields::fq_generics::TFqPartialEq;
@@ -42,12 +41,12 @@ impl Fq2Frobenius of Fq2FrobeniusTrait {
 impl Fq2Utils of FieldUtils<Fq2, u384, CircuitModulus> {
     // #[inline(always)]
     fn one() -> Fq2 {
-        fq2(one_384, zero_384)
+        fq2(ONE, ZERO)
     }
 
     // #[inline(always)]
     fn zero() -> Fq2 {
-        fq2(zero_384, zero_384)
+        fq2(ZERO, ZERO)
     }
 
     // #[inline(always)]

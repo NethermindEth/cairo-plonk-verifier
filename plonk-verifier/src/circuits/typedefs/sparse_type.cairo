@@ -6,24 +6,35 @@ use core::circuit::{
 	CircuitInput as CI,
 	CircuitElement as CE,
 };
+
 // Sparse mul_034_by_034
+// let Fq12Sparse034 { c3: c3, c4: c4 } = self;
+// let Fq12Sparse034 { c3: d3, c4: d4 } = rhs;
+// // x3 = c3 * d3
+// let c3d3 = c3.mul(d3, m);
+// // x4 = c4 * d4
+// let c4d4 = c4.mul(d4, m);
+// // x04 = c4 + d4
+// let x04 = c4.add(d4, m);
+// // x03 = c3 + d3
+// let x03 = c3.add(d3, m);
+// // tmp = c3 + c4
+// // x34 = d3 + d4
+// // x34 = x34 * tmp
+// let x34 = d3.add(d4, m).mul(c3.add(c4, m), m); // d3c3 + d3c4 + d4c3 + d4c4
+// // x34 = x34 - x3
+// let x34 = x34.sub(c3d3, m); // d3c4 + d4c3 + d4c4
+// // x34 = x34 - x4
+// let x34 = x34.sub(c4d4, m); // d3c4 + d4c3
 
-// let  (zC0B0_c0, zC0B0_c1, c3d3_c0, c3d3_c1, x34_c0, x34_c1, x03_c0, x03_c1, x04_c0, x04_c1) = mul_034_by_034_circuit(); 
+// // zC0B0 = ξx4
+// // zC0B0 = zC0B0 + 1
+// // zC0B1 = x3
+// // zC0B2 = x34
+// // zC1B0 = x03
+// // zC1B1 = x04
 
-// let outputs = match (zC0B0_c0, zC0B0_c1, c3d3_c0, c3d3_c1, x34_c0, x34_c1, x03_c0, x03_c1, x04_c0, x04_c1).new_inputs()
-//     .next(self.c3.c0.c0)
-//     .next(self.c3.c1.c0)
-//     .next(self.c4.c0.c0)
-//     .next(self.c4.c1.c0)
-//     .next(rhs.c3.c0.c0)
-//     .next(rhs.c3.c1.c0)
-//     .next(rhs.c4.c0.c0)
-//     .next(rhs.c4.c1.c0)
-//     .done().eval(m) {
-//         Result::Ok(outputs) => { outputs },
-//         Result::Err(_) => { panic!("Expected success") }
-// };
-
+// let mut zC0B0: Fq2 = c4d4.mul_by_nonresidue(m);
 // let mut zC0B0 = fq2(outputs.get_output(zC0B0_c0), outputs.get_output(zC0B0_c1));
 // let c3d3 = fq2(outputs.get_output(c3d3_c0), outputs.get_output(c3d3_c1));
 // let x34 = fq2(outputs.get_output(x34_c0), outputs.get_output(x34_c1));

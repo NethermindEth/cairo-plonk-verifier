@@ -39,18 +39,6 @@ impl PlonkVerifier of PVerifier {
         let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let m_o = TryInto::<_, CircuitModulus>::try_into(ORDER_U384).unwrap();
 
-        // let points = [proof.A, proof.B, proof.C, proof.Z ,proof.T1, proof.T2, proof.T3, proof.Wxi, proof.Wxiw].span(); 
-
-        // let fields = [proof.eval_a, proof.eval_b, proof.eval_c, proof.eval_s1, proof.eval_s2, proof.eval_zw].span(); 
-
-        // for point in points {
-        //     result = result && Self::is_on_curve(*point, m);
-        // };
-
-        // for field in fields {
-        //     result = result && Self::is_in_field(*field); 
-        // };
-
         result = result
             && Self::is_on_curve(proof.A, m)
             && Self::is_on_curve(proof.B, m)
@@ -103,8 +91,7 @@ impl PlonkVerifier of PVerifier {
         // As y^2 - x^3 = 3
         let out = core::circuit::CircuitElement::<core::circuit::SubModGate::<core::circuit::MulModGate::<core::circuit::CircuitInput::<1>, core::circuit::CircuitInput::<1>>, core::circuit::MulModGate::<core::circuit::MulModGate::<core::circuit::CircuitInput::<0>, core::circuit::CircuitInput::<0>>, core::circuit::CircuitInput::<0>>>> {};
 
-        let outputs = match (out,)
-            .new_inputs()
+        let outputs = match (out,).new_inputs()
             .next(pt.x.c0)
             .next(pt.y.c0)
             .done()
@@ -148,9 +135,6 @@ impl PlonkVerifier of PVerifier {
             u: FqUtils::zero()
         };
 
-        // let vk_points = [verification_key.Qm, verification_key.Ql, verification_key.Qr, verification_key.Qo,
-        // verification_key.Qc, verification_key.S1, verification_key.S2, verification_key.S3].span();
-        
         // Challenge round 2: beta and gamma
         let mut beta_transcript = Transcript::new();
         beta_transcript.add(TranscriptElement::Polynomial(verification_key.Qm));
@@ -161,10 +145,6 @@ impl PlonkVerifier of PVerifier {
         beta_transcript.add(TranscriptElement::Polynomial(verification_key.S1));
         beta_transcript.add(TranscriptElement::Polynomial(verification_key.S2));
         beta_transcript.add(TranscriptElement::Polynomial(verification_key.S3));
-
-        // for p in vk_points {
-        //     beta_transcript.add(*p);
-        // };
 
         let mut i = 0;
         while i < publicSignals.len() {
@@ -201,9 +181,6 @@ impl PlonkVerifier of PVerifier {
         // // Challenge round 5: v
         let mut v_transcript = Transcript::new();
         v_transcript.add(TranscriptElement::Scalar(challenges.xi));
-        // for field in prf_flds{
-        //     v_transcript.add(*field);
-        // };
         v_transcript.add(TranscriptElement::Scalar(proof.eval_a));
         v_transcript.add(TranscriptElement::Scalar(proof.eval_b));
         v_transcript.add(TranscriptElement::Scalar(proof.eval_c));
@@ -237,7 +214,7 @@ impl PlonkVerifier of PVerifier {
         while i < verification_key.power {
             let sqr_mod = mul_c(xin.c0, xin.c0, m_o);
             xin = fq(sqr_mod);
-            domain_size = domain_size.add(domain_size,m); //scale(2, m);
+            domain_size = domain_size.add(domain_size,m); // scale(2, m);
             i += 1;
         };
 
@@ -324,8 +301,7 @@ impl PlonkVerifier of PVerifier {
         let d2ab = CE::<A::<A::<M::<M::<M::<A::<A::<CI::<2>, M::<CI::<0>, CI::<1>>>, CI::<3>>, A::<A::<CI::<5>, M::<M::<CI::<0>, CI::<1>>, CI::<4>>>, CI::<3>>>, A::<A::<CI::<7>, M::<M::<CI::<0>, CI::<1>>, CI::<6>>>, CI::<3>>>, CI::<8>>, M::<CI::<9>, M::<CI::<8>, CI::<8>>>>, CI::<10>>> {};
         let d3ab = CE::<M::<M::<A::<A::<CI::<2>, M::<CI::<0>, CI::<11>>>, CI::<3>>, A::<A::<CI::<5>, M::<CI::<0>, CI::<12>>>, CI::<3>>>, M::<M::<CI::<8>, CI::<0>>, CI::<13>>>> {};
 
-        let o = match (d2ab, d3ab)
-            .new_inputs()
+        let o = match (d2ab, d3ab).new_inputs()
             .next(challenges.beta.c0)
             .next(challenges.xi.c0)
             .next(proof.eval_a.c0)
@@ -450,26 +426,24 @@ impl PlonkVerifier of PVerifier {
         let e5_inner = circuit_mul(u, zw);
         let e5 = circuit_add(e4, e5_inner);
 
-        let outputs =
-            match (e5,)
-                .new_inputs()
-                .next(neg_r0)
-                .next(challenges.v1.c0)
-                .next(challenges.v2.c0)
-                .next(challenges.v3.c0)
-                .next(challenges.v4.c0)
-                .next(challenges.v5.c0)
-                .next(challenges.u.c0)
-                .next(proof.eval_a.c0)
-                .next(proof.eval_b.c0)
-                .next(proof.eval_c.c0)
-                .next(proof.eval_s1.c0)
-                .next(proof.eval_s2.c0)
-                .next(proof.eval_zw.c0)
-                .done()
-                .eval(m_o) {
-            Result::Ok(outputs) => { outputs },
-            Result::Err(_) => { panic!("Expected success") }
+        let outputs = match (e5,).new_inputs()
+            .next(neg_r0)
+            .next(challenges.v1.c0)
+            .next(challenges.v2.c0)
+            .next(challenges.v3.c0)
+            .next(challenges.v4.c0)
+            .next(challenges.v5.c0)
+            .next(challenges.u.c0)
+            .next(proof.eval_a.c0)
+            .next(proof.eval_b.c0)
+            .next(proof.eval_c.c0)
+            .next(proof.eval_s1.c0)
+            .next(proof.eval_s2.c0)
+            .next(proof.eval_zw.c0)
+            .done()
+            .eval(m_o) {
+                Result::Ok(outputs) => { outputs },
+                Result::Err(_) => { panic!("Expected success") }
         };
         let e: u384 = outputs.get_output(e5);
 

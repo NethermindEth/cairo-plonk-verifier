@@ -80,11 +80,8 @@ impl Fq12Sparse01234PartialEq of PartialEq<Fq12Sparse01234> {
 // }
 #[generate_trait]
 impl FqSparse of FqSparseTrait {
-    //////////////////////////////////////////////////////////////
-    /////////////////////// Fq6 sparse ///////////////////////////
-    //////////////////////////////////////////////////////////////
-    // These methods are used internally and work with Fq6Sparse01
-
+    
+    // Fq6 sparse 
     // Mul Fq6 with a sparse Fq6 01 derived from a sparse 034 Fq12
     // Same as Fq6 u_mul but with b2 as zero (and associated ops removed)
     // #[inline(always)]
@@ -148,11 +145,8 @@ impl FqSparse of FqSparseTrait {
 
     //     Fq6 { c0: v0, c1: c1, c2: v1 }
     // }
-
-    //////////////////////////////////////////////////////////////
-    /////////////////////// Fq12 sparse //////////////////////////
-    //////////////////////////////////////////////////////////////
-
+       
+    // Fq12 sparse 
     // Mul a sparse 034 Fq12 by another 034 Fq12 resulting in a sparse 01234
     // https://github.com/Consensys/gnark/blob/v0.9.1/std/algebra/emulated/fields_bn254/e12_pairing.go#L150
     // // #[inline(always)]
@@ -179,39 +173,12 @@ impl FqSparse of FqSparseTrait {
         let x03 = fq2(o.get_output(M034034_X03C0), o.get_output(M034034_X03C1));
         let x04 = fq2(o.get_output(M034034_X04C0), o.get_output(M034034_X04C1));
         
-        // let Fq12Sparse034 { c3: c3, c4: c4 } = self;
-        // let Fq12Sparse034 { c3: d3, c4: d4 } = rhs;
-        // // x3 = c3 * d3
-        // let c3d3 = c3.mul(d3, m);
-        // // x4 = c4 * d4
-        // let c4d4 = c4.mul(d4, m);
-        // // x04 = c4 + d4
-        // let x04 = c4.add(d4, m);
-        // // x03 = c3 + d3
-        // let x03 = c3.add(d3, m);
-        // // tmp = c3 + c4
-        // // x34 = d3 + d4
-        // // x34 = x34 * tmp
-        // let x34 = d3.add(d4, m).mul(c3.add(c4, m), m); // d3c3 + d3c4 + d4c3 + d4c4
-        // // x34 = x34 - x3
-        // let x34 = x34.sub(c3d3, m); // d3c4 + d4c3 + d4c4
-        // // x34 = x34 - x4
-        // let x34 = x34.sub(c4d4, m); // d3c4 + d4c3
-
-        // // zC0B0 = ξx4
-        // // zC0B0 = zC0B0 + 1
-        // // zC0B1 = x3
-        // // zC0B2 = x34
-        // // zC1B0 = x03
-        // // zC1B1 = x04
-
-        // let mut zC0B0: Fq2 = c4d4.mul_by_nonresidue(m);
-
         zC0B0.c0 = zC0B0.c0.add(FieldUtils::one(), m); 
         Fq12Sparse01234 {
             c0: Fq6 { c0: zC0B0, c1: c3d3, c2: x34 }, c1: Fq6Sparse01 { c0: x03, c1: x04 },
         }
     }
+    
     // Mul a sparse 034 Fq12 by another 034 Fq12 resulting in a sparse 01234
     // https://github.com/Consensys/gnark/blob/v0.9.1/std/algebra/emulated/fields_bn254/e12_pairing.go#L150
     // // #[inline(always)]

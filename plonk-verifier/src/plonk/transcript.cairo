@@ -7,7 +7,7 @@ use core::{
     traits::{Destruct, Into, TryInto},
 };
 
-use plonk_verifier::circuits::fq_circuits::{add_co, zero_384};
+use plonk_verifier::circuits::fq_circuits::{add_co, ZERO};
 use plonk_verifier::{
     curve::groups::{AffineG1, AffineG2, g2},
     fields::{fq, Fq, FqIntoU256},
@@ -42,9 +42,11 @@ impl Transcript of Keccak256Transcript<PlonkTranscript, CircuitModulus, AffineG1
     fn new() -> PlonkTranscript {
         PlonkTranscript { data: ArrayTrait::new() }
     }
+    
     fn add(ref self: PlonkTranscript, item: TranscriptElement<AffineG1, Fq>) {
         self.data.append(item); 
     }
+
     // fn add_poly_commitment(ref self: PlonkTranscript, polynomial_commitment: AffineG1) {
     //     self.data.append(TranscriptElement::Polynomial(polynomial_commitment));
     // }
@@ -82,7 +84,7 @@ impl Transcript of Keccak256Transcript<PlonkTranscript, CircuitModulus, AffineG1
 
         let le_value = keccak::compute_keccak_byte_array(@buffer);
         let be_u256 = reverse_endianness(le_value);
-        let be_mod = add_co(from_u256(be_u256), zero_384, m_o);
+        let be_mod = add_co(from_u256(be_u256), ZERO, m_o);
         let challenge: Fq = fq(be_mod);
 
         challenge

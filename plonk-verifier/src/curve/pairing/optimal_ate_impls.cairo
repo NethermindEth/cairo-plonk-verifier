@@ -27,8 +27,8 @@ impl SingleMillerPrecompute of MillerPrecompute<PtG1, PtG2, PreCompute, CircuitM
     fn precompute(self: (PtG1, PtG2), m: CircuitModulus) -> (PreCompute, PtG2) {
         let (p, q) = self;
         let ppc = p_precompute(p, m);
-        // let precomp = PreCompute { ppc, neg_q: q.neg(), m, p, q, };
         let precomp = PreCompute {p, q, neg_q: q.neg(m), ppc, modulus: m };
+
         (precomp, q.clone(),)
     }
 }

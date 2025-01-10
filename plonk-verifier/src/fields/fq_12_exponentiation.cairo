@@ -4,7 +4,6 @@ use core::circuit::{
     CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, circuit_add, circuit_inverse,
     circuit_mul, circuit_sub, u384,
 };
-use core::traits::TryInto;
 
 use plonk_verifier::curve::constants::FIELD_U384;
 use plonk_verifier::fields::{
