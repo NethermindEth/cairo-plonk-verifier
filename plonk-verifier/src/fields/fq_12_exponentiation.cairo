@@ -42,7 +42,6 @@ fn addchain_exp_by_neg_t(x: Fq12, m: CircuitModulus) -> Fq12 {
     let t5 = t3.cyclotomic_sqr_circuit(m); // Step 2: t5 = x^0x4
     let z = t5.cyclotomic_sqr_circuit(m); // Step 3: z = x^0x8
     let t0 = z.cyclotomic_sqr_circuit(m); // Step 4: t0 = x^0x10
-
     let t2 = x.mul(t0, m); // Step 5: t2 = x^0x11
     let t0 = t3.mul(t2, m); // Step 6: t0 = x^0x13
     let t1 = x.mul(t0, m); // Step 7: t1 = x^0x14
@@ -111,6 +110,7 @@ impl Fq12Exponentiation of PairingExponentiationTrait {
         let d = c.mul(b, m);
 
         let e = d.exp_by_neg_t(m);
+        
         let f = e.cyclotomic_sqr_circuit(m);
         let g = f.exp_by_neg_t(m);
         let h = d.conjugate(m);

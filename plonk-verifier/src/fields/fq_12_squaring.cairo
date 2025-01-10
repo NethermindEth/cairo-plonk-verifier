@@ -28,15 +28,15 @@ pub fn krbn2345(g2: Fq2, g3: Fq2, g4: Fq2, g5: Fq2) -> Krbn2345 {
 
 // Todo: Refactor as Circuits
 // #[inline(always)]
-fn x2(a: Fq2, m: CircuitModulus) -> Fq2 {
-    a.add(a, m)
-}
+// fn x2(a: Fq2, m: CircuitModulus) -> Fq2 {
+//     a.add(a, m)
+// }
 
-// #[inline(always)]
-fn x4(a: Fq2, m: CircuitModulus) -> Fq2 {
-    let a_twice = x2(a, m);
-    a_twice.add(a_twice, m)
-}
+// // #[inline(always)]
+// fn x4(a: Fq2, m: CircuitModulus) -> Fq2 {
+//     let a_twice = x2(a, m);
+//     a_twice.add(a_twice, m)
+// }
 
 const TWO: u384 = u384 { limb0: 2, limb1: 0, limb2: 0, limb3: 0 };
 
@@ -72,38 +72,38 @@ impl Fq12Squaring of Fq12SquaringTrait {
     fn krbn_decompress(self: Krbn2345, m: CircuitModulus) -> Fq12 {
         // // core::internal::revoke_ap_tracking();
         let Krbn2345 { g2, g3, g4, g5 } = self;
-        // Si = gi^2
-        if g2.c0 == FieldUtils::zero() && g2.c1 == FieldUtils::zero() {
-            let (g0_c0, g0_c1, g1_c0, g1_c1) = decompress_zero_circuit(); 
+        // // Si = gi^2
+        // if g2.c0 == FieldUtils::zero() && g2.c1 == FieldUtils::zero() {
+        //     let (g0_c0, g0_c1, g1_c0, g1_c1) = decompress_zero_circuit(); 
 
-            let o = match (g0_c0, g0_c1, g1_c0, g1_c1).new_inputs()
-                .next(self.g3.c0.c0)
-                .next(self.g3.c1.c0)
-                .next(self.g4.c0.c0)
-                .next(self.g4.c1.c0)
-                .next(self.g5.c0.c0)
-                .next(self.g5.c1.c0)
-                .done().eval(m) {
-                    Result::Ok(outputs) => { outputs },
-                    Result::Err(_) => { panic!("Expected success") }
-            };
+        //     let o = match (g0_c0, g0_c1, g1_c0, g1_c1).new_inputs()
+        //         .next(self.g3.c0.c0)
+        //         .next(self.g3.c1.c0)
+        //         .next(self.g4.c0.c0)
+        //         .next(self.g4.c1.c0)
+        //         .next(self.g5.c0.c0)
+        //         .next(self.g5.c1.c0)
+        //         .done().eval(m) {
+        //             Result::Ok(outputs) => { outputs },
+        //             Result::Err(_) => { panic!("Expected success") }
+        //     };
     
-            let mut g0 = fq2(o.get_output(g0_c0), o.get_output(g0_c1));
-            let g1 = fq2(o.get_output(g1_c0), o.get_output(g1_c1));
-        //     // g1 = 2g4g5/g3
-        //     let tg24g5 = x2(g4.mul(g5, m), m);
-        //     let g1 = tg24g5.mul(g3.inv(m), m);
+        //     let mut g0 = fq2(o.get_output(g0_c0), o.get_output(g0_c1));
+        //     let g1 = fq2(o.get_output(g1_c0), o.get_output(g1_c1));
+        // //     // g1 = 2g4g5/g3
+        // //     let tg24g5 = x2(g4.mul(g5, m), m);
+        // //     let g1 = tg24g5.mul(g3.inv(m), m);
 
-        //     // g0 = (2S1 - 3g3g4)ξ + 1
-        //     let S1 = g1.sqr(m);
-        //     let T_g3g4 = g3.mul(g4, m);
-        //     let Tmp = (S1.sub(T_g3g4, m)).scale(TWO, m);
-        //     let mut g0 = (Tmp.sub(T_g3g4, m)).mul_by_nonresidue(m);
+        // //     // g0 = (2S1 - 3g3g4)ξ + 1
+        // //     let S1 = g1.sqr(m);
+        // //     let T_g3g4 = g3.mul(g4, m);
+        // //     let Tmp = (S1.sub(T_g3g4, m)).scale(TWO, m);
+        // //     let mut g0 = (Tmp.sub(T_g3g4, m)).mul_by_nonresidue(m);
 
-            g0 = g0.add(FieldUtils::one(), m);
+        //     g0 = g0.add(FieldUtils::one(), m);
 
-            Fq12 { c0: Fq6 { c0: g0, c1: g4, c2: g3 }, c1: Fq6 { c0: g2, c1: g1, c2: g5 } }
-        } else {
+        //     Fq12 { c0: Fq6 { c0: g0, c1: g4, c2: g3 }, c1: Fq6 { c0: g2, c1: g1, c2: g5 } }
+        // } else {
             let (g0_c0, g0_c1, g1_c0, g1_c1) = decompress_non_zero_circuit(); 
 
             let o = match (g0_c0, g0_c1, g1_c0, g1_c1).new_inputs()
@@ -138,7 +138,7 @@ impl Fq12Squaring of Fq12SquaringTrait {
             // let mut g0 = (Tmp.add(T_g2g5.sub(T_g3g4, m), m)).mul_by_nonresidue(m);
             g0 = g0.add(FieldUtils::one(), m);
             Fq12 { c0: Fq6 { c0: g0, c1: g4, c2: g3 }, c1: Fq6 { c0: g2, c1: g1, c2: g5 } }
-        }
+        // }
     }
 
     // https://eprint.iacr.org/2010/542.pdf
@@ -231,119 +231,119 @@ impl Fq12Squaring of Fq12SquaringTrait {
     //         .krbn_decompress(m)
     // }
 
-    // Cyclotomic squaring
-    fn cyclotomic_sqr(self: Fq12, m: CircuitModulus) -> Fq12 {
-        // core::internal::revoke_ap_tracking();
+    // // Cyclotomic squaring
+    // fn cyclotomic_sqr(self: Fq12, m: CircuitModulus) -> Fq12 {
+    //     // core::internal::revoke_ap_tracking();
 
-        let z0 = self.c0.c0;
-        let z4 = self.c0.c1;
-        let z3 = self.c0.c2;
-        let z2 = self.c1.c0;
-        let z1 = self.c1.c1;
-        let z5 = self.c1.c2;
-        // let tmp = z0 * z1;
-        // let Tmp = z0.u_mul(z1);
-        // let t0 = (z0 + z1) * (z1.mul_by_nonresidue() + z0) - tmp - tmp.mul_by_nonresidue();
-        // let T0 = z0.u_add(z1).u_mul(z1.mul_by_nonresidue().u_add(z0))
-        //     - Tmp
-        //     - mul_by_xi_nz(Tmp, field_nz);
+    //     let z0 = self.c0.c0;
+    //     let z4 = self.c0.c1;
+    //     let z3 = self.c0.c2;
+    //     let z2 = self.c1.c0;
+    //     let z1 = self.c1.c1;
+    //     let z5 = self.c1.c2;
+    //     // let tmp = z0 * z1;
+    //     // let Tmp = z0.u_mul(z1);
+    //     // let t0 = (z0 + z1) * (z1.mul_by_nonresidue() + z0) - tmp - tmp.mul_by_nonresidue();
+    //     // let T0 = z0.u_add(z1).u_mul(z1.mul_by_nonresidue().u_add(z0))
+    //     //     - Tmp
+    //     //     - mul_by_xi_nz(Tmp, field_nz);
 
-        // let t1 = tmp + tmp;
-        // let T1 = Tmp + Tmp;
+    //     // let t1 = tmp + tmp;
+    //     // let T1 = Tmp + Tmp;
 
-        // // let tmp = z2 * z3;
-        // let Tmp = z2.u_mul(z3);
-        // // let t2 = (z2 + z3) * (z3.mul_by_nonresidue() + z2) - tmp - tmp.mul_by_nonresidue();
-        // let T2 = z2.u_add(z3).u_mul(z3.mul_by_nonresidue().u_add(z2))
-        //     - Tmp
-        //     - mul_by_xi_nz(Tmp, field_nz);
-        // // let t3 = tmp + tmp;
-        // let T3 = Tmp + Tmp;
+    //     // // let tmp = z2 * z3;
+    //     // let Tmp = z2.u_mul(z3);
+    //     // // let t2 = (z2 + z3) * (z3.mul_by_nonresidue() + z2) - tmp - tmp.mul_by_nonresidue();
+    //     // let T2 = z2.u_add(z3).u_mul(z3.mul_by_nonresidue().u_add(z2))
+    //     //     - Tmp
+    //     //     - mul_by_xi_nz(Tmp, field_nz);
+    //     // // let t3 = tmp + tmp;
+    //     // let T3 = Tmp + Tmp;
 
-        // // let tmp = z4 * z5;
-        // let Tmp = z4.u_mul(z5);
-        // // let t4 = (z4 + z5) * (z5.mul_by_nonresidue() + z4) - tmp - tmp.mul_by_nonresidue();
-        // let T4 = z4.u_add(z5).u_mul(z5.mul_by_nonresidue().u_add(z4))
-        //     - Tmp
-        //     - mul_by_xi_nz(Tmp, field_nz);
-        // // let t5 = tmp + tmp;
-        // let T5 = Tmp + Tmp;
+    //     // // let tmp = z4 * z5;
+    //     // let Tmp = z4.u_mul(z5);
+    //     // // let t4 = (z4 + z5) * (z5.mul_by_nonresidue() + z4) - tmp - tmp.mul_by_nonresidue();
+    //     // let T4 = z4.u_add(z5).u_mul(z5.mul_by_nonresidue().u_add(z4))
+    //     //     - Tmp
+    //     //     - mul_by_xi_nz(Tmp, field_nz);
+    //     // // let t5 = tmp + tmp;
+    //     // let T5 = Tmp + Tmp;
 
-        // let Z0 = T0.u512_sub_fq(z0);
-        // let Z0 = Z0 + Z0;
-        // let Z0 = Z0 + T0;
+    //     // let Z0 = T0.u512_sub_fq(z0);
+    //     // let Z0 = Z0 + Z0;
+    //     // let Z0 = Z0 + T0;
 
-        // let Z1 = T1.u512_add_fq(z1);
-        // let Z1 = Z1 + Z1;
-        // let Z1 = Z1 + T1;
+    //     // let Z1 = T1.u512_add_fq(z1);
+    //     // let Z1 = Z1 + Z1;
+    //     // let Z1 = Z1 + T1;
 
-        // let Tmp = mul_by_xi_nz(T5, field_nz);
-        // let Z2 = Tmp.u512_add_fq(z2);
-        // let Z2 = Z2 + Z2;
-        // let Z2 = Z2 + Tmp;
+    //     // let Tmp = mul_by_xi_nz(T5, field_nz);
+    //     // let Z2 = Tmp.u512_add_fq(z2);
+    //     // let Z2 = Z2 + Z2;
+    //     // let Z2 = Z2 + Tmp;
 
-        // let Z3 = T4.u512_sub_fq(z3);
-        // let Z3 = Z3 + Z3;
-        // let Z3 = Z3 + T4;
+    //     // let Z3 = T4.u512_sub_fq(z3);
+    //     // let Z3 = Z3 + Z3;
+    //     // let Z3 = Z3 + T4;
 
-        // let Z4 = T2.u512_sub_fq(z4);
-        // let Z4 = Z4 + Z4;
-        // let Z4 = Z4 + T2;
+    //     // let Z4 = T2.u512_sub_fq(z4);
+    //     // let Z4 = Z4 + Z4;
+    //     // let Z4 = Z4 + T2;
 
-        // let Z5 = T3.u512_add_fq(z5);
-        // let Z5 = Z5 + Z5;
-        // let Z5 = Z5 + T3;
+    //     // let Z5 = T3.u512_add_fq(z5);
+    //     // let Z5 = Z5 + Z5;
+    //     // let Z5 = Z5 + T3;
 
-        let tmp = z0.mul(z1, m);
-        let T0 = z0
-            .add(z1, m)
-            .mul(z1.mul_by_nonresidue(m).add(z0, m), m)
-            .sub(tmp, m)
-            .sub(mul_by_xi_nz_as_circuit(tmp, m), m);
+    //     let tmp = z0.mul(z1, m);
+    //     let T0 = z0
+    //         .add(z1, m)
+    //         .mul(z1.mul_by_nonresidue(m).add(z0, m), m)
+    //         .sub(tmp, m)
+    //         .sub(mul_by_xi_nz_as_circuit(tmp, m), m);
 
-        let T1 = tmp.add(tmp, m);
+    //     let T1 = tmp.add(tmp, m);
 
-        let tmp = z2.mul(z3, m);
+    //     let tmp = z2.mul(z3, m);
 
-        let T2 = z2.add(z3, m).mul(z3.mul_by_nonresidue(m).add(z2, m), m)
-           .sub(tmp, m)
-           .sub(mul_by_xi_nz_as_circuit(tmp, m), m);
-        let T3 = tmp.add(tmp, m);
+    //     let T2 = z2.add(z3, m).mul(z3.mul_by_nonresidue(m).add(z2, m), m)
+    //        .sub(tmp, m)
+    //        .sub(mul_by_xi_nz_as_circuit(tmp, m), m);
+    //     let T3 = tmp.add(tmp, m);
 
-        let tmp = z4.mul(z5, m);
-        let T4 = z4.add(z5, m).mul(z5.mul_by_nonresidue(m).add(z4, m), m)
-           .sub(tmp, m)
-           .sub(mul_by_xi_nz_as_circuit(tmp, m), m);
-        let T5 = tmp.add(tmp, m);
+    //     let tmp = z4.mul(z5, m);
+    //     let T4 = z4.add(z5, m).mul(z5.mul_by_nonresidue(m).add(z4, m), m)
+    //        .sub(tmp, m)
+    //        .sub(mul_by_xi_nz_as_circuit(tmp, m), m);
+    //     let T5 = tmp.add(tmp, m);
 
-        let Z0 = T0.sub(z0, m);
-        let Z0 = Z0.add(Z0, m);
-        let Z0 = Z0.add(T0, m);
+    //     let Z0 = T0.sub(z0, m);
+    //     let Z0 = Z0.add(Z0, m);
+    //     let Z0 = Z0.add(T0, m);
 
-        let Z1 = T1.add(z1, m);
-        let Z1 = Z1.add(Z1, m);
-        let Z1 = Z1.add(T1, m);
+    //     let Z1 = T1.add(z1, m);
+    //     let Z1 = Z1.add(Z1, m);
+    //     let Z1 = Z1.add(T1, m);
 
-        let tmp = mul_by_xi_nz_as_circuit(T5, m);
+    //     let tmp = mul_by_xi_nz_as_circuit(T5, m);
 
-        let Z2 = tmp.add(z2, m);
-        let Z2 = Z2.add(Z2, m);
-        let Z2 = Z2.add(tmp, m);
+    //     let Z2 = tmp.add(z2, m);
+    //     let Z2 = Z2.add(Z2, m);
+    //     let Z2 = Z2.add(tmp, m);
 
-        let Z3 = T4.sub(z3, m);
-        let Z3 = Z3.add(Z3, m);
-        let Z3 = Z3.add(T4, m);
+    //     let Z3 = T4.sub(z3, m);
+    //     let Z3 = Z3.add(Z3, m);
+    //     let Z3 = Z3.add(T4, m);
 
-        let Z4 = T2.sub(z4, m);
-        let Z4 = Z4.add(Z4, m);
-        let Z4 = Z4.add(T2, m);
+    //     let Z4 = T2.sub(z4, m);
+    //     let Z4 = Z4.add(Z4, m);
+    //     let Z4 = Z4.add(T2, m);
 
-        let Z5 = T3.add(z5, m);
-        let Z5 = Z5.add(Z5, m);
-        let Z5 = Z5.add(T3, m);
+    //     let Z5 = T3.add(z5, m);
+    //     let Z5 = Z5.add(Z5, m);
+    //     let Z5 = Z5.add(T3, m);
 
-        Fq12 { c0: Fq6 { c0: Z0, c1: Z4, c2: Z3 }, c1: Fq6 { c0: Z2, c1: Z1, c2: Z5 }, }
-    }
+    //     Fq12 { c0: Fq6 { c0: Z0, c1: Z4, c2: Z3 }, c1: Fq6 { c0: Z2, c1: Z1, c2: Z5 }, }
+    // }
 }
 
 #[generate_trait]
@@ -669,8 +669,8 @@ impl Fq12SquaringCircuit of Fq12SquaringCircuitTrait {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
-        let z5_0 = outputs.get_output(Z5_0).try_into().unwrap();
-        let z5_1 = outputs.get_output(Z5_1).try_into().unwrap();
+        let z5_0 = outputs.get_output(Z5_0);
+        let z5_1 = outputs.get_output(Z5_1);
 
         Fq12 {
             c0: Fq6 {
