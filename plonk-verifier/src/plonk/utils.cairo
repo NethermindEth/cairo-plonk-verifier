@@ -7,10 +7,18 @@ use core::{
 use core::circuit::{CircuitModulus, u384}; 
 
 use plonk_verifier::curve::{
-    constants::FIELD_U384,
+    constants::{FIELD_U384, ORDER_U384},
     groups::{AffineG1, AffineG2, AffineG2Impl, ECOperationsCircuitFq, g2},
 };
 use plonk_verifier::fields::{fq12, Fq12};
+
+fn field_modulus() -> CircuitModulus {
+    TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap()
+}
+
+fn order_modulus() -> CircuitModulus {
+    TryInto::<_, CircuitModulus>::try_into(ORDER_U384).unwrap()
+}
 
 // // Serde for group points todo:(optimize - last u96 points of each u384 may be unused)
 // // Serialize

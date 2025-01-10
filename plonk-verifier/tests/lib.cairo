@@ -1,3 +1,5 @@
+mod benchmarks; 
+
 use core::clone::Clone;
 use core::circuit::conversions::from_u256;
 use plonk_verifier::plonk::constants;
@@ -35,6 +37,7 @@ fn test_plonk_verify() {
     let verified = PlonkVerifier::verify(verification_key, proof, public_signals);
     assert(verified, 'verification failed');
 }
+
 #[test]
 fn test_is_on_curve() {
     let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
@@ -134,6 +137,7 @@ fn test_compute_challenges() {
 
     assert_eq!(is_equal, true);
 }
+
 #[test]
 fn test_compute_lagrange_evaluations() {
     let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
@@ -198,6 +202,7 @@ fn test_compute_lagrange_evaluations() {
     );
     assert_eq!(L, correct_L);
 }
+
 #[test]
 fn test_compute_PI() {
     let m_o = TryInto::<_, CircuitModulus>::try_into(ORDER_U384).unwrap();
@@ -218,6 +223,7 @@ fn test_compute_PI() {
 
     assert_eq!(correct_PI_256, PI_u256);
 }
+
 #[test]
 fn test_compute_R0() {
     let m_o = TryInto::<_, CircuitModulus>::try_into(ORDER_U384).unwrap();
@@ -253,6 +259,7 @@ fn test_compute_R0() {
         8252012205077960742641393316361079931166529015625841574934366119104137152715;
     assert_eq!(fq(from_u256(correct_R0)), R0);
 }
+
 #[test]
 fn test_compute_D() {
     let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
@@ -317,6 +324,7 @@ fn test_compute_D() {
     assert_eq!(D.x, corret_D.x);
     assert_eq!(D.y, corret_D.y);
 }
+
 #[test]
 fn test_compute_F() {
     let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
@@ -380,6 +388,7 @@ fn test_compute_F() {
     assert_eq!(F.x, correct_F.x);
     assert_eq!(F.y, correct_F.y);
 }
+
 #[test]
 fn test_compute_E() {
     let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
@@ -438,6 +447,7 @@ fn test_compute_E() {
     assert_eq!(E.x, correct_E.x);
     assert_eq!(E.y, correct_E.y);
 }
+
 #[test]
 fn test_valid_pairing() {
     let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
@@ -502,6 +512,7 @@ fn test_valid_pairing() {
     let valid = PlonkVerifier::valid_pairing(proof, challenges, verification_key, E, F, m, m_o);
     assert_eq!(valid, true);
 }
+
 // corelib keccak hash test
 // #[test]
 // fn test_byte_array() {

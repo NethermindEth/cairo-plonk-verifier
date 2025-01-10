@@ -26,6 +26,7 @@ use plonk_verifier::{
         constants::THREE,
         transcript::{Keccak256Transcript, Transcript, TranscriptElement},
         types::{PlonkChallenge, PlonkProof, PlonkVerificationKey},
+        utils:: {field_modulus, order_modulus},
     },
     traits::{FieldOps, FieldUtils},
 };
@@ -36,8 +37,8 @@ impl PlonkVerifier of PVerifier {
         verification_key: PlonkVerificationKey, proof: PlonkProof, publicSignals: Array<u384>
     ) -> bool {
         let mut result = true;
-        let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
-        let m_o = TryInto::<_, CircuitModulus>::try_into(ORDER_U384).unwrap();
+        let m = field_modulus();
+        let m_o = order_modulus();
 
         result = result
             && Self::is_on_curve(proof.A, m)
