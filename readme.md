@@ -1,11 +1,10 @@
 <div align="center">
-  <h1>Cairo Plonk Verifier</h1>
-<div align="center">
+    <h1>Cairo Plonk Verifier</h1>
+</div>
 
 <br />
 
 ## About 
-
 Standard Plonk Verifier written in Cairo.
 - This verifier is keccak based and currently supports the BN-254 curve. 
 - This verifier also includes a pairing function that does not need extra prover side computations. 
@@ -27,6 +26,7 @@ Contract
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | sh -s -- -v 2.9.2
 ```
+
 Testing
 - [snforge 0.30.0](https://github.com/foundry-rs/starknet-foundry)
 ```bash
