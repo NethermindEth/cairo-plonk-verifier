@@ -1,11 +1,57 @@
-use plonk_verifier::fields::{fq12, Fq12};
-use plonk_verifier::traits::FieldOps;
 use core::circuit::conversions::from_u256;
 use core::circuit::u384;
 
+use plonk_verifier::curve::groups::{g1, g2, affine_fq1, affine_fq2, AffineG1, AffineG2, AffineG2Impl, Fq, Fq2};
+use plonk_verifier::fields::{fq12, Fq12};
+use plonk_verifier::traits::FieldOps;
+use plonk_verifier::pairing::optimal_ate::{ate_miller_loop, single_ate_pairing};
+use plonk_verifier::plonk::utils::{field_modulus, order_modulus};
+
+#[test]
+fn test_get_circuit_modules() {
+    field_modulus();
+    order_modulus();
+}
+
+#[test]
+fn test_get_field_circuit_modulus() {
+    field_modulus();
+}
+
 #[test]
 fn test_fq12_sqr() {
-    a().mul(b()); 
+    a().sqr(field_modulus()); 
+}
+
+#[test]
+fn test_fq12_mul() {
+    a().mul(b(), field_modulus()); 
+}
+
+#[test]
+fn test_from_u256() {
+    from_u256(324234324982374982374982374932);
+}
+
+#[test]
+fn test_single_pairing() {
+    let m = field_modulus();
+    let b1 = b1();
+    let one = AffineG2Impl::one();
+
+    single_ate_pairing(b1, one, m);
+}
+
+#[test]
+fn test_double_pairing() {
+    let m = field_modulus();
+    let a1 = a1();
+    let b1 = b1();
+    let one = AffineG2Impl::one();
+    let vk_x2 = vk_x2(); 
+
+    single_ate_pairing(a1, vk_x2, m);
+    single_ate_pairing(b1, one, m);
 }
 
 #[inline(always)]
@@ -161,5 +207,28 @@ fn b() -> Fq12 {
             limb2: 1223946940893925553,
             limb3: 0,
         }
+    )
+}
+
+fn a1() -> AffineG1 {
+    affine_fq1(
+        u384 { limb0: 3209527847428690266530783740, limb1: 55337686315757186000162450659, limb2: 2212770980232976579, limb3: 0 },
+        u384 { limb0: 46346148385340027716068912668, limb1: 18720056049288877884169473976, limb2: 575822920149061695, limb3: 0 }
+    )
+}
+
+fn b1() -> AffineG1 {
+    affine_fq1(
+        u384 { limb0: 32095932548263576516832882190, limb1: 27627422231292153826551667087, limb2: 462671122537780448, limb3: 0 },
+        u384 { limb0: 78044359350417384183944496129, limb1: 6173955170862308429817299390, limb2: 2915957127384411288, limb3: 0 }
+    )
+}
+
+fn vk_x2() -> AffineG2 {
+    affine_fq2(
+        u384 { limb0: 18353151190051857166641552021, limb1: 52786476996209570262942893618, limb2: 326064827328795136, limb3: 0 }, 
+        u384 { limb0: 20192752979982682526746928346, limb1: 52899724692943572339616162160, limb2: 228410087665646553, limb3: 0 }, 
+        u384 { limb0: 63095858333796245672569770745, limb1: 40333516049151993280954701381, limb2: 161315476375980791, limb3: 0 }, 
+        u384 { limb0: 43875589942346715297683682426, limb1: 18625475627853803198435279565, limb2: 667673862985451015, limb3: 0 }
     )
 }

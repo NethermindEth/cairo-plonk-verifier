@@ -224,8 +224,6 @@ impl Fq12Ops of FieldOps<Fq12, CircuitModulus> {
     }
 
     fn mul(self: Fq12, rhs: Fq12, m: CircuitModulus) -> Fq12 {
-        core::internal::revoke_ap_tracking();
-
         let (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = mul_circuit(); 
 
         let outputs = match (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11).new_inputs()
@@ -272,8 +270,6 @@ impl Fq12Ops of FieldOps<Fq12, CircuitModulus> {
     }
 
     fn sqr(self: Fq12, m: CircuitModulus) -> Fq12 {
-        core::internal::revoke_ap_tracking();
-
         let (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = sqr_circuit();
 
         let outputs = match (c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11).new_inputs()
