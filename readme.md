@@ -50,7 +50,6 @@ curl -L https://raw.githubusercontent.com/software-mansion/universal-sierra-comp
 | Fq12 Multiply      | 686           |
 | BN254 Pairing n=1  | 528143        |
 | BN254 Pairing n=2  | 1056340       |
-| BN254 Pairing n=2  | 1056340       |
 | Final Verification | 2998910       |
 
 ## Acknowledgements
