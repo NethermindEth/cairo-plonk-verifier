@@ -53,5 +53,4 @@ curl -L https://raw.githubusercontent.com/software-mansion/universal-sierra-comp
 | Final Verification | 2998910       |
 
 ## Acknowledgements
-- Thank you to Shramee's [pairing library](https://github.com/shramee/cairo_pairing) written in Cairo for providing the base towered approach.
-- Thank you to Feltroid for helping to identify the bytecode limit for Starknet contracts. 
+- Cairo [pairing library](https://github.com/shramee/cairo_pairing) - towered field implementation in Cairo.
