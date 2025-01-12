@@ -26,12 +26,12 @@ struct PlonkProof {
 
 #[derive(Copy, Drop, Serde)]
 struct PlonkVerificationKey {
-    n: u256,
-    power: u256,
-    k1: u384,
-    k2: u384,
-    nPublic: u256,
-    nLagrange: u256,
+    n: Fq,
+    power: Fq,
+    k1: Fq,
+    k2: Fq,
+    nPublic: Fq,
+    nLagrange: Fq,
     Qm: AffineG1,
     Qc: AffineG1,
     Ql: AffineG1,
@@ -41,7 +41,7 @@ struct PlonkVerificationKey {
     S2: AffineG1,
     S3: AffineG1,
     X_2: AffineG2,
-    w: u384
+    w: Fq
 }
 
 #[derive(Debug, Drop, Copy)]

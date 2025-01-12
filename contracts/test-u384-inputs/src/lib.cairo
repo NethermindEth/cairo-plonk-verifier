@@ -8,6 +8,7 @@ trait ICircuit<T> {
     fn input_test_vk(ref self: T, vk: PlonkVerificationKey) -> bool;
     fn input_test_proof(ref self: T, proof: PlonkProof) -> bool;
     fn input_test_proof_and_public_signals(ref self: T, proof: PlonkProof, public_signals:Array<u384>) -> bool;
+    fn input_test_vk_proof_and_public_signals(ref self: T, vk: PlonkVerificationKey,proof: PlonkProof, public_signals:Array<u384>) -> bool;
 }
 
 #[starknet::contract]
@@ -66,6 +67,9 @@ mod Circuit {
         }
 
         fn input_test_proof_and_public_signals(ref self: ContractState, proof: PlonkProof, public_signals:Array<u384>) -> bool{
+            return true;
+        }
+        fn input_test_vk_proof_and_public_signals(ref self: ContractState, vk: PlonkVerificationKey,proof: PlonkProof, public_signals:Array<u384>) -> bool{
             return true;
         }
     }

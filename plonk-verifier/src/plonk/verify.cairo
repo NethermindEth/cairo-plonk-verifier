@@ -35,13 +35,6 @@ impl PlonkVerifier of PVerifier {
         let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
         let m_o = TryInto::<_, CircuitModulus>::try_into(ORDER_U384).unwrap();
 
-        // let points = [proof.A, proof.B, proof.C, proof.Z
-        //     ,proof.T1, proof.T2, proof.T3, proof.Wxi, proof.Wxiw].span();
-
-        // for point in points {
-        //     result = result && Self::is_on_curve(*point, m);
-        // };
-
         result = result
             && Self::is_on_curve(proof.A, m)
             && Self::is_on_curve(proof.B, m)
@@ -61,9 +54,10 @@ impl PlonkVerifier of PVerifier {
             && Self::is_in_field(proof.eval_s2)
             && Self::is_in_field(proof.eval_zw);
 
+        let n_public_u256 = (verification_key.nPublic.c0).try_into().unwrap();
         result = result
             && Self::check_public_inputs_length(
-                verification_key.nPublic, publicSignals.len().into()
+                n_public_u256, publicSignals.len().into()
             );
 
         let mut challenges: PlonkChallenge = Self::compute_challenges(
@@ -227,7 +221,8 @@ impl PlonkVerifier of PVerifier {
         let mut domain_size = FqUtils::one();
 
         let mut i = 0;
-        while i < verification_key.power {
+        let key_power_u256: u256 = (verification_key.power.c0).try_into().unwrap();
+        while i < key_power_u256 {
             let sqr_mod = sqr_co(xin.c0, m_o);
             xin = fq(sqr_mod);
             domain_size = domain_size.scale(2, m);
@@ -243,7 +238,7 @@ impl PlonkVerifier of PVerifier {
         let n: Fq = domain_size;
         let mut w: Fq = FqUtils::one();
 
-        let n_public: u32 = verification_key.nPublic.try_into().unwrap();
+        let n_public: u256 = (verification_key.nPublic.c0).try_into().unwrap();
 
         let mut j = 1;
         while j <= max(1, n_public) {
@@ -253,7 +248,7 @@ impl PlonkVerifier of PVerifier {
             let l_i = div_co(w_mul_zh, xi_mul_n, m_o);
             lagrange_evaluations.append(fq(l_i));
 
-            w = fq(mul_co(w.c0, verification_key.w, m_o));
+            w = fq(mul_co(w.c0, verification_key.w.c0, m_o));
 
             j += 1;
         };
@@ -325,11 +320,11 @@ impl PlonkVerifier of PVerifier {
         let mut d2a1 = add_co(proof.eval_a.c0, betaxi, m_o);
         d2a1 = add_co(d2a1, challenges.gamma.c0, m_o);
 
-        let mut d2a2 = mul_co(betaxi, vk.k1, m_o);
+        let mut d2a2 = mul_co(betaxi, vk.k1.c0, m_o);
         d2a2 = add_co(proof.eval_b.c0, d2a2, m_o);
         d2a2 = add_co(d2a2, challenges.gamma.c0, m_o);
 
-        let mut d2a3 = mul_co(betaxi, vk.k2, m_o);
+        let mut d2a3 = mul_co(betaxi, vk.k2.c0, m_o);
         d2a3 = add_co(proof.eval_c.c0, d2a3, m_o);
         d2a3 = add_co(d2a3, challenges.gamma.c0, m_o);
 
@@ -481,7 +476,7 @@ impl PlonkVerifier of PVerifier {
         A1 = A1.add_as_circuit(Wxiw_mul_u, m);
 
         let mut B1 = proof.Wxi.multiply_as_circuit(challenges.xi.c0, m);
-        let s = mul_co(mul_co(challenges.u.c0, challenges.xi.c0, m_o), vk.w, m_o);
+        let s = mul_co(mul_co(challenges.u.c0, challenges.xi.c0, m_o), vk.w.c0, m_o);
 
         let Wxiw_mul_s = proof.Wxiw.multiply_as_circuit(s, m);
         B1 = B1.add_as_circuit(Wxiw_mul_s, m);
@@ -515,7 +510,7 @@ impl PlonkVerifier of PVerifier {
         A1 = A1.add_as_circuit(Wxiw_mul_u, m);
 
         let mut B1 = proof.Wxi.multiply_as_circuit(challenges.xi.c0, m);
-        let s = mul_co(mul_co(challenges.u.c0, challenges.xi.c0, m_o), vk.w, m_o);
+        let s = mul_co(mul_co(challenges.u.c0, challenges.xi.c0, m_o), vk.w.c0, m_o);
 
         let Wxiw_mul_s = proof.Wxiw.multiply_as_circuit(s, m);
         B1 = B1.add_as_circuit(Wxiw_mul_s, m);
@@ -555,9 +550,10 @@ impl PlonkVerifier of PVerifier {
             && Self::is_in_field(proof.eval_s2)
             && Self::is_in_field(proof.eval_zw);
 
+        let n_public_u256: u256 = (verification_key.nPublic.c0).try_into().unwrap();
         result = result
             && Self::check_public_inputs_length(
-                verification_key.nPublic, publicSignals.len().into()
+                n_public_u256, publicSignals.len().into()
             );
 
         let mut challenges: PlonkChallenge = Self::compute_challenges(

@@ -96,12 +96,12 @@ pub fn public_inputs() -> Array<u384> {
 // verification_key
 
 pub fn verification_key() -> (
-    u256,
-    u256,
-    u384,
-    u384,
-    u256,
-    u256,
+    Fq,
+    Fq,
+    Fq,
+    Fq,
+    Fq,
+    Fq,
     AffineG1,
     AffineG1,
     AffineG1,
@@ -111,15 +111,15 @@ pub fn verification_key() -> (
     AffineG1,
     AffineG1,
     AffineG2,
-    u384
+    Fq
 ) {
-    let n = 4096;
-    let power = 12;
-    let k1 = u384 { limb0: 2, limb1: 0, limb2: 0, limb3: 0 };
-    let k2 = u384 { limb0: 3, limb1: 0, limb2: 0, limb3: 0 };
+    let n =  fq(c0: u384 { limb0: 4096, limb1: 0, limb2: 0, limb3: 0 });
+    let power = fq(c0: u384 { limb0: 12, limb1: 0, limb2: 0, limb3: 0 });
+    let k1 =fq(c0: u384 { limb0: 2, limb1: 0, limb2: 0, limb3: 0 });
+    let k2 = fq(c0: u384 { limb0: 3, limb1: 0, limb2: 0, limb3: 0 });
 
-    let nPublic: u256 = 5;
-    let nLagrange: u256 = 5;
+    let nPublic =fq(c0: u384 { limb0: 5, limb1: 0, limb2: 0, limb3: 0 });
+    let nLagrange = fq(c0: u384 { limb0: 5, limb1: 0, limb2: 0, limb3: 0 });
 
     // selector polynomials
     let mut Qm = g1(
@@ -163,6 +163,6 @@ pub fn verification_key() -> (
         1012593656704398130331921245405877456331931988986547477234119259528482165497,
         4191056764018303486822079644163839762717699764181526746691927713416713155706
     );
-    let w = from_u256(4158865282786404163413953114870269622875596290766033564087307867933865333818);
+    let w = fq(from_u256(4158865282786404163413953114870269622875596290766033564087307867933865333818));
     (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w)
 }
