@@ -1,7 +1,7 @@
 use core::circuit::{
     AddInputResultTrait, AddMod, CircuitElement, CircuitInput, CircuitInputs, CircuitModulus,
     CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, circuit_add, circuit_inverse,
-    circuit_mul, circuit_sub, u384,
+    circuit_mul, circuit_sub, u384,U384Serde
 };
 
 use plonk_verifier::circuits::{
@@ -14,7 +14,7 @@ use plonk_verifier::fields::{fq, Fq, FqOps};
 use plonk_verifier::fields::fq_generics::TFqPartialEq;
 use plonk_verifier::traits::{FieldEqs, FieldOps, FieldUtils};
 
-#[derive(Copy, Drop, Debug)]
+#[derive(Copy, Drop, Debug, Serde)]
 struct Fq2 {
     c0: Fq,
     c1: Fq,

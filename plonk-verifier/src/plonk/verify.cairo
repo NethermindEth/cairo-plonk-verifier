@@ -487,4 +487,89 @@ impl PlonkVerifier of PVerifier {
 
         res
     }
+
+    fn compute_pairing(
+        proof: PlonkProof,
+        challenges: PlonkChallenge,
+        vk: PlonkVerificationKey,
+        E: AffineG1,
+        F: AffineG1,
+        m: CircuitModulus,
+        m_o: CircuitModulus
+    ) -> (AffineG1, AffineG2, AffineG1, AffineG2) {
+        let mut A1 = proof.Wxi;
+
+        let Wxiw_mul_u = proof.Wxiw.multiply_as_circuit(challenges.u.c0, m);
+        A1 = A1.add_as_circuit(Wxiw_mul_u, m);
+
+        let mut B1 = proof.Wxi.multiply_as_circuit(challenges.xi.c0, m);
+        let s = mul_c(mul_c(challenges.u.c0, challenges.xi.c0, m_o), vk.w, m_o);
+
+        let Wxiw_mul_s = proof.Wxiw.multiply_as_circuit(s, m);
+        B1 = B1.add_as_circuit(Wxiw_mul_s, m);
+
+        B1 = B1.add_as_circuit(F, m);
+
+        B1 = B1.add_as_circuit(E.neg(m), m);
+
+        let g2_one = AffineG2Impl::one();
+
+        (A1, vk.X_2, B1, g2_one)
+    }
+
+    fn verify_except_pairing(
+        verification_key: PlonkVerificationKey, proof: PlonkProof, publicSignals: Array<u384>
+    ) -> (AffineG1, AffineG2, AffineG1, AffineG2) {
+        let mut result = true;
+        let m = TryInto::<_, CircuitModulus>::try_into(FIELD_U384).unwrap();
+        let m_o = TryInto::<_, CircuitModulus>::try_into(ORDER_U384).unwrap();
+
+        result = result
+            && Self::is_on_curve(proof.A, m)
+            && Self::is_on_curve(proof.B, m)
+            && Self::is_on_curve(proof.C, m)
+            && Self::is_on_curve(proof.Z, m)
+            && Self::is_on_curve(proof.T1, m)
+            && Self::is_on_curve(proof.T2, m)
+            && Self::is_on_curve(proof.T3, m)
+            && Self::is_on_curve(proof.Wxi, m)
+            && Self::is_on_curve(proof.Wxiw, m);
+
+        result = result
+            && Self::is_in_field(proof.eval_a)
+            && Self::is_in_field(proof.eval_b)
+            && Self::is_in_field(proof.eval_c)
+            && Self::is_in_field(proof.eval_s1)
+            && Self::is_in_field(proof.eval_s2)
+            && Self::is_in_field(proof.eval_zw);
+
+        result = result
+            && Self::check_public_inputs_length(
+                verification_key.nPublic, publicSignals.len().into()
+            );
+
+        let mut challenges: PlonkChallenge = Self::compute_challenges(
+            verification_key, proof, @publicSignals.clone(), m_o
+        );
+
+        let (L, challenges) = Self::compute_lagrange_evaluations(
+            verification_key, challenges, m, m_o
+        );
+
+        let PI = Self::compute_PI(@publicSignals.clone(), @L.clone(), m_o);
+
+        let R0 = Self::compute_R0(proof, challenges, @PI, @L[1].clone(), m_o);
+
+        let D = Self::compute_D(proof, challenges, verification_key, @L[1].clone(), m, m_o);
+
+        let F = Self::compute_F(proof, challenges, verification_key, D, m);
+
+        let E = Self::compute_E(proof, challenges, R0, m, m_o);
+
+        let (G1_P1, G2_P1, G1_P2, G2_P2) = Self::compute_pairing(
+            proof, challenges, verification_key, E, F, m, m_o
+        );
+
+        (G1_P1, G2_P1, G1_P2, G2_P2)
+    }
 }
