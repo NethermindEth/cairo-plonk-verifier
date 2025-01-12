@@ -1,13 +1,11 @@
-use std::path::Path;
-use std::fs;
 use crate::error::CliError;
+use std::fs;
+use std::path::Path;
 
 pub fn read_json_file(path: &Path) -> Result<serde_json::Value, CliError> {
-    let content = fs::read_to_string(path)
-        .map_err(|e| CliError::IoError(e.to_string()))?;
-    
-    serde_json::from_str(&content)
-        .map_err(|e| CliError::ParseError(e.to_string()))
+    let content = fs::read_to_string(path).map_err(|e| CliError::IoError(e.to_string()))?;
+
+    serde_json::from_str(&content).map_err(|e| CliError::ParseError(e.to_string()))
 }
 
 pub fn validate_json_file(path: &Path) -> Result<(), CliError> {
@@ -17,7 +15,7 @@ pub fn validate_json_file(path: &Path) -> Result<(), CliError> {
             path.display()
         )));
     }
-    
+
     // Try to read and parse as JSON to validate
     read_json_file(path)?;
     Ok(())

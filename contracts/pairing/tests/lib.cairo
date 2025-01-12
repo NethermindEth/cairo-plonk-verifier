@@ -1,7 +1,10 @@
 use snforge_std::{declare, ContractClassTrait, DeclareResultTrait};
 use pairing_contract::{IPairingDispatcher, IPairingDispatcherTrait};
 use plonk_verifier::curve::groups::{AffineG1, AffineG2, fq, fq2};
-use core::circuit::u384;
+use core::circuit::{u384, conversions::from_u256};
+use plonk_verifier::plonk::types::{PlonkProof, PlonkVerificationKey};
+use plonk_verifier::plonk::constants;
+use core::array::ArrayTrait;
 
 #[test]
 fn call_and_invoke() {
@@ -14,7 +17,24 @@ fn call_and_invoke() {
     // Create a Dispatcher object that will allow interacting with the deployed contract
     let dispatcher = IPairingDispatcher { contract_address };
 
-    // Call a view function of the contract
+    let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
+                constants::verification_key();
+    let verification_key: PlonkVerificationKey = PlonkVerificationKey {
+        n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
+    };
+
+    // proof
+    let (
+        A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
+    ) =
+        constants::proof();
+    let proof: PlonkProof = PlonkProof {
+        A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
+    };
+
+    //public_signals
+    let public_signals = constants::public_inputs();
+
     let A1: AffineG1 = AffineG1 {
         x: fq(
             u384 {
@@ -115,11 +135,31 @@ fn call_and_invoke() {
         )
     };
 
+    let public_signals: Array<u384> = 
+        array![
+        from_u256(18830187580832391953292633656724590808884826987965006042179076864562655717112),
+        from_u256(3142850441180811825929099504508009930706757625639242073235848449635957522737),
+        from_u256(1390849295786071768276380950238675083608645509734),
+        from_u256(642829559307850963015472508762062935916233390536),
+        from_u256(0)
+    ];
+
     let mut call_data: Array<felt252> = array![];
-    let A1_serialized = Serde::serialize(@A1, ref call_data);
+    Serde::serialize(@proof, ref call_data);
+    println!("call data: {:?}", call_data.span());
+
+    Serde::serialize(@public_signals, ref call_data);
+    println!("call data: {:?}", call_data.span());
+    Serde::serialize(@verification_key, ref call_data);
+    println!("call data: {:?}", call_data.span());
+
+   
+    Serde::serialize(@A1, ref call_data);
     Serde::serialize(@vk_X2, ref call_data);
     Serde::serialize(@B1, ref call_data);
     Serde::serialize(@g2_one, ref call_data);
+
+    
 
     let valid = dispatcher.valid_pairing(A1, vk_X2, B1, g2_one);
 
