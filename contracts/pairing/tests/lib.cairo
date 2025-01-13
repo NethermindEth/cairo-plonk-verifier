@@ -151,16 +151,15 @@ fn call_and_invoke() {
     // Serde::serialize(@proof, ref call_data);
     // println!("call data: {:?}", call_data.span());
 
-    Serde::serialize(@public_signals, ref call_data);
-    println!("call data public_signals: {:?}", call_data.span());
+    // Serde::serialize(@public_signals, ref call_data);
+    // println!("call data public_signals: {:?}", call_data.span());
 
    
     Serde::serialize(@A1, ref call_data);
     Serde::serialize(@vk_X2, ref call_data);
     Serde::serialize(@B1, ref call_data);
     Serde::serialize(@g2_one, ref call_data);
-    // println!("call data: {:?}", call_data.span());
-    
+    println!("call data: {:?}", call_data.span());
 
     let valid = dispatcher.valid_pairing(A1, vk_X2, B1, g2_one);
 

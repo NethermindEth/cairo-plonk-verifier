@@ -27,7 +27,7 @@ mod PLONK_Verifier {
     use core::starknet::{ContractAddress, ClassHash};
     use starknet::SyscallResultTrait;
 
-    const PAIRING_CLASS_HASH: felt252 = 0x04816a82902119418e5205a092322022e7b1694cf5804d54d0c6001dde74674e;
+    const PAIRING_CLASS_HASH: felt252 = 0x076a5e592f61c4b87741ad5f7026f2dc818f227b21936cc3ef5220ff3693c0b7;
 
     #[storage]
     struct Storage {}
@@ -44,27 +44,27 @@ mod PLONK_Verifier {
             proof: PlonkProof,
             public_signals: Array<u384>
         ) -> bool {
-            let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
-                constants::verification_key();
-            let vk: PlonkVerificationKey = PlonkVerificationKey {
-                n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
-            };
+            // let (n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w) =
+            //     constants::verification_key();
+            // let vk: PlonkVerificationKey = PlonkVerificationKey {
+            //     n, power, k1, k2, nPublic, nLagrange, Qm, Ql, Qr, Qo, Qc, S1, S2, S3, X_2, w
+            // };
 
-            // proof
-            let (
-                A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
-            ) =
-                constants::proof();
-            let pf: PlonkProof = PlonkProof {
-                A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
-            };
+            // // proof
+            // let (
+            //     A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
+            // ) =
+            //     constants::proof();
+            // let pf: PlonkProof = PlonkProof {
+            //     A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
+            // };
 
-            //public_signals
-            let pi = constants::public_inputs();
+            // //public_signals
+            // let pi = constants::public_inputs();
 
             let (A1, vk_X2, B1, g2_one) =
                 plonk_verifier::plonk::verify::PlonkVerifier::verify_except_pairing(
-                    vk, pf, pi
+                    verification_key, proof, public_signals
             );
 
             let mut call_data: Array<felt252> = array![];

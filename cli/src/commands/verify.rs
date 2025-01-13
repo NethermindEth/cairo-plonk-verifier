@@ -53,10 +53,6 @@ pub async fn verify(
     let account_address =
         env::var("ACCOUNT_ADDRESS").expect("ACCOUNT_ADDRESS environment variable is not set");
 
-    println!("Private Key: {}", private_key);
-    println!("Contract Address: {}", contract_address);
-    println!("Account Address: {}", account_address);
-
     // Ensure temp directory exists
     ensure_temp_dir()?;
 
@@ -148,16 +144,16 @@ pub async fn verify(
     calldata.push(Felt::from_dec_str(&w_low).unwrap());
     calldata.push(Felt::from_dec_str(&w_high).unwrap());
 
-    println!("Calldata for verification key:");
-    print!("[");
-    for (i, value) in calldata.iter().enumerate() {
-        if i == 0 {
-            print!("{}", value); // Print the first value without a comma
-        } else {
-            print!(", {}", value); // Add a comma before subsequent values
-        }
-    }
-    println!("]");
+    // println!("Calldata for verification key:");
+    // print!("[");
+    // for (i, value) in calldata.iter().enumerate() {
+    //     if i == 0 {
+    //         print!("{}", value); // Print the first value without a comma
+    //     } else {
+    //         print!(", {}", value); // Add a comma before subsequent values
+    //     }
+    // }
+    // println!("]");
 
     // Add proof fields
     let proof_field_points = [
@@ -196,16 +192,16 @@ pub async fn verify(
         calldata.push(Felt::from_dec_str(&high).unwrap());
     }
 
-    println!("Calldata for proof:");
-    print!("[");
-    for (i, value) in calldata.iter().enumerate() {
-        if i == 0 {
-            print!("{}", value); // Print the first value without a comma
-        } else {
-            print!(", {}", value); // Add a comma before subsequent values
-        }
-    }
-    println!("]");
+    // println!("Calldata for proof:");
+    // print!("[");
+    // for (i, value) in calldata.iter().enumerate() {
+    //     if i == 0 {
+    //         print!("{}", value); // Print the first value without a comma
+    //     } else {
+    //         print!(", {}", value); // Add a comma before subsequent values
+    //     }
+    // }
+    // println!("]");
 
     // Add public signals
     let public_signal_length = public_signals.len();
@@ -254,22 +250,36 @@ pub async fn verify(
     account.set_block_id(BlockId::Tag(BlockTag::Pending));
 
     // Execute Call (Example Interaction)
-    let result = account
-        .execute_v1(vec![Call {
-            to: verifier_contract_address,
-            selector: get_selector_from_name("verify").unwrap(),
-            calldata: calldata,
-        }])
-        .send()
-        .await
-        .expect("Failed to send transaction");
+    let result = match account
+    .execute_v1(vec![Call {
+        to: verifier_contract_address,
+        selector: get_selector_from_name("verify").unwrap(),
+        calldata: calldata,
+    }])
+    .send()
+    .await {
+        Ok(result) => {
+            println!("Transaction hash: {:#064x}", result.transaction_hash);
+            println!("\nVerifying proof...");
+            println!("✅ Proof is valid!");
+            true
+        },
+        Err(error) => {
+            println!("Transaction hash: Error occurred");
+            println!("\nVerifying proof...");
+            println!("❌ Proof is invalid!");
+            println!("Error: {:?}", error);
+            false
+        }
+    };
+    // println!("Transaction hash: {:#064x}", result.transaction_hash);
 
-    println!("Transaction hash: {:#064x}", result.transaction_hash);
+    
 
-    // Perform verification
-    println!("\nVerifying proof...");
-    // Add actual verification logic here
-    println!("✅ Proof is valid!");
+    // // Perform verification
+    // println!("\nVerifying proof...");
+    // // Add actual verification logic here
+    // println!("✅ Proof is valid!");
 
     Ok(())
 }

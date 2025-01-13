@@ -490,7 +490,7 @@ impl PlonkVerifier of PVerifier {
         let e_A1_vk_x2 = single_ate_pairing(A1, vk.X_2, m);
         let e_B1_g2_1 = single_ate_pairing(B1, g2_one, m);
 
-        let res: bool = e_A1_vk_x2.c0 == e_B1_g2_1.c0;
+        let res: bool = e_A1_vk_x2 == e_B1_g2_1;
 
         res
     }
