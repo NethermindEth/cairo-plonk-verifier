@@ -1,10 +1,9 @@
 use crate::commands::types::{PLONKProof, VerificationKey};
 use crate::commands::utils::{ensure_temp_dir, read_json_file};
 
-use crate::commands::type_conversion::{convert_u256_to_low_high, convert_u384_to_low_high};
+use crate::commands::type_conversion::{convert_u384_to_low_high};
 use crate::error::CliError;
 use dotenv::dotenv;
-use serde::Deserialize;
 use serde_json;
 use starknet::{
     accounts::{Account, ExecutionEncoding, SingleOwnerAccount}, // Call
@@ -69,9 +68,9 @@ pub async fn verify(
     type PublicSignals = Vec<String>; // Public.json is an array of strings
 
     // Load and validate all files
-    let vk = read_json_file(&vk_full_path)?;
-    let proof = read_json_file(&proof_full_path)?;
-    let public = read_json_file(&public_full_path)?;
+    // let vk = read_json_file(&vk_full_path)?;
+    // let proof = read_json_file(&proof_full_path)?;
+    // let public = read_json_file(&public_full_path)?;
 
     // Load and parse verification key
     let vk_json = std::fs::read_to_string(&vk_full_path)?;
@@ -96,29 +95,31 @@ pub async fn verify(
     let mut calldata: Vec<Felt> = vec![];
 
     // Add verification key fields
-    let (n_low, n_high) = convert_u256_to_low_high(&vk.n);
+    let (n_low, n_high) = convert_u384_to_low_high(&vk.n);
     calldata.push(Felt::from_dec_str(&n_low).unwrap());
-    calldata.push(Felt::ZERO);
+    calldata.push(Felt::from_dec_str(&n_high).unwrap());
 
-    let (power_low, power_high) = convert_u256_to_low_high(&vk.power);
+    let (power_low, power_high) = convert_u384_to_low_high(&vk.power);
     calldata.push(Felt::from_dec_str(&power_low).unwrap());
-    calldata.push(Felt::ZERO);
+    calldata.push(Felt::from_dec_str(&power_high).unwrap());
 
     let (k1_low, k1_high) = convert_u384_to_low_high(&vk.k1);
     calldata.push(Felt::from_dec_str(&k1_low).unwrap());
-    calldata.push(Felt::ZERO);
+    calldata.push(Felt::from_dec_str(&k1_high).unwrap());
 
     let (k2_low, k2_high) = convert_u384_to_low_high(&vk.k2);
     calldata.push(Felt::from_dec_str(&k2_low).unwrap());
-    calldata.push(Felt::ZERO);
-
-    let (n_public_low, n_public_high) = convert_u256_to_low_high(&vk.n_public);
+    calldata.push(Felt::from_dec_str(&k2_high).unwrap());
+   
+    let (n_public_low, n_public_high) = convert_u384_to_low_high(&vk.n_public);
     calldata.push(Felt::from_dec_str(&n_public_low).unwrap());
     calldata.push(Felt::from_dec_str(&n_public_high).unwrap());
 
-    let (n_lagrange_low, n_lagrange_high) = convert_u256_to_low_high(&vk.n_lagrange);
+    let (n_lagrange_low, n_lagrange_high) = convert_u384_to_low_high(&vk.n_lagrange);
     calldata.push(Felt::from_dec_str(&n_lagrange_low).unwrap());
     calldata.push(Felt::from_dec_str(&n_lagrange_high).unwrap());
+
+    
 
     // Add G1 points for Qm, Qc, Ql, Qr, Qo, S1, S2, S3
     let g1_points = [
@@ -147,12 +148,13 @@ pub async fn verify(
     calldata.push(Felt::from_dec_str(&w_low).unwrap());
     calldata.push(Felt::from_dec_str(&w_high).unwrap());
 
-    println!("Calldata: [");
+    println!("Calldata for verification key:");
+    print!("[");
     for (i, value) in calldata.iter().enumerate() {
         if i == 0 {
             print!("{}", value); // Print the first value without a comma
         } else {
-            print!(",{}", value); // Add a comma before subsequent values
+            print!(", {}", value); // Add a comma before subsequent values
         }
     }
     println!("]");
@@ -194,17 +196,38 @@ pub async fn verify(
         calldata.push(Felt::from_dec_str(&high).unwrap());
     }
 
+    println!("Calldata for proof:");
+    print!("[");
+    for (i, value) in calldata.iter().enumerate() {
+        if i == 0 {
+            print!("{}", value); // Print the first value without a comma
+        } else {
+            print!(", {}", value); // Add a comma before subsequent values
+        }
+    }
+    println!("]");
+
     // Add public signals
+    let public_signal_length = public_signals.len();
+    calldata.push(Felt::from_dec_str(&public_signal_length.to_string()).unwrap());
     for signal in public_signals {
         let (low, high) = convert_u384_to_low_high(signal.as_str());
         calldata.push(Felt::from_dec_str(&low).unwrap());
         calldata.push(Felt::from_dec_str(&high).unwrap());
     }
 
-    println!("Calldata:");
-    for (index, value) in calldata.iter().enumerate() {
-        println!("  [{}]: {}", index, value);
+    println!("Calldata for public_signals:");
+    print!("[");
+    for (i, value) in calldata.iter().enumerate() {
+        if i == 0 {
+            print!("{}", value); // Print the first value without a comma
+        } else {
+            print!(", {}", value); // Add a comma before subsequent values
+        }
     }
+    println!("]");
+
+    
 
     // Starknet Provider and Account Setup
     let provider = JsonRpcClient::new(HttpTransport::new(
