@@ -7,6 +7,7 @@ use plonk_verifier::traits::FieldOps;
 use plonk_verifier::pairing::optimal_ate::{ate_miller_loop, single_ate_pairing};
 use plonk_verifier::plonk::utils::{field_modulus, order_modulus};
 
+// Final benchmarked stepcounts have their type conversions excluded. 
 #[test]
 fn test_get_circuit_modules() {
     field_modulus();

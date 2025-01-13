@@ -38,10 +38,10 @@ curl -L https://raw.githubusercontent.com/software-mansion/universal-sierra-comp
 - Otherwise, for testing purposes or development purposes, import the library and call the exposed verify function.
 
 ## Deployed Contract Addresses
-| Type      | Network   | Address        |
-|-----------|-----------|----------------|
-| Verifier  | Sepolia   |                |
-| Pairing   | Sepolia   |                |
+| Type      | Network   | Address                                                             |
+|-----------|-----------|---------------------------------------------------------------------|
+| Verifier  | Sepolia   | 0x040fa51f373511141dfd7009267540b6cc33717b80c1c555cb5aacde1b6ca9dd  |
+| Pairing   | Sepolia   | 0x01e2e7868e826ea937791f4baa3d0cef977632234856ec24cb6d33f5d519f0c6  |
 
 ## Benchmarks
 | Circuit            | Steps         |
