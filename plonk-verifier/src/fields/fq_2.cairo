@@ -101,18 +101,19 @@ impl Fq2Utils of FieldUtils<Fq2, u384, CircuitModulus> {
 impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
     // #[inline(always)]
     fn add(self: Fq2, rhs: Fq2, m: CircuitModulus) -> Fq2 {
-        let (c0, c1) = add_circuit(); 
+        let (c0, c1) = add_circuit();
 
-        let outputs = match (c0, c1)
-            .new_inputs()
-            .next(self.c0.c0)
-            .next(self.c1.c0)
-            .next(rhs.c0.c0)
-            .next(rhs.c1.c0)
-            .done()
-            .eval(m) {
-                Result::Ok(outputs) => { outputs },
-                Result::Err(_) => { panic!("Expected success") }
+        let outputs =
+            match (c0, c1)
+                .new_inputs()
+                .next(self.c0.c0)
+                .next(self.c1.c0)
+                .next(rhs.c0.c0)
+                .next(rhs.c1.c0)
+                .done()
+                .eval(m) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
         };
 
         fq2(outputs.get_output(c0), outputs.get_output(c1))
@@ -120,18 +121,19 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
 
     // #[inline(always)]
     fn sub(self: Fq2, rhs: Fq2, m: CircuitModulus) -> Fq2 {
-        let (c0, c1) = sub_circuit(); 
+        let (c0, c1) = sub_circuit();
 
-        let outputs = match (c0, c1)
-            .new_inputs()
-            .next(self.c0.c0)
-            .next(self.c1.c0)
-            .next(rhs.c0.c0)
-            .next(rhs.c1.c0)
-            .done()
-            .eval(m) {
-                Result::Ok(outputs) => { outputs },
-                Result::Err(_) => { panic!("Expected success") }
+        let outputs =
+            match (c0, c1)
+                .new_inputs()
+                .next(self.c0.c0)
+                .next(self.c1.c0)
+                .next(rhs.c0.c0)
+                .next(rhs.c1.c0)
+                .done()
+                .eval(m) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
         };
 
         fq2(outputs.get_output(c0), outputs.get_output(c1))
@@ -139,18 +141,19 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
 
     // #[inline(always)]
     fn mul(self: Fq2, rhs: Fq2, m: CircuitModulus) -> Fq2 {
-        let (c0, c1) = mul_circuit(); 
+        let (c0, c1) = mul_circuit();
 
-        let outputs = match (c0, c1)
-            .new_inputs()
-            .next(self.c0.c0)
-            .next(self.c1.c0)
-            .next(rhs.c0.c0)
-            .next(rhs.c1.c0)
-            .done()
-            .eval(m) {
-                Result::Ok(outputs) => { outputs },
-                Result::Err(_) => { panic!("Expected success") }
+        let outputs =
+            match (c0, c1)
+                .new_inputs()
+                .next(self.c0.c0)
+                .next(self.c1.c0)
+                .next(rhs.c0.c0)
+                .next(rhs.c1.c0)
+                .done()
+                .eval(m) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
         };
 
         fq2(outputs.get_output(c0), outputs.get_output(c1))
@@ -158,18 +161,19 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
 
     // #[inline(always)]
     fn div(self: Fq2, rhs: Fq2, m: CircuitModulus) -> Fq2 {
-        let (c0, c1) = div_circuit(); 
+        let (c0, c1) = div_circuit();
 
-        let outputs = match (c0, c1)
-            .new_inputs()
-            .next(self.c0.c0)
-            .next(self.c1.c0)
-            .next(rhs.c0.c0)
-            .next(rhs.c1.c0)
-            .done()
-            .eval(m) {
-                Result::Ok(outputs) => { outputs },
-                Result::Err(_) => { panic!("Expected success") }
+        let outputs =
+            match (c0, c1)
+                .new_inputs()
+                .next(self.c0.c0)
+                .next(self.c1.c0)
+                .next(rhs.c0.c0)
+                .next(rhs.c1.c0)
+                .done()
+                .eval(m) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
         };
 
         fq2(outputs.get_output(c0), outputs.get_output(c1))
@@ -177,16 +181,11 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
 
     // #[inline(always)]
     fn neg(self: Fq2, m: CircuitModulus) -> Fq2 {
-        let (c0, c1) = neg_circuit(); 
+        let (c0, c1) = neg_circuit();
 
-        let outputs = match (c0, c1)
-            .new_inputs()
-            .next(self.c0.c0)
-            .next(self.c1.c0)
-            .done()
-            .eval(m) {
-                Result::Ok(outputs) => { outputs },
-                Result::Err(_) => { panic!("Expected success") }
+        let outputs = match (c0, c1).new_inputs().next(self.c0.c0).next(self.c1.c0).done().eval(m) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
         };
 
         fq2(outputs.get_output(c0), outputs.get_output(c1))
@@ -194,16 +193,11 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
 
     // #[inline(always)]
     fn sqr(self: Fq2, m: CircuitModulus) -> Fq2 {
-        let (c0, c1) = sqr_circuit(); 
+        let (c0, c1) = sqr_circuit();
 
-        let outputs = match (c0, c1)
-            .new_inputs()
-            .next(self.c0.c0)
-            .next(self.c1.c0)
-            .done()
-            .eval(m) {
-                Result::Ok(outputs) => { outputs },
-                Result::Err(_) => { panic!("Expected success") }
+        let outputs = match (c0, c1).new_inputs().next(self.c0.c0).next(self.c1.c0).done().eval(m) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
         };
 
         fq2(outputs.get_output(c0), outputs.get_output(c1))
@@ -211,16 +205,11 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
 
     // #[inline(always)]
     fn inv(self: Fq2, m: CircuitModulus) -> Fq2 {
-        let (c0, c1) = inv_circuit(); 
+        let (c0, c1) = inv_circuit();
 
-        let outputs = match (c0, c1)
-            .new_inputs()
-            .next(self.c0.c0)
-            .next(self.c1.c0)
-            .done()
-            .eval(m) {
-                Result::Ok(outputs) => { outputs },
-                Result::Err(_) => { panic!("Expected success") }
+        let outputs = match (c0, c1).new_inputs().next(self.c0.c0).next(self.c1.c0).done().eval(m) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
         };
 
         fq2(outputs.get_output(c0), outputs.get_output(c1))
