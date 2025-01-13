@@ -1,6 +1,5 @@
 use core::circuit::{u384, conversions::from_u256};
 
-
 mod fp {
     use super::u384;
 
@@ -8,13 +7,13 @@ mod fp {
     const NONRESIDUE_C0: u384 = u384 { limb0: 32324006162389411176778628423, limb1: 57042285082623239461879769745, limb2: 3486998266802970665, limb3: 0 };
 }
 
-mod fp2 {
-    use super::u384;
+// mod fp2 {
+//     use super::u384;
 
-    // NONRESIDUE, ξ = 9+U
-    const NONRESIDUE_C0: u384 = u384 { limb0: 9, limb1: 0, limb2: 0, limb3: 0 };
-    const NONRESIDUE_C1: u384 = u384 { limb0: 1, limb1: 0, limb2: 0, limb3: 0 };
-}
+//     // NONRESIDUE, ξ = 9+U
+//     const NONRESIDUE_C0: u384 = u384 { limb0: 9, limb1: 0, limb2: 0, limb3: 0 };
+//     const NONRESIDUE_C1: u384 = u384 { limb0: 1, limb1: 0, limb2: 0, limb3: 0 };
+// }
 
 mod fp6 {
     use super::u384;

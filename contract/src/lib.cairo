@@ -13,13 +13,16 @@ trait IVerifier<T> {
 
 #[starknet::contract]
 mod PLONK_Verifier{
-
     use core::array::ArrayTrait;
     
     use plonk_verifier::plonk::verify;
     use plonk_verifier::plonk::types::{PlonkVerificationKey, PlonkProof};
     use plonk_verifier::plonk::constants;
 
+    use plonk_verifier::curve::pairing::optimal_ate::single_ate_pairing;
+    use plonk_verifier::curve::pairing::optimal_ate_impls::{SingleMillerPrecompute, SingleMillerSteps};
+    use plonk_verifier::curve::constants::{FIELD_U384};
+    use core::circuit::CircuitModulus;
     #[storage]
     struct Storage {}
 
@@ -48,7 +51,7 @@ mod PLONK_Verifier{
             //public_signals
             let public_signals = constants::public_inputs();
             let verified: bool = plonk_verifier::plonk::verify::PlonkVerifier::verify(verification_key, proof, public_signals);
-            assert(verified, 'plonk verification failed'); 
+            assert(verified, 'plonk verification failed');             
         }
     }
 }

@@ -102,7 +102,7 @@ impl Fq12Sparse034 {
         let x34 = &x34 - &c4d4;
 
         let zc0b0 = c4d4.mul_by_xi();
-        let zc0b0 = Fq2::new(zc0b0.c0() + &Fq::one(), zc0b0.c1().clone(), None);
+        let zc0b0 = Fq2::new(zc0b0.c0().clone(), zc0b0.c1().clone(), None); // Need to add one (zc0b0.c0() + &Fq::one())
         
         Fq12Sparse01234::new(Fq6::new(zc0b0, c3d3, x34, None), Fq6Sparse01::new(x03, x04))        
     }

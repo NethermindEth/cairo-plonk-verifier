@@ -34,6 +34,11 @@ impl Fq2 {
         Self { c0: &self.c0().scl_9() - &self.c1(), c1: &self.c1().scl_9() + &self.c0(), inp: None }
     }
 
+    // Modified mul_by_xi function where circuitinput[0] = 9
+    pub fn mul_by_xi_offset(&self) -> Self {
+        Self { c0: &self.c0().scl_9_no_add() - &self.c1(), c1: &self.c1().scl_9_no_add() + &self.c0(), inp: None }
+    }
+
     // For πₚ frobeneus map
     pub fn fq2_mul_nr(&self, inp: [usize; 2]) -> Self {
         self * &Fq2::new_input(inp)

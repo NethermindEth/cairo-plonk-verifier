@@ -1,7 +1,7 @@
 use core::circuit::CircuitModulus;
 
 use plonk_verifier::curve::groups::{
-    Affine, AffineG1 as PtG1, AffineG2 as PtG2, ECGroup, g1, g2,
+    Affine, AffineG1 as PtG1, AffineG2 as PtG2, ECGroup, g2,
 };
 use plonk_verifier::fields::{
     fq, Fq, Fq2, fq2, Fq6, Fq12, FqOps, Fq2Ops, Fq2Utils, Fq12Ops, Fq12Utils, Fq12Exponentiation,
@@ -58,58 +58,59 @@ struct LineFn {
 }
 
 mod line_fn {
+    use core::circuit::{
+        AddInputResultTrait, AddModGate as A, CircuitElement, CircuitElement as CE, CircuitInput,
+        CircuitInput as CI, CircuitInputs, CircuitModulus, CircuitOutputsTrait, EvalCircuitResult,
+        EvalCircuitTrait, InverseGate as I, MulModGate as M, SubModGate as S, circuit_add,
+        circuit_inverse, circuit_mul, circuit_sub, u384,
+    };    
     use core::circuit::conversions::from_u256;
 
+    use plonk_verifier::circuits::ate_circuits::step_dbl_add_slopes_circuit;
     use plonk_verifier::fields::fq_2::Fq2FrobeniusTrait;
     use plonk_verifier::fields::fq_sparse::FqSparseTrait;
     use plonk_verifier::traits::{FieldUtils};
     use plonk_verifier::curve::groups::ECOperationsCircuitFq2;
-    use plonk_verifier::curve::groups::{g1, g2, ECGroup};
+    use plonk_verifier::curve::groups::{g2, ECGroup};
     use plonk_verifier::curve::groups::{Affine, AffineG1 as PtG1, AffineG2 as PtG2};
-    // use plonk_verifier::fields::fq_generics::{
-    //     TFqAdd, TFqSub, TFqMul, TFqDiv, TFqNeg, TFqPartialEq,
-    // };
     use plonk_verifier::fields::{
         Fq, fq, Fq2, fq2, Fq6, Fq12, Fq12Utils, Fq12Ops, FqOps, Fq2Utils, Fq2Ops,
         Fq12Exponentiation,
     };
     use plonk_verifier::fields::{Fq12Sparse034, Fq12Sparse01234, FqSparse};
-    // use plonk_verifier::fields::print::{Fq2Display, Fq12Display, FqDisplay};
     use plonk_verifier::fields::frobenius::pi;
     use super::{LineFn, PPre, NZNum, F034};
     use plonk_verifier::curve::constants::FIELD_U384;
-    use core::circuit::CircuitModulus;
     
-    #[inline(always)]
+    // #[inline(always)]
     fn line_fn(slope: Fq2, s: PtG2, m: CircuitModulus) -> LineFn {
         LineFn { slope, c: slope.mul(s.x, m).sub(s.y, m) }
     }
 
     // For πₚ frobeneus map
     // Multiply by Fp2::NONRESIDUE^(2((q^1) - 1)/6)
-    #[inline(always)]
+    // #[inline(always)]
     fn fq2_mul_nr_1p_2(a: Fq2, m: CircuitModulus) -> Fq2 {
         a.mul(fq2(pi::Q1X2_C0, pi::Q1X2_C1), m)
     }
 
-
     // For πₚ frobeneus map
     // Multiply by Fp2::NONRESIDUE^(3((q^1) - 1)/6)
-    #[inline(always)]
+    // #[inline(always)]
     fn fq2_mul_nr_1p_3(a: Fq2, m: CircuitModulus) -> Fq2 {
         a.mul(fq2(pi::Q1X3_C0, pi::Q1X3_C1), m)
     }
 
     // For πₚ² frobeneus map
     // Multiply by Fp2::NONRESIDUE^(2(p^2-1)/6)
-    #[inline(always)]
+    // #[inline(always)]
     fn fq2_mul_nr_2p_2(a: Fq2, m: CircuitModulus) -> Fq2 {
         a.scale(pi::Q2X2_C0, m)
     }
 
     // For πₚ² frobeneus map
     // Multiply by Fp2::NONRESIDUE^(3(p^2-1)/6)
-    #[inline(always)]
+    // #[inline(always)]
     fn fq2_mul_nr_2p_3(a: Fq2, m: CircuitModulus) -> Fq2 {
         a.scale(pi::Q2X3_C0, m)
     }
@@ -117,22 +118,45 @@ mod line_fn {
     // https://eprint.iacr.org/2022/1162 (Section 6.1)
     // computes acc = acc + q + acc and line evals for p
     // returns product of line evaluations to multiply with f
-    // #[inline(always)]
+    // // #[inline(always)]
     fn step_dbl_add(ref acc: PtG2, q: PtG2, m: CircuitModulus) -> (LineFn, LineFn) {
-        let s = acc;
+        // let (slope1_c0, slope1_c1, x1_c0, x1_c1, slope2_c0, slope2_c1) = step_dbl_add_slopes_circuit();
+
+        // let o = match (slope1_c0, slope1_c1, x1_c0, x1_c1, slope2_c0, slope2_c1).new_inputs()
+        //     .next(acc.x.c0.c0)
+        //     .next(acc.x.c1.c0)
+        //     .next(acc.y.c0.c0)
+        //     .next(acc.y.c1.c0)
+        //     .next(q.x.c0.c0)
+        //     .next(q.x.c1.c0)
+        //     .next(q.y.c0.c0)
+        //     .next(q.y.c1.c0)
+        //     .done().eval(m) {
+        //         Result::Ok(outputs) => { outputs },
+        //         Result::Err(_) => { panic!("Expected success") }
+        // };
+
+        // let slope1 = fq2(o.get_output(slope1_c0), o.get_output(slope1_c1));
+        // let x1 = fq2(o.get_output(x1_c0), o.get_output(x1_c1));
+        // let slope2 = fq2(o.get_output(slope2_c0), o.get_output(slope2_c1));
+
+        // let s = acc;
         // s + q
-        let slope1 = s.chord_as_circuit(q, m);
-        let x1 = s.x_on_slope(slope1, q.x, m);
-        let line1 = line_fn(slope1, s, m);
+        
+        let slope1 = acc.chord_as_circuit(q, m);
+        let x1 = acc.x_on_slope(slope1, q.x, m);
+        
 
         // we skip y1 calculation and sub slope1 directly in second slope calculation
 
         // s + (s + q)
         // λ2 = (y2-y1)/(x2-x1), subbing y2 = λ(x2-x1)+y1
         // λ2 = -λ1-2y1/(x3-x1)
-        let slope2 = slope1.neg(m).sub((s.y.add(s.y, m)).div(x1.sub(s.x, m), m), m);
-        acc = s.pt_on_slope_as_circuit(slope2, x1, m);
-        let line2 = line_fn(slope2, s, m);
+        let slope2 = slope1.neg(m).sub((acc.y.add(acc.y, m)).div(x1.sub(acc.x, m), m), m); // rm div -> circuit
+
+        let line1 = line_fn(slope1, acc, m);
+        let line2 = line_fn(slope2, acc, m);
+        acc = acc.pt_on_slope_as_circuit(slope2, x1, m);
 
         // line functions
         (line1, line2)
@@ -141,7 +165,7 @@ mod line_fn {
     // https://eprint.iacr.org/2022/1162 (Section 6.1)
     // computes acc = 2 * acc and line eval for p
     // returns line evaluation to multiply with f
-    // #[inline(always)]
+    // // #[inline(always)]
     fn step_double(ref acc: PtG2, m: CircuitModulus) -> LineFn {
         let s = acc;
         // λ = 3x²/2y
@@ -153,7 +177,7 @@ mod line_fn {
     // https://eprint.iacr.org/2022/1162 (Section 6.1)
     // computes acc = acc + q and line eval for p
     // returns line evaluation to multiply with f
-    // #[inline(always)]
+    // // #[inline(always)]
     fn step_add(ref acc: PtG2, q: PtG2, m: CircuitModulus) -> LineFn {
         let s = acc;
         // λ = (yS−yQ)/(xS−xQ)
@@ -167,7 +191,7 @@ mod line_fn {
     // https://eprint.iacr.org/2013/722.pdf
     // Code inspired by gnark
     // https://github.com/Consensys/gnark/blob/v0.9.1/std/algebra/emulated/sw_bn254/pairing.go#L529
-    // #[inline(always)]
+    // // #[inline(always)]
     fn correction_step(ref acc: PtG2, q: PtG2, m: CircuitModulus) -> (LineFn, LineFn) {
         // Line 9: Q1 ← πₚ(Q),Q2 ← πₚ²(Q)
         // πₚ(x,y) = (xp,yp)
@@ -200,7 +224,7 @@ mod line_fn {
     }
 }
 
-#[inline(always)]
+// #[inline(always)]
 fn line_fn_at_p(line: LineFn, p_pre: @PPre, m: CircuitModulus) -> F034 {
     F034 {
         c3: line.slope.scale(*p_pre.neg_x_over_y.c0, m),
@@ -215,7 +239,7 @@ fn line_evaluation_at_p(slope: Fq2, p_pre: @PPre, s: PtG2, m: CircuitModulus) ->
     }
 }
 
-#[inline(always)]
+// #[inline(always)]
 fn step_dbl_add_to_f(ref acc: PtG2, ref f: Fq12, p_pre: @PPre, p: PtG1, q: PtG2, m: CircuitModulus) {
     let (l1, l2) = step_dbl_add(ref acc, p_pre, p, q, m);
     f = f.mul_01234(l1.mul_034_by_034(l2, m), m);
@@ -226,24 +250,24 @@ fn step_dbl_add(ref acc: PtG2, p_pre: @PPre, p: PtG1, q: PtG2, m: CircuitModulus
     (line_fn_at_p(lf1, p_pre, m), line_fn_at_p(lf2, p_pre, m))
 }
 
-#[inline(always)]
+// #[inline(always)]
 fn step_double_to_f(ref acc: PtG2, ref f: Fq12, p_pre: @PPre, p: PtG1, m: CircuitModulus) {
     f = f.mul_034(step_double(ref acc, p_pre, p, m), m);
 }
 
-#[inline(always)]
+// #[inline(always)]
 fn step_double(ref acc: PtG2, p_pre: @PPre, p: PtG1, m: CircuitModulus) -> F034 {
     let lf = line_fn::step_double(ref acc, m);
     line_fn_at_p(lf, p_pre, m)
 }
 
-#[inline(always)]
-fn step_add(ref acc: PtG2, p_pre: @PPre, p: PtG1, q: PtG2, m: CircuitModulus) -> F034 {
-    let lf = line_fn::step_add(ref acc, q, m);
-    line_fn_at_p(lf, p_pre, m)
-}
+// #[inline(always)]
+// fn step_add(ref acc: PtG2, p_pre: @PPre, p: PtG1, q: PtG2, m: CircuitModulus) -> F034 {
+//     let lf = line_fn::step_add(ref acc, q, m);
+//     line_fn_at_p(lf, p_pre, m)
+// }
 
-#[inline(always)]
+// #[inline(always)]
 fn correction_step_to_f(
     ref acc: PtG2, ref f: Fq12, p_pre: @PPre, p: PtG1, q: PtG2, m: CircuitModulus
 ) {
@@ -253,7 +277,7 @@ fn correction_step_to_f(
     f = f.mul_01234(l1.mul_034_by_034(l2, m), m);
 }
 
-#[inline(always)]
+// #[inline(always)]
 fn correction_step(ref acc: PtG2, p_pre: @PPre, p: PtG1, q: PtG2, m: CircuitModulus) -> (F034, F034) {
     let (lf1, lf2) = line_fn::correction_step(ref acc, q, m);
     (line_fn_at_p(lf1, p_pre, m), line_fn_at_p(lf2, p_pre, m))

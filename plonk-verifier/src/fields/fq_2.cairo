@@ -3,13 +3,12 @@ use core::circuit::{
     CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, circuit_add, circuit_inverse,
     circuit_mul, circuit_sub, u384,
 };
-use core::traits::TryInto;
 
 use plonk_verifier::circuits::{
-    fq_circuits::{one_384, zero_384}, 
+    fq_circuits::{ONE, ZERO}, 
     fq_2_circuits::{add_circuit, div_circuit, inv_circuit, mul_circuit, neg_circuit, sqr_circuit, sub_circuit}
 };
-use plonk_verifier::curve::{circuit_scale_9};
+use plonk_verifier::curve::circuit_scale_9;
 use plonk_verifier::curve::constants::FIELD_U384;
 use plonk_verifier::fields::{fq, Fq, FqOps};
 use plonk_verifier::fields::fq_generics::TFqPartialEq;
@@ -21,36 +20,36 @@ struct Fq2 {
     c1: Fq,
 }
 
-#[inline(always)]
+// #[inline(always)]
 fn fq2(c0: u384, c1: u384) -> Fq2 {
     Fq2 { c0: fq(c0), c1: fq(c1), }
 }
 
 #[generate_trait]
 impl Fq2Frobenius of Fq2FrobeniusTrait {
-    #[inline(always)]
+    // #[inline(always)]
     fn frob0(self: Fq2) -> Fq2 {
         self
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn frob1(self: Fq2, m: CircuitModulus) -> Fq2 {
         self.conjugate(m)
     }
 }
 
 impl Fq2Utils of FieldUtils<Fq2, u384, CircuitModulus> {
-    #[inline(always)]
+    // #[inline(always)]
     fn one() -> Fq2 {
-        fq2(one_384, zero_384)
+        fq2(ONE, ZERO)
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn zero() -> Fq2 {
-        fq2(zero_384, zero_384)
+        fq2(ZERO, ZERO)
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn scale(self: Fq2, by: u384, m: CircuitModulus) -> Fq2 {
         let a_c0 = CircuitElement::<CircuitInput<0>> {};
         let a_c1 = CircuitElement::<CircuitInput<1>> {};
@@ -82,12 +81,12 @@ impl Fq2Utils of FieldUtils<Fq2, u384, CircuitModulus> {
         res
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn conjugate(self: Fq2, m: CircuitModulus) -> Fq2 {
         Fq2 { c0: self.c0, c1: self.c1.neg(m), }
     }
     
-    #[inline(always)]
+    // #[inline(always)]
     fn mul_by_nonresidue(self: Fq2, m: CircuitModulus) -> Fq2 {
         let Fq2 { c0: a0, c1: a1 } = self;
         // fq2(9, 1)
@@ -97,19 +96,10 @@ impl Fq2Utils of FieldUtils<Fq2, u384, CircuitModulus> {
             c1: a0.add(circuit_scale_9(a1, m), m), //
         }
     }
-
-    #[inline(always)]
-    fn frobenius_map(self: Fq2, power: usize, m: CircuitModulus) -> Fq2 {
-        if power % 2 == 0 {
-            self
-        } else {
-            self.conjugate(m)
-        }
-    }
 }
 
 impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
-    #[inline(always)]
+    // #[inline(always)]
     fn add(self: Fq2, rhs: Fq2, m: CircuitModulus) -> Fq2 {
         let (c0, c1) = add_circuit(); 
 
@@ -128,7 +118,7 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
         fq2(outputs.get_output(c0), outputs.get_output(c1))
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn sub(self: Fq2, rhs: Fq2, m: CircuitModulus) -> Fq2 {
         let (c0, c1) = sub_circuit(); 
 
@@ -147,7 +137,7 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
         fq2(outputs.get_output(c0), outputs.get_output(c1))
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn mul(self: Fq2, rhs: Fq2, m: CircuitModulus) -> Fq2 {
         let (c0, c1) = mul_circuit(); 
 
@@ -166,7 +156,7 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
         fq2(outputs.get_output(c0), outputs.get_output(c1))
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn div(self: Fq2, rhs: Fq2, m: CircuitModulus) -> Fq2 {
         let (c0, c1) = div_circuit(); 
 
@@ -185,7 +175,7 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
         fq2(outputs.get_output(c0), outputs.get_output(c1))
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn neg(self: Fq2, m: CircuitModulus) -> Fq2 {
         let (c0, c1) = neg_circuit(); 
 
@@ -202,7 +192,7 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
         fq2(outputs.get_output(c0), outputs.get_output(c1))
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn sqr(self: Fq2, m: CircuitModulus) -> Fq2 {
         let (c0, c1) = sqr_circuit(); 
 
@@ -219,7 +209,7 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
         fq2(outputs.get_output(c0), outputs.get_output(c1))
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn inv(self: Fq2, m: CircuitModulus) -> Fq2 {
         let (c0, c1) = inv_circuit(); 
 
@@ -238,7 +228,7 @@ impl Fq2Ops of FieldOps<Fq2, CircuitModulus> {
 }
 
 impl FqEqs of FieldEqs<Fq2> {
-    #[inline(always)]
+    // #[inline(always)]
     fn eq(lhs: @Fq2, rhs: @Fq2) -> bool {
         lhs.c0 == rhs.c0 && lhs.c1 == rhs.c1
     }

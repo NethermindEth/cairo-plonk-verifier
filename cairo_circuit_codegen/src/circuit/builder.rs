@@ -20,7 +20,7 @@ impl CairoCodeBuilder {
     }
 
     pub fn assign_variable(&mut self, name: &str, circuit: Circuit) -> &mut Self {
-        let line = "let ".to_string() + name + " = " + &circuit.inner();
+        let line = "type ".to_string() + name + " = " + &circuit.inner();
         self.add_line(line);
         self
     }
