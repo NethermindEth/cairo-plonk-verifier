@@ -52,6 +52,11 @@ impl Fq6 {
     pub fn mul_by_v(&self) -> Self {
         Self { c0: self.c2().mul_by_xi(), c1: self.c0().clone(), c2: self.c1().clone(), inp: None } // todo: remove clone
     }
+
+    // Modified mul_by_vi function where circuitinput[0] = 9
+    pub fn mul_by_v_offset(&self) -> Self {
+        Self { c0: self.c2().mul_by_xi_offset(), c1: self.c0().clone(), c2: self.c1().clone(), inp: None } 
+    }
 }
 
 impl FieldOps for Fq6 {

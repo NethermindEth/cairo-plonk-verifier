@@ -3,10 +3,11 @@ use crate::fields::fq::Fq;
 use crate::fields::fq12::Fq12;
 
 use crate::circuit::builder::CairoCodeBuilder;
+use crate::fields::fq12_squaring::Krbn2345;
 use crate::fields::fq2::Fq2;
 use crate::fields::fq6::Fq6;
 use crate::fields::{ECOperations, FieldOps};
-use crate::pairing::line::Precompute;
+use crate::pairing::line::{LineFn, Precompute};
 
 pub trait CairoCodeAdder {
     fn add_circuit(&self, builder: &mut CairoCodeBuilder, names: Option<Vec<&str>>); 
@@ -131,6 +132,24 @@ impl CairoCodeAdder for Affine<Fq2> {
     }
 }
 
+impl CairoCodeAdder for LineFn {
+    fn add_circuit(&self, builder: &mut CairoCodeBuilder, names: Option<Vec<&str>>) {
+        let names = names
+            .filter(|v| v.len() >= 4)
+            .unwrap_or(vec!["slope_c0", "slope_c1", "c0", "c1"]);
+
+        let slope_c0 = self.slope().c0().c0().format_circuit();
+        let slope_c1 = self.slope().c1().c0().format_circuit();
+        let c0 = self.c().c0().c0().format_circuit();
+        let c1 = self.c().c1().c0().format_circuit();
+        
+        builder.assign_variable(names[0], slope_c0);
+        builder.assign_variable(names[1], slope_c1);    
+        builder.assign_variable(names[2], c0);
+        builder.assign_variable(names[3], c1);    
+    }
+}
+
 impl CairoCodeAdder for Precompute {
     fn add_circuit(&self, builder: &mut CairoCodeBuilder, names: Option<Vec<&str>>) {
         let names = names
@@ -142,5 +161,18 @@ impl CairoCodeAdder for Precompute {
         self.neg_q().add_circuit(builder, Some(names[6..10].to_vec()));
         self.ppc().neg_x_over_y().add_circuit(builder, Some(names[10..11].to_vec()));
         self.ppc().y_inv().add_circuit(builder, Some(names[10..12].to_vec()));
+    }
+}
+
+impl CairoCodeAdder for Krbn2345 {
+    fn add_circuit(&self, builder: &mut CairoCodeBuilder, names: Option<Vec<&str>>) {
+        let names = names
+            .filter(|v| v.len() >= 8)
+            .unwrap_or(vec!["KrbnG2C0", "KrbnG2C1", "KrbnG3C0", "KrbnG3C1", "KrbnG4C0", "KrbnG4C1", "KrbnG5C0", "KrbnG5C1"]);
+        
+        self.g2().add_circuit(builder, Some(names[0..2].to_vec()));
+        self.g3().add_circuit(builder, Some(names[2..4].to_vec()));
+        self.g4().add_circuit(builder, Some(names[4..6].to_vec()));
+        self.g5().add_circuit(builder, Some(names[6..8].to_vec()));
     }
 }

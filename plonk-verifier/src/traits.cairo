@@ -18,7 +18,6 @@ trait FieldUtils<TFq, TFqChildren, M> {
     fn conjugate(self: TFq, m: M) -> TFq;
     fn scale(self: TFq, by: TFqChildren, m: M) -> TFq;
     fn mul_by_nonresidue(self: TFq, m: M) -> TFq;
-    fn frobenius_map(self: TFq, power: usize, m: M) -> TFq;
 }
 
 trait MillerPrecompute<TG1, TG2, TPreComp, M> {
@@ -27,15 +26,15 @@ trait MillerPrecompute<TG1, TG2, TPreComp, M> {
 
 trait MillerSteps<TPreComp, TG2, TFq> {
     // square target group element
-    fn sqr_target(self: @TPreComp, i: u32, ref acc: TG2, ref f: TFq);
+    fn sqr_target(self: @TPreComp, ref acc: TG2, ref f: TFq);
     // first and second step
-    fn miller_first_second(self: @TPreComp, i1: u32, i2: u32, ref acc: TG2) -> TFq;
+    fn miller_first(self: @TPreComp, ref acc: TG2) -> TFq;
     // 0 bit
-    fn miller_bit_o(self: @TPreComp, i: u32, ref acc: TG2, ref f: TFq);
+    fn miller_bit_o(self: @TPreComp, ref acc: TG2, ref f: TFq);
     // 1 bit
-    fn miller_bit_p(self: @TPreComp, i: u32, ref acc: TG2, ref f: TFq);
+    fn miller_bit_p(self: @TPreComp, ref acc: TG2, ref f: TFq);
     // -1 bit
-    fn miller_bit_n(self: @TPreComp, i: u32, ref acc: TG2, ref f: TFq);
+    fn miller_bit_n(self: @TPreComp, ref acc: TG2, ref f: TFq);
     // last step
     fn miller_last(self: @TPreComp, ref acc: TG2, ref f: TFq);
 }

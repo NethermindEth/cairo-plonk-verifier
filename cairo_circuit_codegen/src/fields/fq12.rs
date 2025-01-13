@@ -34,7 +34,7 @@ impl Fq12 {
 
         let b = a1.mul_01(&Fq6Sparse01::new(c3.clone(), c4.clone())); // todo: remove clone
         
-        // Circuit div(x/x) = 1 
+        // Circuit div(x/x) = 1 // assumes circuit input is non-zero
         let tmp = c3.c0() + &Fq::one();
         let c3 = Fq2::new(tmp, c3.c1().clone(), None);
         let d = a0 + a1;
@@ -96,7 +96,7 @@ impl FieldOps for Fq12 {
 
         Fq12 { c0, c1, inp: None }
     }
-
+    
     fn neg(&self,) -> Self {
         Self { c0: -&self.c0, c1: -&self.c1, inp: None }
     }
@@ -106,6 +106,16 @@ impl FieldOps for Fq12 {
 
         Self { c0: self.c0() * &t, c1: -(self.c1() * &t), inp: None }
     }
+}
+
+// Modified mul_by_vi function where circuitinput[0] = 9
+pub fn sqr_offset(lhs: &Fq12) -> Fq12 {
+    let (a0, a1) = (lhs.c0(), lhs.c1()); 
+    let v = a0 * a1;
+    let c0 = &(&((a0 + a1) * (a0 + &a1.mul_by_v_offset())) - &v) - &v.mul_by_v_offset();
+    let c1 = &v + &v;
+
+    Fq12 { c0, c1, inp: None }
 }
 
 #[cfg(test)]

@@ -17,16 +17,24 @@ use curve::{groups as g, pairing};
 mod circuits {
     mod typedefs {
         mod affine;
+        mod ate_type;
         mod fq_2_type;
         mod fq_6_type;
         mod fq_12_type; 
+        mod fq_12_squaring_type;
         mod add_sub_neg;
+        mod sparse_type;
+        // mod line_fn_step_dbl_add_type;
     }
     mod affine_circuits;
+    mod ate_circuits; 
     mod fq_circuits;
     mod fq_2_circuits;
     mod fq_6_circuits;
     mod fq_12_circuits;
+    mod fq_12_squaring_circuits;
+    mod sparse_circuits;
+    // mod line_fn_step_dbl_add_circuits;
 }
 
 // Fix imports with proper libs
@@ -37,14 +45,14 @@ mod fields {
     mod fq_2;
     mod fq_6;
     mod fq_12;
-    mod fq_12_direct;
+    // mod fq_12_direct;
     mod fq_12_squaring;
     mod fq_12_exponentiation;
     mod frobenius;
     // mod print;
     // mod utils;
-    #[cfg(test)]
-    mod tests {
+    // #[cfg(test)]
+    // mod tests {
         // mod fq12;
         // mod fq6;
         // mod fq2;
@@ -54,7 +62,7 @@ mod fields {
         // mod u512;
         // mod frobenius;
         // mod utils;
-    }
+    // }
 
     use fq_1::{Fq, FqOps, FqUtils, fq, FqIntoU256};
     use fq_2::{Fq2, Fq2Ops, Fq2Utils, fq2, Fq2Frobenius};

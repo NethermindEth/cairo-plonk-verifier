@@ -4,12 +4,8 @@ use core::circuit::{
     EvalCircuitTrait, InverseGate as I, MulModGate as M, SubModGate as S, circuit_add,
     circuit_inverse, circuit_mul, circuit_sub, u384,
 };
-use core::circuit::conversions::from_u256;
-use core::traits::TryInto;
 
-use debug::PrintTrait;
-
-use plonk_verifier::circuits::fq_circuits::{one_384, zero_384};
+use plonk_verifier::circuits::fq_circuits::{ONE, ZERO};
 use plonk_verifier::circuits::fq_6_circuits::{
     add_circuit, mul_circuit, neg_circuit, sqr_circuit, sub_circuit,
 };
@@ -28,19 +24,19 @@ struct Fq6 {
     c2: Fq2,
 }
 
-#[inline(always)]
+// #[inline(always)]
 fn fq6(c0: u384, c1: u384, c2: u384, c3: u384, c4: u384, c5: u384) -> Fq6 {
     Fq6 { c0: fq2(c0, c1), c1: fq2(c2, c3), c2: fq2(c4, c5) }
 }
 
 #[generate_trait]
 impl Fq6Frobenius of Fq6FrobeniusTrait {
-    #[inline(always)]
+    // #[inline(always)]
     fn frob0(self: Fq6) -> Fq6 {
         self
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn frob1(self: Fq6, m: CircuitModulus) -> Fq6 {
         let Fq6 { c0, c1, c2 } = self;
         Fq6 {
@@ -50,13 +46,13 @@ impl Fq6Frobenius of Fq6FrobeniusTrait {
         }
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn frob2(self: Fq6, m: CircuitModulus) -> Fq6 {
         let Fq6 { c0, c1, c2 } = self;
         Fq6 { c0: c0, c1: c1.scale(frob::Q_2_C0, m), c2: c2.scale(frob::Q2_2_C0, m) }
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn frob3(self: Fq6, m: CircuitModulus) -> Fq6 {
         let Fq6 { c0, c1, c2 } = self;
         Fq6 {
@@ -66,7 +62,7 @@ impl Fq6Frobenius of Fq6FrobeniusTrait {
         }
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn frob4(self: Fq6, m: CircuitModulus) -> Fq6 {
         let Fq6 { c0, c1, c2 } = self;
         Fq6 {
@@ -76,7 +72,7 @@ impl Fq6Frobenius of Fq6FrobeniusTrait {
         }
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn frob5(self: Fq6, m: CircuitModulus) -> Fq6 {
         let Fq6 { c0, c1, c2 } = self;
         Fq6 {
@@ -88,63 +84,45 @@ impl Fq6Frobenius of Fq6FrobeniusTrait {
 }
 
 impl Fq6Utils of FieldUtils<Fq6, Fq2, CircuitModulus> {
-    #[inline(always)]
+    // #[inline(always)]
     fn one() -> Fq6 {
-        fq6(one_384, zero_384, zero_384, zero_384, zero_384, zero_384)
+        fq6(ONE, ZERO, ZERO, ZERO, ZERO, ZERO)
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn zero() -> Fq6 {
-        fq6(zero_384, zero_384, zero_384, zero_384, zero_384, zero_384)
+        fq6(ZERO, ZERO, ZERO, ZERO, ZERO, ZERO)
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn scale(self: Fq6, by: Fq2, m: CircuitModulus) -> Fq6 {
         Fq6 { c0: self.c0.mul(by, m), c1: self.c1.mul(by, m), c2: self.c2.mul(by, m) }
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn conjugate(self: Fq6, m: CircuitModulus) -> Fq6 {
         assert(false, 'no_impl: fq6 conjugate');
         FieldUtils::zero()
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn mul_by_nonresidue(self: Fq6, m: CircuitModulus) -> Fq6 {
         Fq6 { c0: self.c2.mul_by_nonresidue(m), c1: self.c0, c2: self.c1, }
-    }
-
-    #[inline(always)]
-    fn frobenius_map(self: Fq6, power: usize, m: CircuitModulus) -> Fq6 {
-        let rem = power % 6;
-        if rem == 0 {
-            self.frob0()
-        } else if rem == 1 {
-            self.frob1(m)
-        } else if rem == 2 {
-            self.frob2(m)
-        } else if rem == 3 {
-            self.frob3(m)
-        } else if rem == 4 {
-            self.frob4(m)
-        } else {
-            self.frob5(m)
-        }
     }
 }
 
 impl Fq6Ops of FieldOps<Fq6, CircuitModulus> {
-    #[inline(always)]
+    // #[inline(always)]
     fn add(self: Fq6, rhs: Fq6, m: CircuitModulus) -> Fq6 {
         Fq6 { c0: self.c0.add(rhs.c0, m), c1: self.c1.add(rhs.c1, m), c2: self.c2.add(rhs.c2, m), }
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn sub(self: Fq6, rhs: Fq6, m: CircuitModulus) -> Fq6 {
         Fq6 { c0: self.c0.sub(rhs.c0, m), c1: self.c1.sub(rhs.c1, m), c2: self.c2.sub(rhs.c2, m), }
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn mul(self: Fq6, rhs: Fq6, m: CircuitModulus) -> Fq6 {
         let (c0, c1, c2, c3, c4, c5) = mul_circuit(); 
 
@@ -172,17 +150,17 @@ impl Fq6Ops of FieldOps<Fq6, CircuitModulus> {
             c2: Fq2 { c0: Fq { c0: outputs.get_output(c4) }, c1: Fq { c0: outputs.get_output(c5) } } 
         }
     }
-    #[inline(always)]
+    // #[inline(always)]
     fn div(self: Fq6, rhs: Fq6, m: CircuitModulus) -> Fq6 {
         self.mul(rhs.inv(m), m)
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn neg(self: Fq6, m: CircuitModulus) -> Fq6 {
         Fq6 { c0: self.c0.neg(m), c1: self.c1.neg(m), c2: self.c2.neg(m) }
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn sqr(self: Fq6, m: CircuitModulus) -> Fq6 {
         let (c0, c1, c2, c3, c4, c5) = sqr_circuit(); 
 
@@ -205,7 +183,7 @@ impl Fq6Ops of FieldOps<Fq6, CircuitModulus> {
         }
     }
 
-    #[inline(always)]
+    // #[inline(always)]
     fn inv(self: Fq6, m: CircuitModulus) -> Fq6 {
         let Fq6 { c0, c1, c2 } = self;
         let c1_mul_c2 = Fq2Ops::mul(c1, c2, m);
@@ -225,23 +203,8 @@ impl Fq6Ops of FieldOps<Fq6, CircuitModulus> {
     }
 }
 
-fn fq6_karatsuba_sqr(a: Fq6, rhs: Fq6, m: CircuitModulus) -> (Fq2, Fq2, Fq2) {
-    let Fq6 { c0: a0, c1: a1, c2: a2 } = a;
-    // Karatsuba squaring
-    // v0 = a0a0, v1 = a1a1, v2 = a2a2
-    let (V0, V1, V2,) = (a0.sqr(m), a1.sqr(m), a2.sqr(m),);
-
-    // c0 = v0 + ξ((a1 + a2)(a1 + a2) - v1 - v2)
-    let C0 = V0.add(mul_by_xi_nz_as_circuit(a1.add(a2, m), m).sqr(m).sub(V1, m).sub(V2, m), m);
-    // c1 =(a0 + a1)(a0 + a1) - v0 - v1 + ξv2
-    let C1 = (a0.add(a1, m)).sqr(m).sub(V0, m).sub(V1, m).add(mul_by_xi_nz_as_circuit(V2, m), m);
-    // c2 = (a0 + a2)(a0 + a2) - v0 + v1 - v2,
-    let C2 = (a0.add(a2, m)).sqr(m).sub(V0, m).add(V1, m).sub(V2, m);
-    (C0, C1, C2)
-}
-
 impl FqEqs of FieldEqs<Fq6> {
-    #[inline(always)]
+    // #[inline(always)]
     fn eq(lhs: @Fq6, rhs: @Fq6) -> bool {
         lhs.c0 == rhs.c0 && lhs.c1 == rhs.c1 && lhs.c2 == rhs.c2
     }
