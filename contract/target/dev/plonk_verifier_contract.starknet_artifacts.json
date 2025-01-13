@@ -1,1 +1,0 @@
-{"version":1,"contracts":[{"id":"4g1giosutcfgs","package_name":"plonk_verifier_contract","contract_name":"PLONK_Verifier","module_path":"plonk_verifier_contract::PLONK_Verifier","artifacts":{"sierra":"plonk_verifier_contract_PLONK_Verifier.contract_class.json","casm":"plonk_verifier_contract_PLONK_Verifier.compiled_contract_class.json"}}]}
