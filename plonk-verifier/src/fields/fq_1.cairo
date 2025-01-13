@@ -1,7 +1,7 @@
 use core::circuit::{
     AddInputResultTrait, CircuitElement, CircuitInput, CircuitInputs, CircuitModulus,
     CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, circuit_add, circuit_inverse,
-    circuit_mul, circuit_sub, u384,
+    circuit_mul, circuit_sub, u384,U384Serde
 };
 use core::num::traits::Zero;
 
@@ -11,7 +11,7 @@ use plonk_verifier::circuits::fq_circuits::{
 use plonk_verifier::curve::constants::FIELD_U384;
 use plonk_verifier::traits::{FieldEqs, FieldOps, FieldUtils};
 
-#[derive(Copy, Drop, Debug)]
+#[derive(Copy, Drop, Debug, Serde)]
 struct Fq {
     c0: u384
 }

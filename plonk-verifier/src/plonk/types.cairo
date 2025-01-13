@@ -1,3 +1,5 @@
+use core::serde::Serde;
+use core::circuit::U384Serde;
 use core::{
     array::ArrayTrait,
     circuit::u384,
@@ -11,7 +13,7 @@ use plonk_verifier::{
     fields::fq_generics::TFqPartialEq,
 };
 
-#[derive(Copy, Drop)]
+#[derive(Copy, Drop, Serde)]
 struct PlonkProof {
     A: AffineG1,
     B: AffineG1,
@@ -30,7 +32,7 @@ struct PlonkProof {
     eval_zw: Fq
 }
 
-#[derive(Copy, Drop)]
+#[derive(Copy, Drop, Serde)]
 struct PlonkVerificationKey {
     n: u256,
     power: u256,
