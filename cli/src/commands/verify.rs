@@ -1,7 +1,7 @@
 use crate::commands::types::{PLONKProof, VerificationKey};
-use crate::commands::utils::{ensure_temp_dir, read_json_file};
+use crate::commands::utils::{ensure_temp_dir};
 
-use crate::commands::type_conversion::{convert_u384_to_low_high};
+use crate::commands::type_conversion::convert_u384_to_low_high;
 use crate::error::CliError;
 use dotenv::dotenv;
 use serde_json;
@@ -52,6 +52,8 @@ pub async fn verify(
         env::var("CONTRACT_ADDRESS").expect("CONTRACT_ADDRESS environment variable is not set");
     let account_address =
         env::var("ACCOUNT_ADDRESS").expect("ACCOUNT_ADDRESS environment variable is not set");
+    let rpc_url =
+        env::var("RPC_URL").expect("RPC_URL environment variable is not set");
 
     // Ensure temp directory exists
     ensure_temp_dir()?;
@@ -62,11 +64,6 @@ pub async fn verify(
     let public_full_path = resolve_file_path(public_inputs_path, DEFAULT_PUBLIC)?;
 
     type PublicSignals = Vec<String>; // Public.json is an array of strings
-
-    // Load and validate all files
-    // let vk = read_json_file(&vk_full_path)?;
-    // let proof = read_json_file(&proof_full_path)?;
-    // let public = read_json_file(&public_full_path)?;
 
     // Load and parse verification key
     let vk_json = std::fs::read_to_string(&vk_full_path)?;
@@ -81,11 +78,6 @@ pub async fn verify(
     let public_json = std::fs::read_to_string(&public_full_path)?;
     let public_signals: PublicSignals =
         serde_json::from_str(&public_json).expect("Failed to parse public inputs");
-
-    // Debug print parsed data (optional)
-    // println!("Parsed verification key: {:?}", vk);
-    // println!("Parsed proof: {:?}", proof);
-    // println!("Parsed public inputs: {:?}", public_signals);
 
     // // Prepare calldata
     let mut calldata: Vec<Felt> = vec![];
@@ -106,7 +98,7 @@ pub async fn verify(
     let (k2_low, k2_high) = convert_u384_to_low_high(&vk.k2);
     calldata.push(Felt::from_dec_str(&k2_low).unwrap());
     calldata.push(Felt::from_dec_str(&k2_high).unwrap());
-   
+
     let (n_public_low, n_public_high) = convert_u384_to_low_high(&vk.n_public);
     calldata.push(Felt::from_dec_str(&n_public_low).unwrap());
     calldata.push(Felt::from_dec_str(&n_public_high).unwrap());
@@ -114,8 +106,6 @@ pub async fn verify(
     let (n_lagrange_low, n_lagrange_high) = convert_u384_to_low_high(&vk.n_lagrange);
     calldata.push(Felt::from_dec_str(&n_lagrange_low).unwrap());
     calldata.push(Felt::from_dec_str(&n_lagrange_high).unwrap());
-
-    
 
     // Add G1 points for Qm, Qc, Ql, Qr, Qo, S1, S2, S3
     let g1_points = [
@@ -143,17 +133,6 @@ pub async fn verify(
     let (w_low, w_high) = convert_u384_to_low_high(&vk.w);
     calldata.push(Felt::from_dec_str(&w_low).unwrap());
     calldata.push(Felt::from_dec_str(&w_high).unwrap());
-
-    // println!("Calldata for verification key:");
-    // print!("[");
-    // for (i, value) in calldata.iter().enumerate() {
-    //     if i == 0 {
-    //         print!("{}", value); // Print the first value without a comma
-    //     } else {
-    //         print!(", {}", value); // Add a comma before subsequent values
-    //     }
-    // }
-    // println!("]");
 
     // Add proof fields
     let proof_field_points = [
@@ -192,7 +171,17 @@ pub async fn verify(
         calldata.push(Felt::from_dec_str(&high).unwrap());
     }
 
-    // println!("Calldata for proof:");
+    // Add public signals
+    let public_signal_length = public_signals.len();
+    calldata.push(Felt::from_dec_str(&public_signal_length.to_string()).unwrap());
+    
+    for signal in public_signals {
+        let (low, high) = convert_u384_to_low_high(signal.as_str());
+        calldata.push(Felt::from_dec_str(&low).unwrap());
+        calldata.push(Felt::from_dec_str(&high).unwrap());
+    }
+
+    // println!("Calldata for public_signals:");
     // print!("[");
     // for (i, value) in calldata.iter().enumerate() {
     //     if i == 0 {
@@ -203,31 +192,9 @@ pub async fn verify(
     // }
     // println!("]");
 
-    // Add public signals
-    let public_signal_length = public_signals.len();
-    calldata.push(Felt::from_dec_str(&public_signal_length.to_string()).unwrap());
-    for signal in public_signals {
-        let (low, high) = convert_u384_to_low_high(signal.as_str());
-        calldata.push(Felt::from_dec_str(&low).unwrap());
-        calldata.push(Felt::from_dec_str(&high).unwrap());
-    }
-
-    println!("Calldata for public_signals:");
-    print!("[");
-    for (i, value) in calldata.iter().enumerate() {
-        if i == 0 {
-            print!("{}", value); // Print the first value without a comma
-        } else {
-            print!(", {}", value); // Add a comma before subsequent values
-        }
-    }
-    println!("]");
-
-    
-
     // Starknet Provider and Account Setup
     let provider = JsonRpcClient::new(HttpTransport::new(
-        Url::parse("https://starknet-sepolia.public.blastapi.io/rpc/v0_7").unwrap(),
+        Url::parse(&rpc_url).unwrap(),
     ));
 
     let signer = LocalWallet::from(SigningKey::from_secret_scalar(
@@ -251,19 +218,20 @@ pub async fn verify(
 
     // Execute Call (Example Interaction)
     let result = match account
-    .execute_v1(vec![Call {
-        to: verifier_contract_address,
-        selector: get_selector_from_name("verify").unwrap(),
-        calldata: calldata,
-    }])
-    .send()
-    .await {
+        .execute_v1(vec![Call {
+            to: verifier_contract_address,
+            selector: get_selector_from_name("verify").unwrap(),
+            calldata: calldata,
+        }])
+        .send()
+        .await
+    {
         Ok(result) => {
             println!("Transaction hash: {:#064x}", result.transaction_hash);
             println!("\nVerifying proof...");
             println!("✅ Proof is valid!");
             true
-        },
+        }
         Err(error) => {
             println!("Transaction hash: Error occurred");
             println!("\nVerifying proof...");
@@ -272,14 +240,6 @@ pub async fn verify(
             false
         }
     };
-    // println!("Transaction hash: {:#064x}", result.transaction_hash);
-
-    
-
-    // // Perform verification
-    // println!("\nVerifying proof...");
-    // // Add actual verification logic here
-    // println!("✅ Proof is valid!");
 
     Ok(())
 }

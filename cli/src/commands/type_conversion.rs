@@ -1,5 +1,5 @@
 use num_bigint::BigUint;
-use num_traits::{One};
+use num_traits::One;
 use primitive_types::U256;
 use std::str::FromStr;
 
