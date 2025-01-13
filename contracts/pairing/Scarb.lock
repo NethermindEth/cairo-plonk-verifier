@@ -2,17 +2,17 @@
 version = 1
 
 [[package]]
-name = "plonk_verifier"
+name = "pairing_contract"
 version = "0.1.0"
 dependencies = [
+ "plonk_verifier",
  "snforge_std",
 ]
 
 [[package]]
-name = "plonk_verifier_contract"
+name = "plonk_verifier"
 version = "0.1.0"
 dependencies = [
- "plonk_verifier",
  "snforge_std",
 ]
 
