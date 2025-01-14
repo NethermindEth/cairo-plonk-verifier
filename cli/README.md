@@ -12,9 +12,32 @@ cargo build
 cargo install --path .
 ```
 
+## Prerequisites
+
+- Rust 1.70 or higher
+- Cargo
+- snarkjs (for generating proof components)
+
+### Configuration
+Create a .env file in the project root with the following variables:
+
+```
+PRIVATE_KEY=           # Your private key
+CONTRACT_ADDRESS=0x07bb076ad972cb92eccdf2f32544cf68cf365911ec731008bc24c8b8a4049445
+ACCOUNT_ADDRESS=       # Your account address
+RPC_URL=              # Your RPC endpoint URL
+```
+
 ## Usage
 
-Verify a PLONK proof:
+### 1. Generate Proof Components
+
+Use snarkjs to generate the following files:
+- verification_key.json
+- proof.json
+- public.json
+
+### 2. Verify Proof
 
 ```bash
 cargo run -- verify [OPTIONS]
@@ -39,63 +62,26 @@ cargo run -- verify \
   --public ./custom/path/public.json
 ```
 
-## File Formats
-
-### Verification Key (verification_key.json)
-
-```json
-{
-  "protocol": "plonk",
-  "curve": "bn128",
-  "nPublic": 5,
-  "power": 12,
-  "k1": "2",
-  "k2": "3"
-  // ... other verification key parameters
-}
-```
-
-### Proof (proof.json)
-
-```json
-{
-  "protocol": "plonk",
-  "curve": "bn128",
-  "A": ["...", "...", "1"],
-  "B": ["...", "...", "1"]
-  // ... other proof parameters
-}
-```
-
-### Public Inputs (public.json)
-
-```json
-{
-  // public input values
-}
-```
-
 ## Project Structure
 
 ```
 .
-├── Cargo.toml
-├── data/
-│   └── temp/           # Default location for input files
-├── src/
-│   ├── cli.rs         # CLI argument definitions
-│   ├── commands/      # Command implementations
-│   ├── error.rs       # Error handling
-│   ├── lib.rs         # Library exports
-│   └── main.rs        # Entry point
+├── ./data
+│   └── ./data/temp
+├── ./src
+│   ├── ./src/cli.rs
+│   ├── ./src/commands
+│   │   ├── ./src/commands/mod.rs
+│   │   ├── ./src/commands/type_conversion.rs
+│   │   ├── ./src/commands/types.rs
+│   │   ├── ./src/commands/utils.rs
+│   │   └── ./src/commands/verify.rs
+│   ├── ./src/error.rs
+│   ├── ./src/lib.rs
+│   └── ./src/main.rs
 ```
 
 ## Development
-
-### Prerequisites
-
-- Rust 1.70 or higher
-- Cargo
 
 ### Building
 

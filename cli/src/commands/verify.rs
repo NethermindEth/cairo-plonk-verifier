@@ -218,7 +218,7 @@ pub async fn verify(
 
     // Execute Call (Example Interaction)
     let result = match account
-        .execute_v1(vec![Call {
+        .execute_v3(vec![Call {
             to: verifier_contract_address,
             selector: get_selector_from_name("verify").unwrap(),
             calldata: calldata,
