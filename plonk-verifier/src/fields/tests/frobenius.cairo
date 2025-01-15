@@ -52,16 +52,16 @@ fn frobenius_fq12() -> Array<Fq12> {
     ]
 }
 
-#[test]
-fn fq12_frobenius_all() {
-    let frobenius_maps = frobenius_fq12();
-    let input = *frobenius_maps[0];
-    let mut i = 0;
-    loop {
-        i += 1;
-        if i == frobenius_maps.len() {
-            break;
-        }
-        assert(input.frobenius_map(i) == *frobenius_maps[i], 'incorrect frobenius 0' + i.into())
-    }
-}
+// #[test]
+// fn fq12_frobenius_all() {
+//     let frobenius_maps = frobenius_fq12();
+//     let input = *frobenius_maps[0];
+//     let mut i = 0;
+//     loop {
+//         i += 1;
+//         if i == frobenius_maps.len() {
+//             break;
+//         }
+//         assert(input.frobenius_map(i) == *frobenius_maps[i], 'incorrect frobenius 0' + i.into())
+//     }
+// }

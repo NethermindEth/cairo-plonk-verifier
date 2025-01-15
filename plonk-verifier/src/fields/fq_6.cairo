@@ -4,12 +4,8 @@ use core::circuit::{
     EvalCircuitTrait, InverseGate as I, MulModGate as M, SubModGate as S, circuit_add,
     circuit_inverse, circuit_mul, circuit_sub, u384,
 };
-use core::circuit::conversions::from_u256;
-use core::traits::TryInto;
 
-use debug::PrintTrait;
-
-use plonk_verifier::circuits::fq_circuits::{one_384, zero_384};
+use plonk_verifier::circuits::fq_circuits::{ONE, ZERO};
 use plonk_verifier::circuits::fq_6_circuits::{
     add_circuit, mul_circuit, neg_circuit, sqr_circuit, sub_circuit,
 };
@@ -90,12 +86,12 @@ impl Fq6Frobenius of Fq6FrobeniusTrait {
 impl Fq6Utils of FieldUtils<Fq6, Fq2, CircuitModulus> {
     // #[inline(always)]
     fn one() -> Fq6 {
-        fq6(one_384, zero_384, zero_384, zero_384, zero_384, zero_384)
+        fq6(ONE, ZERO, ZERO, ZERO, ZERO, ZERO)
     }
 
     // #[inline(always)]
     fn zero() -> Fq6 {
-        fq6(zero_384, zero_384, zero_384, zero_384, zero_384, zero_384)
+        fq6(ZERO, ZERO, ZERO, ZERO, ZERO, ZERO)
     }
 
     // #[inline(always)]
@@ -112,24 +108,6 @@ impl Fq6Utils of FieldUtils<Fq6, Fq2, CircuitModulus> {
     // #[inline(always)]
     fn mul_by_nonresidue(self: Fq6, m: CircuitModulus) -> Fq6 {
         Fq6 { c0: self.c2.mul_by_nonresidue(m), c1: self.c0, c2: self.c1, }
-    }
-
-    // #[inline(always)]
-    fn frobenius_map(self: Fq6, power: usize, m: CircuitModulus) -> Fq6 {
-        let rem = power % 6;
-        if rem == 0 {
-            self.frob0()
-        } else if rem == 1 {
-            self.frob1(m)
-        } else if rem == 2 {
-            self.frob2(m)
-        } else if rem == 3 {
-            self.frob3(m)
-        } else if rem == 4 {
-            self.frob4(m)
-        } else {
-            self.frob5(m)
-        }
     }
 }
 
@@ -224,21 +202,6 @@ impl Fq6Ops of FieldOps<Fq6, CircuitModulus> {
         Fq6 { c0: c0, c1: c1, c2: c2 }
     }
 }
-
-// fn fq6_karatsuba_sqr(a: Fq6, rhs: Fq6, m: CircuitModulus) -> (Fq2, Fq2, Fq2) {
-//     let Fq6 { c0: a0, c1: a1, c2: a2 } = a;
-//     // Karatsuba squaring
-//     // v0 = a0a0, v1 = a1a1, v2 = a2a2
-//     let (V0, V1, V2,) = (a0.sqr(m), a1.sqr(m), a2.sqr(m),);
-
-//     // c0 = v0 + ξ((a1 + a2)(a1 + a2) - v1 - v2)
-//     let C0 = V0.add(mul_by_xi_nz_as_circuit(a1.add(a2, m), m).sqr(m).sub(V1, m).sub(V2, m), m);
-//     // c1 =(a0 + a1)(a0 + a1) - v0 - v1 + ξv2
-//     let C1 = (a0.add(a1, m)).sqr(m).sub(V0, m).sub(V1, m).add(mul_by_xi_nz_as_circuit(V2, m), m);
-//     // c2 = (a0 + a2)(a0 + a2) - v0 + v1 - v2,
-//     let C2 = (a0.add(a2, m)).sqr(m).sub(V0, m).add(V1, m).sub(V2, m);
-//     (C0, C1, C2)
-// }
 
 impl FqEqs of FieldEqs<Fq6> {
     // #[inline(always)]

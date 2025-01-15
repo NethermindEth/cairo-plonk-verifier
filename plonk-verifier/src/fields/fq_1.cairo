@@ -3,12 +3,10 @@ use core::circuit::{
     CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, circuit_add, circuit_inverse,
     circuit_mul, circuit_sub, u384, U384Serde
 };
-use core::circuit::conversions::from_u256;
 use core::num::traits::Zero;
-use core::traits::TryInto;
 
 use plonk_verifier::circuits::fq_circuits::{
-    add_c, div_c, inv_c, mul_c, neg_c, one_384, scl_c, sqr_c, sub_c, zero_384,
+    add_c, div_c, inv_c, mul_c, neg_c, ONE, scl_c, sqr_c, sub_c, ZERO,
 };
 use plonk_verifier::curve::constants::FIELD_U384;
 use plonk_verifier::traits::{FieldEqs, FieldOps, FieldUtils};
@@ -26,12 +24,12 @@ fn fq(c0: u384) -> Fq {
 impl FqUtils of FieldUtils<Fq, u128, CircuitModulus> {
     // #[inline(always)]
     fn one() -> Fq {
-        fq(one_384)
+        fq(ONE)
     }
 
     // #[inline(always)]
     fn zero() -> Fq {
-        fq(zero_384)
+        fq(ZERO)
     }
 
     // #[inline(always)]
@@ -54,12 +52,6 @@ impl FqUtils of FieldUtils<Fq, u128, CircuitModulus> {
         assert(false, 'no_impl: fq conjugate');
         FieldUtils::zero()
     }
-
-    // #[inline(always)]
-    fn frobenius_map(self: Fq, power: usize, m: CircuitModulus) -> Fq {
-        assert(false, 'no_impl: fq frobenius_map');
-        FieldUtils::zero()
-    }
 }
 
 impl FqOps of FieldOps<Fq, CircuitModulus> {
@@ -75,20 +67,8 @@ impl FqOps of FieldOps<Fq, CircuitModulus> {
 
     // #[inline(always)]
     fn mul(self: Fq, rhs: Fq, m: CircuitModulus) -> Fq {
-        let a = CircuitElement::<CircuitInput<0>> {};
-        let b = CircuitElement::<CircuitInput<1>> {};
-        let mul = circuit_mul(a, b);
+        fq(mul_c(self.c0, rhs.c0, m))
 
-        let a = self.c0;
-        let b = rhs.c0;
-
-        let outputs = match (mul,).new_inputs().next(a).next(b).done().eval(m) {
-            Result::Ok(outputs) => { outputs },
-            Result::Err(_) => { panic!("Expected success") }
-        };
-
-        let fq_c0 = Fq { c0: outputs.get_output(mul).try_into().unwrap() };
-        fq_c0
     }
 
     // #[inline(always)]
@@ -104,17 +84,7 @@ impl FqOps of FieldOps<Fq, CircuitModulus> {
 
     // #[inline(always)]
     fn sqr(self: Fq, m: CircuitModulus) -> Fq {
-        let a0 = CircuitElement::<CircuitInput<0>> {};
-        let sqr = circuit_mul(a0, a0);
-
-        let a = self.c0;
-
-        let outputs = match (sqr,).new_inputs().next(a).done().eval(m) {
-            Result::Ok(outputs) => { outputs },
-            Result::Err(_) => { panic!("Expected success") }
-        };
-
-        Fq { c0: outputs.get_output(sqr) }
+        fq(sqr_c(self.c0, m))
     }
 
     // #[inline(always)]

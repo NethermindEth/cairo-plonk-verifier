@@ -1,14 +1,15 @@
 use core::circuit::CircuitModulus;
-use core::debug::PrintTrait;
 
 use plonk_verifier::curve::constants::FIELD_U384;
-use plonk_verifier::curve::{groups, pairing::optimal_ate_impls};
+use plonk_verifier::curve::{groups, pairing::{optimal_ate_impls, optimal_ate_impls::step_double}};
 use plonk_verifier::fields::{
     fq, Fq, Fq2, Fq6, Fq12, Fq12Exponentiation, Fq12Utils, FieldOps, FieldUtils,
 };
+use plonk_verifier::fields::fq_sparse::FqSparseTrait;
+
 use plonk_verifier::traits::{MillerPrecompute, MillerSteps};
 
-use groups::{Affine, AffineG1, AffineG2, ECGroup, g1, g2};
+use groups::{Affine, AffineG1, AffineG2, ECGroup, g2};
 use optimal_ate_impls::{SingleMillerPrecompute, SingleMillerSteps};
 use plonk_verifier::curve::pairing::optimal_ate_impls::PreCompute;
 
@@ -34,9 +35,8 @@ fn ate_miller_loop<
 >( 
     p: TG1, q: TG2, m: M 
 ) -> Fq12 {
-    gas::withdraw_gas().unwrap();
-    core::internal::revoke_ap_tracking();
-
+    //gas::withdraw_gas().unwrap();
+    //core::internal::revoke_ap_tracking();
     // Prepare precompute and q accumulator
     let (precompute, mut q_acc) = (p, q).precompute(m);
     
@@ -75,13 +75,13 @@ fn ate_miller_loop<
 fn miller_step<
     TG2, TPreC, +MillerSteps<TPreC, TG2, Fq12>, +Drop<TG2>, +Drop<TPreC>
 >(
-    precompute: @TPreC, i: u32, bit_type: @BitType, ref q_acc: TG2, ref f: Fq12
+    precompute: @TPreC, bit_type: @BitType, ref q_acc: TG2, ref f: Fq12
 ) {
-    precompute.sqr_target(0, ref q_acc, ref f);
+    precompute.sqr_target(ref q_acc, ref f);
     match bit_type {
-        BitType::O => precompute.miller_bit_o(i, ref q_acc, ref f),
-        BitType::N => precompute.miller_bit_n(i, ref q_acc, ref f),
-        BitType::P => precompute.miller_bit_p(i, ref q_acc, ref f),
+        BitType::O => precompute.miller_bit_o(ref q_acc, ref f),
+        BitType::N => precompute.miller_bit_n(ref q_acc, ref f),
+        BitType::P => precompute.miller_bit_p(ref q_acc, ref f),
     }
 }
 
@@ -91,7 +91,8 @@ fn ate_miller_loop_steps<
     precompute: TPreC, ref q_acc: TG2
 ) -> Fq12 {
     // ate_loop[64] = O and ate_loop[63] = N
-    let mut f = precompute.miller_first_second(64, 63, ref q_acc);
+    let mut f = precompute.miller_first(ref q_acc); // first
+    precompute.miller_bit_n(ref q_acc, ref f); // second
 
     let steps = [
         BitType::O, // i=62
@@ -160,7 +161,7 @@ fn ate_miller_loop_steps<
     ].span();
 
     for step in steps {
-        miller_step(@precompute, 0, step, ref q_acc, ref f);
+        miller_step(@precompute, step, ref q_acc, ref f);
     };
 
     precompute.miller_last(ref q_acc, ref f);

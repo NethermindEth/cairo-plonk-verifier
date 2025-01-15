@@ -13,7 +13,7 @@ use plonk_verifier::circuits::affine_circuits::{
     fq2_add_circuit, fq2_chord_circuit, fq2_double_circuit, fq2_pt_on_slope_circuit,
     fq2_tangent_circuit, fq2_y_on_slope_circuit,
 };
-use plonk_verifier::curve::constants::FIELD_U384;
+use plonk_verifier::curve::constants::{ONE, FIELD_U384, TWO, XC0, XC1, YC0, YC1};
 use plonk_verifier::fields::{fq, fq2, Fq, Fq2};
 use plonk_verifier::traits::{FieldOps as FOps};
 
@@ -179,10 +179,10 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
     ) -> Affine<Fq> {
         let nz2: NonZero<u256> = 2_u256.try_into().unwrap();
         let mut dbl_step = *self;
-        let mut result = g1(1, 2);
+        let mut result = AffineG1Impl::one();
         let mut first_add_done = false;
-        let mut multiplier: u256 = multiplier.try_into().unwrap();
 
+        let mut multiplier: u256 = multiplier.try_into().unwrap();
         // TODO:: outside loop reduce down to u256-> felt252, then use loop using felt252
         loop {
             let (q, r, _) = integer::u256_safe_divmod(multiplier, nz2);
@@ -596,18 +596,13 @@ fn g2(x1: u256, x2: u256, y1: u256, y2: u256) -> Affine<Fq2> {
 impl AffineG1Impl of ECGroup<Fq> {
     // #[inline(always)]
     fn one() -> Affine<Fq> {
-        g1(1, 2)
+        affine_fq1(ONE, TWO)
     }
 }
 
 impl AffineG2Impl of ECGroup<Fq2> {
     // #[inline(always)]
     fn one() -> AffineG2 {
-        g2(
-            10857046999023057135944570762232829481370756359578518086990519993285655852781,
-            11559732032986387107991004021392285783925812861821192530917403151452391805634,
-            8495653923123431417604973247489272438418190587263600148770280649306958101930,
-            4082367875863433681332203403145435568316851327593401208105741076214120093531
-        )
+        affine_fq2(XC0, XC1, YC0, YC1)
     }
 }

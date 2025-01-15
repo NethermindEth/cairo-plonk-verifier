@@ -1,9 +1,8 @@
 use core::circuit::{
     AddInputResultTrait, AddMod, CircuitElement, CircuitInput, CircuitInputs, CircuitModulus,
     CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, circuit_add, circuit_inverse,
-    circuit_mul, circuit_sub, u384,
+    circuit_mul, circuit_sub, u384,U384Serde
 };
-use core::traits::TryInto;
 
 use plonk_verifier::circuits::{
     fq_circuits::{one_384, zero_384},
@@ -11,7 +10,7 @@ use plonk_verifier::circuits::{
         add_circuit, div_circuit, inv_circuit, mul_circuit, neg_circuit, sqr_circuit, sub_circuit
     }
 };
-use plonk_verifier::curve::{circuit_scale_9};
+use plonk_verifier::curve::circuit_scale_9;
 use plonk_verifier::curve::constants::FIELD_U384;
 use plonk_verifier::fields::{fq, Fq, FqOps};
 use plonk_verifier::fields::fq_generics::TFqPartialEq;
@@ -44,12 +43,12 @@ impl Fq2Frobenius of Fq2FrobeniusTrait {
 impl Fq2Utils of FieldUtils<Fq2, u384, CircuitModulus> {
     // #[inline(always)]
     fn one() -> Fq2 {
-        fq2(one_384, zero_384)
+        fq2(ONE, ZERO)
     }
 
     // #[inline(always)]
     fn zero() -> Fq2 {
-        fq2(zero_384, zero_384)
+        fq2(ZERO, ZERO)
     }
 
     // #[inline(always)]
@@ -97,15 +96,6 @@ impl Fq2Utils of FieldUtils<Fq2, u384, CircuitModulus> {
             c0: circuit_scale_9(a0, m).sub(a1, m), //  
              // c1: a0 * b1 + a1 * b0,
             c1: a0.add(circuit_scale_9(a1, m), m), //
-        }
-    }
-
-    // #[inline(always)]
-    fn frobenius_map(self: Fq2, power: usize, m: CircuitModulus) -> Fq2 {
-        if power % 2 == 0 {
-            self
-        } else {
-            self.conjugate(m)
         }
     }
 }

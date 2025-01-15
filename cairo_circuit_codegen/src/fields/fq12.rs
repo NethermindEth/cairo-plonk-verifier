@@ -34,7 +34,7 @@ impl Fq12 {
 
         let b = a1.mul_01(&Fq6Sparse01::new(c3.clone(), c4.clone())); // todo: remove clone
         
-        // Circuit div(x/x) = 1 
+        // Circuit div(x/x) = 1 // assumes circuit input is non-zero
         let tmp = c3.c0() + &Fq::one();
         let c3 = Fq2::new(tmp, c3.c1().clone(), None);
         let d = a0 + a1;
