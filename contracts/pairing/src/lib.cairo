@@ -5,7 +5,6 @@ trait IPairing<T> {
     fn valid_pairing(
         ref self: T, point1G1: AffineG1, point1G2: AffineG2, point2G1: AffineG1, point2G2: AffineG2
     ) -> bool;
-    // fn test(ref self: T);
 }
 
 #[starknet::contract]
@@ -21,7 +20,6 @@ mod pairing {
         SingleMillerPrecompute, SingleMillerSteps
     };
 
-
     use core::circuit::{u384, CircuitModulus};
 
     #[storage]
@@ -33,7 +31,6 @@ mod pairing {
         PairingCheck: PairingCheck,
     }
 
-    /// Emitted when tokens are moved from address `from` to address `to`.
     #[derive(Drop, PartialEq, starknet::Event)]
     pub struct PairingCheck {
         pub res: bool,
