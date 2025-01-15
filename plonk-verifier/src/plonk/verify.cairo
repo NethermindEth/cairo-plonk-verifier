@@ -2,16 +2,16 @@ use core::num::traits::Zero;
 use core::{
     array::ArrayTrait,
     circuit::{
-        AddInputResultTrait, AddMod, CircuitElement, CircuitInput, CircuitInputs, CircuitModulus,
-        CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, RangeCheck96, U384Zero, u96, u384,
-        circuit_add, circuit_inverse, circuit_mul, circuit_sub, conversions::from_u256,
+        AddInputResultTrait, AddModGate as A, CircuitElement, CircuitElement as CE, CircuitInput,
+        CircuitInput as CI, CircuitInputs, CircuitModulus, CircuitOutputsTrait, EvalCircuitResult,
+        EvalCircuitTrait, InverseGate as I, MulModGate as M, SubModGate as S, circuit_add,
+        circuit_inverse, circuit_mul, circuit_sub, u96, u384,
     },
-    clone::Clone, cmp::max, traits::{Destruct, Into, TryInto},
+    cmp::max,
+    traits::{Destruct, Into, TryInto},
 };
 
-use plonk_verifier::circuits::fq_circuits::{
-    add_c, add_co, div_c, div_co, mul_c, mul_co, neg_co, sqr_c, sqr_co, sub_c, sub_co
-};
+use plonk_verifier::circuits::fq_circuits::{add_c, div_c, mul_c, neg_c, sqr_c, sub_c};
 use plonk_verifier::{
     curve::{
         constants::{FIELD_U384, ORDER, ORDER_384, ORDER_U384},
@@ -234,7 +234,7 @@ impl PlonkVerifier of PVerifier {
         let mut w: Fq = FqUtils::one();
 
 
-        let n_public: u256 = (verification_key.nPublic.c0).try_into().unwrap();
+        let mut n_public: u256 = (verification_key.nPublic.c0).try_into().unwrap();
         if n_public == 0 {
             n_public = 1; 
         }
@@ -247,7 +247,7 @@ impl PlonkVerifier of PVerifier {
             let l_i = div_c(w_mul_zh, xi_mul_n, m_o);
             lagrange_evaluations.append(fq(l_i));
 
-            w = fq(mul_c(w.c0, verification_key.w, m_o));
+            w = fq(mul_c(w.c0, verification_key.w.c0, m_o));
 
             j += 1;
         };
@@ -314,9 +314,9 @@ impl PlonkVerifier of PVerifier {
             .next(challenges.xi.c0)
             .next(proof.eval_a.c0)
             .next(challenges.gamma.c0)
-            .next(vk.k1)
+            .next(vk.k1.c0)
             .next(proof.eval_b.c0)
-            .next(vk.k2)
+            .next(vk.k2.c0)
             .next(proof.eval_c.c0)
             .next(challenges.alpha.c0)
             .next(*l1.c0)
@@ -482,7 +482,7 @@ impl PlonkVerifier of PVerifier {
 
         let mut B1 = proof.Wxi.multiply_as_circuit(challenges.xi.c0, m);
 
-        let s = mul_c(mul_c(challenges.u.c0, challenges.xi.c0, m_o), vk.w, m_o);
+        let s = mul_c(mul_c(challenges.u.c0, challenges.xi.c0, m_o), vk.w.c0, m_o);
 
         let Wxiw_mul_s = proof.Wxiw.multiply_as_circuit(s, m);
         B1 = B1.add_as_circuit(Wxiw_mul_s, m);
@@ -517,7 +517,7 @@ impl PlonkVerifier of PVerifier {
 
         let mut B1 = proof.Wxi.multiply_as_circuit(challenges.xi.c0, m);
 
-        let s = mul_c(mul_c(challenges.u.c0, challenges.xi.c0, m_o), vk.w, m_o);
+        let s = mul_c(mul_c(challenges.u.c0, challenges.xi.c0, m_o), vk.w.c0, m_o);
 
         let Wxiw_mul_s = proof.Wxiw.multiply_as_circuit(s, m);
         B1 = B1.add_as_circuit(Wxiw_mul_s, m);

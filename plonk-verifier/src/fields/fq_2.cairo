@@ -5,7 +5,7 @@ use core::circuit::{
 };
 
 use plonk_verifier::circuits::{
-    fq_circuits::{one_384, zero_384},
+    fq_circuits::{ZERO, ONE},
     fq_2_circuits::{
         add_circuit, div_circuit, inv_circuit, mul_circuit, neg_circuit, sqr_circuit, sub_circuit
     }
