@@ -1,7 +1,7 @@
 use core::circuit::{
     AddInputResultTrait, AddMod, CircuitElement, CircuitInput, CircuitInputs, CircuitModulus,
     CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, MulMod, RangeCheck96, u96, u384,
-    circuit_add, circuit_inverse, circuit_mul, circuit_sub,
+    circuit_add, circuit_inverse, circuit_mul, circuit_sub, U384Serde
 };
 use core::circuit::conversions::from_u256;
 use core::circuit::{
@@ -22,12 +22,12 @@ type AffineG2 = Affine<Fq2>;
 
 // #[inline(always)]
 fn affine_fq1(c0: u384, c1: u384) -> Affine<Fq> {
-    Affine { x: fq(c0), y: fq(c1)}
+    Affine { x: fq(c0), y: fq(c1) }
 }
 
 // #[inline(always)]
 fn affine_fq2(c0: u384, c1: u384, c2: u384, c3: u384) -> Affine<Fq2> {
-    Affine { x: fq2(c0, c1), y: fq2(c2, c3)}
+    Affine { x: fq2(c0, c1), y: fq2(c2, c3) }
 }
 
 #[derive(Copy, Drop, Serde)]
@@ -55,7 +55,9 @@ trait ECOperationsCircuitFq {
 trait ECOperationsCircuitFq2 {
     fn x_on_slope(self: @Affine<Fq2>, slope: Fq2, x2: Fq2, m: CircuitModulus) -> Fq2;
     fn y_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x: Fq2, m: CircuitModulus) -> Fq2;
-    fn pt_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x2: Fq2, m: CircuitModulus) -> Affine<Fq2>;
+    fn pt_on_slope_as_circuit(
+        self: @Affine<Fq2>, slope: Fq2, x2: Fq2, m: CircuitModulus
+    ) -> Affine<Fq2>;
     fn chord_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>, m: CircuitModulus) -> Fq2;
     fn add_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>, m: CircuitModulus) -> Affine<Fq2>;
     fn tangent_as_circuit(self: @Affine<Fq2>, m: CircuitModulus) -> Fq2;
@@ -172,7 +174,9 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
         Affine { x, y }
     }
 
-    fn multiply_as_circuit(self: @Affine<Fq>, mut multiplier: u384, m: CircuitModulus) -> Affine<Fq> {
+    fn multiply_as_circuit(
+        self: @Affine<Fq>, mut multiplier: u384, m: CircuitModulus
+    ) -> Affine<Fq> {
         let nz2: NonZero<u256> = 2_u256.try_into().unwrap();
         let mut dbl_step = *self;
         let mut result = AffineG1Impl::one();
@@ -296,8 +300,7 @@ impl AffineOpsFqCircuit of ECOperationsCircuitFq {
         let x2 = rhs.x.c0;
         let y2 = rhs.y.c0;
 
-        let outputs =
-            match (mul,).new_inputs().next(x1).next(x2).next(y1).next(y2).done().eval(m) {
+        let outputs = match (mul,).new_inputs().next(x1).next(x2).next(y1).next(y2).done().eval(m) {
             Result::Ok(outputs) => { outputs },
             Result::Err(_) => { panic!("Expected success") }
         };
@@ -318,64 +321,69 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
     fn y_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x: Fq2, m: CircuitModulus) -> Fq2 {
         let (c0, c1) = fq2_y_on_slope_circuit();
 
-        let out = match (c0, c1,)
-            .new_inputs()
-            .next(*self.x.c0.c0)
-            .next(*self.x.c1.c0)
-            .next(*self.y.c0.c0)
-            .next(*self.y.c1.c0)
-            .next(slope.c0.c0)
-            .next(slope.c1.c0)
-            .next(x.c0.c0)
-            .next(x.c1.c0)
-            .done()
-            .eval(m) {
-                Result::Ok(out) => { out },
-                Result::Err(_) => { panic!("Expected success") }
+        let out =
+            match (c0, c1,)
+                .new_inputs()
+                .next(*self.x.c0.c0)
+                .next(*self.x.c1.c0)
+                .next(*self.y.c0.c0)
+                .next(*self.y.c1.c0)
+                .next(slope.c0.c0)
+                .next(slope.c1.c0)
+                .next(x.c0.c0)
+                .next(x.c1.c0)
+                .done()
+                .eval(m) {
+            Result::Ok(out) => { out },
+            Result::Err(_) => { panic!("Expected success") }
         };
 
         fq2(out.get_output(c0), out.get_output(c1))
     }
 
-    fn pt_on_slope_as_circuit(self: @Affine<Fq2>, slope: Fq2, x2: Fq2, m: CircuitModulus) -> Affine<Fq2> {
+    fn pt_on_slope_as_circuit(
+        self: @Affine<Fq2>, slope: Fq2, x2: Fq2, m: CircuitModulus
+    ) -> Affine<Fq2> {
         let (c0, c1, c2, c3) = fq2_pt_on_slope_circuit();
 
-        let out = match (c0, c1, c2, c3)
-            .new_inputs()
-            .next(*self.x.c0.c0)
-            .next(*self.x.c1.c0)
-            .next(*self.y.c0.c0)
-            .next(*self.y.c1.c0)
-            .next(slope.c0.c0)
-            .next(slope.c1.c0)
-            .next(x2.c0.c0)
-            .next(x2.c1.c0)
-            .done()
-            .eval(m) {
-                Result::Ok(outputs) => { outputs },
-                Result::Err(_) => { panic!("Expected success") }
+        let out =
+            match (c0, c1, c2, c3)
+                .new_inputs()
+                .next(*self.x.c0.c0)
+                .next(*self.x.c1.c0)
+                .next(*self.y.c0.c0)
+                .next(*self.y.c1.c0)
+                .next(slope.c0.c0)
+                .next(slope.c1.c0)
+                .next(x2.c0.c0)
+                .next(x2.c1.c0)
+                .done()
+                .eval(m) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
         };
 
         affine_fq2(out.get_output(c0), out.get_output(c1), out.get_output(c2), out.get_output(c3))
     }
 
-    fn chord_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>, m: CircuitModulus) -> Fq2 {        
+    fn chord_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>, m: CircuitModulus) -> Fq2 {
         let (c0, c1) = fq2_chord_circuit();
 
-        let out = match (c0, c1,)
-            .new_inputs()
-            .next(*self.x.c0.c0)
-            .next(*self.x.c1.c0)
-            .next(*self.y.c0.c0)
-            .next(*self.y.c1.c0)
-            .next(rhs.x.c0.c0)
-            .next(rhs.x.c1.c0)
-            .next(rhs.y.c0.c0)
-            .next(rhs.y.c1.c0)
-            .done()
-            .eval(m) {
-                Result::Ok(outputs) => { outputs },
-                Result::Err(_) => { panic!("Expected success") }
+        let out =
+            match (c0, c1,)
+                .new_inputs()
+                .next(*self.x.c0.c0)
+                .next(*self.x.c1.c0)
+                .next(*self.y.c0.c0)
+                .next(*self.y.c1.c0)
+                .next(rhs.x.c0.c0)
+                .next(rhs.x.c1.c0)
+                .next(rhs.y.c0.c0)
+                .next(rhs.y.c1.c0)
+                .done()
+                .eval(m) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
         };
 
         fq2(out.get_output(c0), out.get_output(c1))
@@ -384,38 +392,40 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
     fn add_as_circuit(self: @Affine<Fq2>, rhs: Affine<Fq2>, m: CircuitModulus) -> Affine<Fq2> {
         let (c0, c1, c2, c3) = fq2_add_circuit();
 
-        let out = match (c0, c1, c2, c3)
-            .new_inputs()
-            .next(*self.x.c0.c0)
-            .next(*self.x.c1.c0)
-            .next(*self.y.c0.c0)
-            .next(*self.y.c1.c0)
-            .next(rhs.x.c0.c0)
-            .next(rhs.x.c1.c0)
-            .next(rhs.y.c0.c0)
-            .next(rhs.y.c1.c0)
-            .done()
-            .eval(m) {
-                Result::Ok(outputs) => { outputs },
-                Result::Err(_) => { panic!("Expected success") }
+        let out =
+            match (c0, c1, c2, c3)
+                .new_inputs()
+                .next(*self.x.c0.c0)
+                .next(*self.x.c1.c0)
+                .next(*self.y.c0.c0)
+                .next(*self.y.c1.c0)
+                .next(rhs.x.c0.c0)
+                .next(rhs.x.c1.c0)
+                .next(rhs.y.c0.c0)
+                .next(rhs.y.c1.c0)
+                .done()
+                .eval(m) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
         };
 
         affine_fq2(out.get_output(c0), out.get_output(c1), out.get_output(c2), out.get_output(c3))
     }
 
-    fn tangent_as_circuit(self: @Affine<Fq2>, m: CircuitModulus) -> Fq2 {        
+    fn tangent_as_circuit(self: @Affine<Fq2>, m: CircuitModulus) -> Fq2 {
         let (c0, c1) = fq2_tangent_circuit();
 
-        let out = match (c0, c1,)
-            .new_inputs()
-            .next(*self.x.c0.c0)
-            .next(*self.x.c1.c0)
-            .next(*self.y.c0.c0)
-            .next(*self.y.c1.c0)
-            .done()
-            .eval(m) {
-                Result::Ok(outputs) => { outputs },
-                Result::Err(_) => { panic!("Expected success") }
+        let out =
+            match (c0, c1,)
+                .new_inputs()
+                .next(*self.x.c0.c0)
+                .next(*self.x.c1.c0)
+                .next(*self.y.c0.c0)
+                .next(*self.y.c1.c0)
+                .done()
+                .eval(m) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
         };
 
         fq2(out.get_output(c0), out.get_output(c1))
@@ -424,16 +434,17 @@ impl AffineOpsFq2Circuit of ECOperationsCircuitFq2 {
     fn double_as_circuit(self: @Affine<Fq2>, m: CircuitModulus) -> Affine<Fq2> {
         let (c0, c1, c2, c3) = fq2_double_circuit();
 
-        let out = match (c0, c1, c2, c3)
-            .new_inputs()
-            .next(*self.x.c0.c0)
-            .next(*self.x.c1.c0)
-            .next(*self.y.c0.c0)
-            .next(*self.y.c1.c0)
-            .done()
-            .eval(m) {
-                Result::Ok(outputs) => { outputs },
-                Result::Err(_) => { panic!("Expected success") }
+        let out =
+            match (c0, c1, c2, c3)
+                .new_inputs()
+                .next(*self.x.c0.c0)
+                .next(*self.x.c1.c0)
+                .next(*self.y.c0.c0)
+                .next(*self.y.c1.c0)
+                .done()
+                .eval(m) {
+            Result::Ok(outputs) => { outputs },
+            Result::Err(_) => { panic!("Expected success") }
         };
 
         affine_fq2(out.get_output(c0), out.get_output(c1), out.get_output(c2), out.get_output(c3))

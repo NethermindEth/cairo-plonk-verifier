@@ -20,7 +20,6 @@ mod pairing {
         SingleMillerPrecompute, SingleMillerSteps
     };
 
-
     use core::circuit::{u384, CircuitModulus};
 
     #[storage]
@@ -32,7 +31,6 @@ mod pairing {
         PairingCheck: PairingCheck,
     }
 
-    /// Emitted when tokens are moved from address `from` to address `to`.
     #[derive(Drop, PartialEq, starknet::Event)]
     pub struct PairingCheck {
         pub res: bool,
@@ -54,7 +52,7 @@ mod pairing {
             let ec_pair_1 = single_ate_pairing(point1G1, point1G2, m);
             let ec_pair_2 = single_ate_pairing(point2G1, point2G2, m);
 
-            let res: bool = ec_pair_1.c0 == ec_pair_2.c0;
+            let res: bool = ec_pair_1 == ec_pair_2;
 
             self.emit(PairingCheck { res: res });
 

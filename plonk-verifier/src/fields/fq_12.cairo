@@ -325,10 +325,22 @@ impl Fq12Ops of FieldOps<Fq12, CircuitModulus> {
 //     Fq12 { c0: C0, c1: C1 }
 // }
 
-impl FqEqs of FieldEqs<Fq12> {
+// impl FqEqs of FieldEqs<Fq12> {
+//     // #[inline(always)]
+//     fn eq(lhs: @Fq12, rhs: @Fq12) -> bool {
+//         lhs.c0 == rhs.c0 && lhs.c1 == rhs.c1
+//     }
+// }
+
+impl Fq12PartialEq of PartialEq<Fq12> {
     // #[inline(always)]
     fn eq(lhs: @Fq12, rhs: @Fq12) -> bool {
         lhs.c0 == rhs.c0 && lhs.c1 == rhs.c1
+    }
+
+    // #[inline(always)]
+    fn ne(lhs: @Fq12, rhs: @Fq12) -> bool {
+        !Self::eq(lhs, rhs)
     }
 }
 

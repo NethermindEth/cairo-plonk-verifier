@@ -1,7 +1,7 @@
 use core::circuit::{
     AddInputResultTrait, CircuitElement, CircuitInput, CircuitInputs, CircuitModulus,
     CircuitOutputsTrait, EvalCircuitResult, EvalCircuitTrait, circuit_add, circuit_inverse,
-    circuit_mul, circuit_sub, u384,U384Serde
+    circuit_mul, circuit_sub, u384, U384Serde
 };
 use core::num::traits::Zero;
 

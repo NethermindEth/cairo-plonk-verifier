@@ -5,8 +5,10 @@ use core::circuit::{
 };
 
 use plonk_verifier::circuits::{
-    fq_circuits::{ONE, ZERO}, 
-    fq_2_circuits::{add_circuit, div_circuit, inv_circuit, mul_circuit, neg_circuit, sqr_circuit, sub_circuit}
+    fq_circuits::{ZERO, ONE},
+    fq_2_circuits::{
+        add_circuit, div_circuit, inv_circuit, mul_circuit, neg_circuit, sqr_circuit, sub_circuit
+    }
 };
 use plonk_verifier::curve::circuit_scale_9;
 use plonk_verifier::curve::constants::FIELD_U384;
@@ -85,7 +87,7 @@ impl Fq2Utils of FieldUtils<Fq2, u384, CircuitModulus> {
     fn conjugate(self: Fq2, m: CircuitModulus) -> Fq2 {
         Fq2 { c0: self.c0, c1: self.c1.neg(m), }
     }
-    
+
     // #[inline(always)]
     fn mul_by_nonresidue(self: Fq2, m: CircuitModulus) -> Fq2 {
         let Fq2 { c0: a0, c1: a1 } = self;

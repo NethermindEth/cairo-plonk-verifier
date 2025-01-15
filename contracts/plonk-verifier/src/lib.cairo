@@ -27,8 +27,7 @@ mod PLONK_Verifier {
     use core::starknet::{ContractAddress, ClassHash};
     use starknet::SyscallResultTrait;
 
-    const PAIRING_CLASS_HASH: felt252 =
-        0x0225d938fb98c4614ee1a9f8fef4fab4d4c6b2c0b961f07e7d970319c09ac223;
+    const PAIRING_CLASS_HASH: felt252 = 0x076a5e592f61c4b87741ad5f7026f2dc818f227b21936cc3ef5220ff3693c0b7;
 
     #[storage]
     struct Storage {}
@@ -47,7 +46,7 @@ mod PLONK_Verifier {
         ) -> bool {
             let (A1, vk_X2, B1, g2_one) =
                 plonk_verifier::plonk::verify::PlonkVerifier::verify_except_pairing(
-                verification_key, proof, public_signals
+                    verification_key, proof, public_signals
             );
 
             let mut call_data: Array<felt252> = array![];
@@ -58,12 +57,11 @@ mod PLONK_Verifier {
 
             let mut res_serialized = core::starknet::syscalls::library_call_syscall(
                 PAIRING_CLASS_HASH.try_into().unwrap(), selector!("valid_pairing"), call_data.span()
-            )
-                .unwrap_syscall();
+            ).unwrap_syscall();
+
             let call_res = Serde::<bool>::deserialize(ref res_serialized).unwrap();
             let verified: bool = call_res;
-            // let verified: bool = plonk_verifier::plonk::verify::PlonkVerifier::verify(verification_key, proof, public_signals);
-            // assert(verified, 'plonk verification failed');
+            assert(verified, 'plonk verification failed');
 
             verified
         }
